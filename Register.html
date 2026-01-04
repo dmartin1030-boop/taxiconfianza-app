@@ -9,7 +9,6 @@
 
 <body>
 
-  <!-- NAV -->
   <header class="nav">
     <div class="container nav-inner">
       <div class="brand">
@@ -18,19 +17,18 @@
       </div>
 
       <nav class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <a href="index.html">Inicio</a>
+        <a href="index.html#como">Sobre Nosotros</a>
+        <a href="index.html#contacto">Contacto</a>
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-ghost" href="login.html">Login</a>
-        <a class="btn btn-primary" href="register.html">Register</a>
+        <a class="btn btn-ghost" href="Login.html">Ingresar</a>
+        <a class="btn btn-primary" href="Register.html">Registrarse</a>
       </div>
     </div>
   </header>
 
-  <!-- REGISTER -->
   <main class="auth-page">
     <div class="auth-card">
 
@@ -41,36 +39,36 @@
 
       <form>
         <label>Nombre completo</label>
-        <input type="text" placeholder="Ingresa tu nombre completo" />
+        <input type="text" placeholder="Ingresa tu nombre completo" required />
 
         <label>Correo electrónico</label>
-        <input type="email" placeholder="correo@ejemplo.com" />
+        <input type="email" placeholder="correo@ejemplo.com" required />
 
         <label>Contraseña</label>
-        <input type="password" placeholder="Crea una contraseña" />
+        <input type="password" placeholder="Crea una contraseña" required />
 
         <label>Confirmar contraseña</label>
-        <input type="password" placeholder="Confirma tu contraseña" />
+        <input type="password" placeholder="Confirma tu contraseña" required />
 
         <label class="radio-label">Tipo de usuario</label>
         <div class="radio-group">
-          <label>
-            <input type="radio" name="rol" checked />
+          <label class="radio-option">
+            <input type="radio" name="rol" value="conductor" checked />
             Conductor (Busco taxi para conducir)
           </label>
 
-          <label>
-            <input type="radio" name="rol" />
+          <label class="radio-option">
+            <input type="radio" name="rol" value="propietario" />
             Propietario (Busco conductor para mi taxi)
           </label>
         </div>
 
-        <button class="btn btn-primary btn-block">Registrarse</button>
+        <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
       </form>
 
       <p class="auth-footer">
         ¿Ya tienes una cuenta?
-        <a href="login.html">Inicia sesión</a>
+        <a href="Login.html">Inicia sesión</a>
       </p>
 
     </div>
