@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ingresar | TaxiConfianza</title>
+  <title>TaxiConfianza | Conectando Profesionales</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -17,52 +17,121 @@
       </div>
 
       <nav class="nav-links">
-        <a href="index.html">Inicio</a>
-        <a href="index.html#como">Sobre Nosotros</a>
-        <a href="index.html#contacto">Contacto</a>
+        <a href="#home">Inicio</a>
+        <a href="#como">Sobre Nosotros</a>
+        <a href="#contacto">Contacto</a>
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-primary" href="Login.html">Ingresar</a>
-        <a class="btn btn-ghost" href="#register">Registrarse</a>
+        <a class="btn btn-ghost" href="#login">Ingresar</a>
+        <a class="btn btn-primary" href="#register">Registrarse</a>
       </div>
     </div>
   </header>
 
-  <main class="auth-page">
-    <div class="auth-card">
+  <main id="home" class="hero">
+    <div class="container hero-grid">
+      <section class="hero-left">
+        <h1>
+          Conectando <span class="hl">Conductores</span> y<br/>
+          <span class="hl">Propietarios</span> con Confianza
+        </h1>
 
-      <h2>Iniciar sesión</h2>
-      <p class="auth-sub">
-        Ingresa con tu correo y contraseña para acceder a TaxiConfianza
-      </p>
+        <p class="hero-sub">
+          Plataforma segura para validar historiales, documentación y reputación,
+          y así crear conexiones confiables en el sector del taxi en Colombia.
+        </p>
 
-      <form>
-        <label>Correo electrónico</label>
-        <input type="email" placeholder="correo@ejemplo.com" required />
-
-        <label>Contraseña</label>
-        <input type="password" placeholder="Ingresa tu contraseña" required />
-
-        <div class="auth-row">
-          <label class="remember">
-            <input type="checkbox" />
-            Recuérdame
-          </label>
-
-          <a class="forgot" href="#recuperar">¿Olvidaste tu contraseña?</a>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="#register">Regístrate Ahora →</a>
+          <input class="hero-input" placeholder="Tu correo..." />
         </div>
+      </section>
 
-        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
-      </form>
-
-      <p class="auth-footer">
-        ¿No tienes una cuenta?
-        <a href="#register">Regístrate aquí</a>
-      </p>
-
+      <aside class="hero-right">
+        <div class="mock-card">
+          <div class="mock-title">TaxiConfianza Platform</div>
+          <div class="mock-box">
+            </div>
+        </div>
+      </aside>
     </div>
   </main>
 
+  <section id="como" class="section">
+    <div class="container">
+      <h2 class="section-title">¿Cómo Funciona?</h2>
+
+      <div class="cards">
+        <article class="card">
+          <div class="icon">👤</div>
+          <h3>Registro y Perfil Verificado</h3>
+          <p>Crea tu perfil y avanza por un proceso de validación para generar confianza real.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">🕒</div>
+          <h3>Historial y Reputación</h3>
+          <p>Calificaciones bidireccionales y niveles (Bronce/Plata/Oro/Elite) con trazabilidad.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">➡️</div>
+          <h3>Conexión Segura</h3>
+          <p>Publica ofertas, postula con tu hoja de vida y concreta asignaciones verificadas.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band" id="register">
+    <div class="container cta-inner">
+      <h2>Comienza Hoy a Construir Conexiones Confiables</h2>
+      <p>
+        Ya sea que busques un conductor confiable o un propietario responsable,
+        te ayudamos a tomar decisiones informadas para tu negocio.
+      </p>
+      <a class="btn btn-primary btn-lg" href="#home">Únete a TaxiConfianza</a>
+    </div>
+  </section>
+
+  <footer id="contacto" class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand footer-brand">
+          <div class="brand-badge">TC</div>
+          <span class="brand-name">TaxiConfianza</span>
+        </div>
+        <p class="footer-text">
+          Conectando conductores y propietarios con un sistema de verificación que genera confianza y seguridad en el gremio.
+        </p>
+      </div>
+
+      <div class="footer-cols">
+        <div>
+          <h4>Plataforma</h4>
+          <a href="#como">Cómo Funciona</a>
+          <a href="#home">Características</a>
+          <a href="#home">Plan Carrera</a>
+        </div>
+        <div>
+          <h4>Compañía</h4>
+          <a href="#home">Sobre Nosotros</a>
+          <a href="#contacto">Contacto</a>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <a href="#home">Términos</a>
+          <a href="#home">Privacidad</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <small>© 2026 TaxiConfianza. Todos los derechos reservados.</small>
+    </div>
+  </footer>
+
 </body>
 </html>
+
