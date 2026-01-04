@@ -1,0 +1,12 @@
+{
+  "name": "taxiconfianza-app",
+  "version": "1.0.0",
+  "description": "Laboratorio de pruebas TaxiConfianza",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  }
+}
