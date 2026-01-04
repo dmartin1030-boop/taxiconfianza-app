@@ -3,13 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Login | TaxiConfianza</title>
+  <title>Ingresar | TaxiConfianza</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-  <!-- NAV -->
   <header class="nav">
     <div class="container nav-inner">
       <div class="brand">
@@ -18,19 +17,18 @@
       </div>
 
       <nav class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <a href="index.html">Inicio</a>
+        <a href="index.html#como">Sobre Nosotros</a>
+        <a href="index.html#contacto">Contacto</a>
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-primary" href="login.html">Login</a>
-        <a class="btn btn-ghost" href="register.html">Register</a>
+        <a class="btn btn-primary" href="Login.html">Ingresar</a>
+        <a class="btn btn-ghost" href="#register">Registrarse</a>
       </div>
     </div>
   </header>
 
-  <!-- LOGIN -->
   <main class="auth-page">
     <div class="auth-card">
 
@@ -41,10 +39,10 @@
 
       <form>
         <label>Correo electrónico</label>
-        <input type="email" placeholder="correo@ejemplo.com" />
+        <input type="email" placeholder="correo@ejemplo.com" required />
 
         <label>Contraseña</label>
-        <input type="password" placeholder="Ingresa tu contraseña" />
+        <input type="password" placeholder="Ingresa tu contraseña" required />
 
         <div class="auth-row">
           <label class="remember">
@@ -55,12 +53,12 @@
           <a class="forgot" href="#recuperar">¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button class="btn btn-primary btn-block">Entrar</button>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
       </form>
 
       <p class="auth-footer">
         ¿No tienes una cuenta?
-        <a href="register.html">Regístrate</a>
+        <a href="#register">Regístrate aquí</a>
       </p>
 
     </div>
