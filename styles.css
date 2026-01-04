@@ -311,4 +311,28 @@ body{
   font-weight:600;
   white-space:nowrap;
 }
+/* Ajustes para los botones de selección (Radio Buttons) */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #344054;
+  cursor: pointer;
+  font-weight: 400 !important;
+}
+
+.radio-option input {
+  width: 18px !important;
+  height: 18px !important;
+  cursor: pointer;
+  margin: 0;
+}
 
