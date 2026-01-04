@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro | TaxiConfianza</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <div class="brand-badge">TC</div>
+        <span class="brand-name">TaxiConfianza</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="btn btn-ghost" href="login.html">Login</a>
+        <a class="btn btn-primary" href="register.html">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- REGISTER -->
+  <main class="auth-page">
+    <div class="auth-card">
+
+      <h2>Crear una cuenta</h2>
+      <p class="auth-sub">
+        Regístrate para conectarte con conductores o propietarios verificados
+      </p>
+
+      <form>
+        <label>Nombre completo</label>
+        <input type="text" placeholder="Ingresa tu nombre completo" />
+
+        <label>Correo electrónico</label>
+        <input type="email" placeholder="correo@ejemplo.com" />
+
+        <label>Contraseña</label>
+        <input type="password" placeholder="Crea una contraseña" />
+
+        <label>Confirmar contraseña</label>
+        <input type="password" placeholder="Confirma tu contraseña" />
+
+        <label class="radio-label">Tipo de usuario</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="rol" checked />
+            Conductor (Busco taxi para conducir)
+          </label>
+
+          <label>
+            <input type="radio" name="rol" />
+            Propietario (Busco conductor para mi taxi)
+          </label>
+        </div>
+
+        <button class="btn btn-primary btn-block">Registrarse</button>
+      </form>
+
+      <p class="auth-footer">
+        ¿Ya tienes una cuenta?
+        <a href="login.html">Inicia sesión</a>
+      </p>
+
+    </div>
+  </main>
+
+</body>
+</html>
