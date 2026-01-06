@@ -73,6 +73,23 @@
 
     </div>
   </main>
+  <script>
+  const form = document.querySelector('form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Evita que la página se recargue
+    
+    const formData = {
+      nombre: form.querySelector('input[type="text"]').value,
+      email: form.querySelector('input[type="email"]').value,
+      password: form.querySelectorAll('input[type="password"]')[0].value,
+      rol: form.querySelector('input[name="rol"]:checked').value
+    };
+
+    console.log("Enviando datos...", formData);
+    // Aquí es donde llamaremos a la URL de tu servidor en Railway
+  });
+</script>
 
 </body>
 </html>
+
