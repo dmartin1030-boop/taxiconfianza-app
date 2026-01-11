@@ -37,18 +37,18 @@
         Regístrate para conectarte con conductores o propietarios verificados
       </p>
 
-      <form>
+      <form id="registrationForm">
         <label>Nombre completo</label>
-        <input type="text" placeholder="Ingresa tu nombre completo" required />
+        <input type="text" id="nombre" placeholder="Ingresa tu nombre completo" required />
 
         <label>Correo electrónico</label>
-        <input type="email" placeholder="correo@ejemplo.com" required />
+        <input type="email" id="email" placeholder="correo@ejemplo.com" required />
 
         <label>Contraseña</label>
-        <input type="password" placeholder="Crea una contraseña" required />
+        <input type="password" id="password" placeholder="Crea una contraseña" required />
 
         <label>Confirmar contraseña</label>
-        <input type="password" placeholder="Confirma tu contraseña" required />
+        <input type="password" id="confirmPassword" placeholder="Confirma tu contraseña" required />
 
         <label class="radio-label">Tipo de usuario</label>
         <div class="radio-group">
@@ -73,45 +73,57 @@
 
     </div>
   </main>
+
   <script>
-  const form = document.querySelector('form');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Detiene la recarga de página
+    const form = document.getElementById('registrationForm');
     
-    // Captura los datos de los campos
-    const data = {
-      nombre: form.querySelector('input[type="text"]').value,
-      email: form.querySelector('input[type="email"]').value,
-      password: form.querySelectorAll('input[type="password"]')[0].value,
-      rol: form.querySelector('input[name="rol"]:checked').value
-    };
-
-    console.log("Enviando a base de datos...", data);
-
-    try {
-      // ESTA ES LA PARTE QUE FALTA: Envía los datos al servidor Railway
-      const response = await fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      const result = await response.json();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); 
       
-      if (result.success) {
-        alert('¡Usuario guardado en Hostinger con éxito!');
-        window.location.href = 'Login.html'; // Te manda al login
-      } else {
-        alert('Error en Hostinger: ' + result.error);
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Validación básica de contraseñas en el cliente
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
       }
-    } catch (error) {
-      console.error('Error de conexión:', error);
-      alert('El servidor no responde. Revisa los Logs de Railway.');
-    }
-  });
-</script>
+
+      const data = {
+        nombre: document.getElementById('nombre').value,
+        email: document.getElementById('email').value,
+        password: password,
+        rol: form.querySelector('input[name="rol"]:checked').value
+      };
+
+      console.log("Iniciando envío a Railway...", data);
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('¡Usuario guardado en Hostinger con éxito!');
+          window.location.href = 'Login.html';
+        } else {
+          alert('Error en Hostinger: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Error de conexión:', error);
+        alert('No se pudo conectar con el servidor. Verifica que Railway esté activo.');
+      }
+    });
+  </script>
 
 </body>
 </html>
+
 
 
