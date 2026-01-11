@@ -76,20 +76,42 @@
   <script>
   const form = document.querySelector('form');
   form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Evita que la página se recargue
+    e.preventDefault(); // Detiene la recarga de página
     
-    const formData = {
+    // Captura los datos de los campos
+    const data = {
       nombre: form.querySelector('input[type="text"]').value,
       email: form.querySelector('input[type="email"]').value,
       password: form.querySelectorAll('input[type="password"]')[0].value,
       rol: form.querySelector('input[name="rol"]:checked').value
     };
 
-    console.log("Enviando datos...", formData);
-    // Aquí es donde llamaremos a la URL de tu servidor en Railway
+    console.log("Enviando a base de datos...", data);
+
+    try {
+      // ESTA ES LA PARTE QUE FALTA: Envía los datos al servidor Railway
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('¡Usuario guardado en Hostinger con éxito!');
+        window.location.href = 'Login.html'; // Te manda al login
+      } else {
+        alert('Error en Hostinger: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      alert('El servidor no responde. Revisa los Logs de Railway.');
+    }
   });
 </script>
 
 </body>
 </html>
+
 
