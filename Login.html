@@ -24,7 +24,7 @@
 
       <div class="nav-actions">
         <a class="btn btn-primary" href="Login.html">Ingresar</a>
-        <a class="btn btn-ghost" href="#register">Registrarse</a>
+        <a class="btn btn-ghost" href="Register.html">Registrarse</a>
       </div>
     </div>
   </header>
@@ -37,20 +37,19 @@
         Ingresa con tu correo y contraseña para acceder a TaxiConfianza
       </p>
 
-      <form>
+      <form id="loginForm">
         <label>Correo electrónico</label>
-        <input type="email" placeholder="correo@ejemplo.com" required />
+        <input type="email" id="loginEmail" placeholder="correo@ejemplo.com" required />
 
         <label>Contraseña</label>
-        <input type="password" placeholder="Ingresa tu contraseña" required />
+        <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña" required />
 
         <div class="auth-row">
           <label class="remember">
             <input type="checkbox" />
             Recuérdame
           </label>
-
-          <a class="forgot" href="#recuperar">¿Olvidaste tu contraseña?</a>
+          <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
@@ -58,11 +57,46 @@
 
       <p class="auth-footer">
         ¿No tienes una cuenta?
-        <a href="#register">Regístrate aquí</a>
+        <a href="Register.html">Regístrate aquí</a>
       </p>
 
     </div>
   </main>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const credentials = {
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value
+      };
+
+      try {
+        // Enviamos la petición al servidor para validar
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(credentials)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('¡Bienvenido a TaxiConfianza!');
+          // Aquí puedes redirigir al panel de control o perfil
+          window.location.href = 'index.html'; 
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        alert('Problema de conexión con el servidor.');
+      }
+    });
+  </script>
 
 </body>
 </html>
