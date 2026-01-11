@@ -5,7 +5,7 @@ const app = express();
 
 // 1. Configuración de Middlewares
 app.use(express.json());
-// Servir archivos estáticos (CSS, Imágenes, JS del cliente)
+// Sirve tus archivos HTML, CSS y JS desde la raíz
 app.use(express.static(path.join(__dirname, '/')));
 
 // 2. Conexión a la Base de Datos (Hostinger vía Railway)
@@ -25,7 +25,7 @@ db.connect(err => {
     console.log('¡Conectado exitosamente a la base de datos!');
 });
 
-// 3. RUTAS DE NAVEGACIÓN (Para evitar el error "Not Found")
+// 3. RUTAS DE NAVEGACIÓN (Evitan el error "Not Found")
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -38,24 +38,31 @@ app.get('/Login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'Login.html'));
 });
 
-// 4. RUTA DE REGISTRO (POST)
+// 4. RUTA DE REGISTRO (Ajustada a tu BD en Hostinger)
 app.post('/register', (req, res) => {
     const { nombre, email, password, rol } = req.body;
-    const query = 'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)';
     
-    db.query(query, [nombre, email, password, rol], (err, result) => {
+    // IMPORTANTE: 'nombres', 'password_hash' y 'tipo' coinciden con tu imagen
+    const query = 'INSERT INTO usuarios (nombres, email, password_hash, tipo) VALUES (?, ?, ?, ?)';
+    
+    // Convertimos el rol a MAYÚSCULAS para que el ENUM de tu BD lo acepte
+    const rolMayus = rol.toUpperCase();
+
+    db.query(query, [nombre, email, password, rolMayus], (err, result) => {
         if (err) {
-            console.error('Error al insertar usuario:', err);
+            console.error('Error al insertar en Hostinger:', err);
             return res.status(500).json({ success: false, error: err.message });
         }
-        res.json({ success: true, message: 'Usuario registrado en Hostinger' });
+        res.json({ success: true, message: 'Usuario registrado con éxito' });
     });
 });
 
-// 5. RUTA DE LOGIN (POST)
+// 5. RUTA DE LOGIN (Ajustada a tu BD en Hostinger)
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const query = 'SELECT * FROM usuarios WHERE email = ? AND password = ?';
+    
+    // Buscamos usando 'password_hash'
+    const query = 'SELECT * FROM usuarios WHERE email = ? AND password_hash = ?';
     
     db.query(query, [email, password], (err, results) => {
         if (err) {
@@ -63,10 +70,8 @@ app.post('/login', (req, res) => {
         }
         
         if (results.length > 0) {
-            // Usuario encontrado
             res.json({ success: true, user: results[0] });
         } else {
-            // Credenciales incorrectas
             res.json({ success: false, message: 'Correo o contraseña incorrectos' });
         }
     });
