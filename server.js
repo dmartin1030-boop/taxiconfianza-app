@@ -5,11 +5,9 @@ const app = express();
 
 // 1. Configuración de Middlewares
 app.use(express.json());
-// Sirve tus archivos HTML, CSS y JS desde la raíz
 app.use(express.static(path.join(__dirname, '/')));
 
-// 2. Conexión a la Base de Datos (Hostinger vía Railway)
-// Cambiamos createConnection por createPool
+// 2. Configuración del Pool de Conexiones (Solución al error "closed state")
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -18,41 +16,42 @@ const db = mysql.createPool({
     port: process.env.DB_PORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    keepAliveInitialDelay: 10000, // Ayuda a mantener la conexión activa con Hostinger
+    enableKeepAlive: true
 });
 
-// El Pool no necesita .connect(), se conecta solo al recibir una consulta
-console.log('Pool de conexiones a Hostinger configurado');
-
-db.connect(err => {
+// Verificación de conexión inicial
+db.getConnection((err, connection) => {
     if (err) {
         console.error('Error conectando a Hostinger:', err);
         return;
     }
-    console.log('¡Conectado exitosamente a la base de datos!');
+    console.log('¡Conectado exitosamente a la base de datos mediante Pool!');
+    connection.release();
 });
 
-// 3. RUTAS DE NAVEGACIÓN (Evitan el error "Not Found")
+// 3. RUTAS DE NAVEGACIÓN (En minúsculas como en tu GitHub)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/register.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Register.html'));
+    res.sendFile(path.join(__dirname, 'register.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Login.html'));
+    res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-// 4. RUTA DE REGISTRO (Ajustada a tu BD en Hostinger)
+// 4. RUTA DE REGISTRO (Ajustada a tus columnas: nombres, password_hash, tipo)
 app.post('/register', (req, res) => {
     const { nombre, email, password, rol } = req.body;
     
-    // IMPORTANTE: 'nombres', 'password_hash' y 'tipo' coinciden con tu imagen
+    // El query usa los nombres exactos de tu tabla 'usuarios'
     const query = 'INSERT INTO usuarios (nombres, email, password_hash, tipo) VALUES (?, ?, ?, ?)';
     
-    // Convertimos el rol a MAYÚSCULAS para que el ENUM de tu BD lo acepte
+    // Convertimos el rol a MAYÚSCULAS para cumplir con el ENUM ('CONDUCTOR', 'PROPIETARIO')
     const rolMayus = rol.toUpperCase();
 
     db.query(query, [nombre, email, password, rolMayus], (err, result) => {
@@ -60,15 +59,13 @@ app.post('/register', (req, res) => {
             console.error('Error al insertar en Hostinger:', err);
             return res.status(500).json({ success: false, error: err.message });
         }
-        res.json({ success: true, message: 'Usuario registrado con éxito' });
+        res.json({ success: true, message: 'Usuario registrado con éxito en Hostinger' });
     });
 });
 
-// 5. RUTA DE LOGIN (Ajustada a tu BD en Hostinger)
+// 5. RUTA DE LOGIN
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    
-    // Buscamos usando 'password_hash'
     const query = 'SELECT * FROM usuarios WHERE email = ? AND password_hash = ?';
     
     db.query(query, [email, password], (err, results) => {
@@ -87,5 +84,5 @@ app.post('/login', (req, res) => {
 // 6. Lanzamiento del Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor de TaxiConfianza corriendo en puerto ${PORT}`);
+    console.log(`Servidor corriendo en puerto ${PORT}`);
 });
