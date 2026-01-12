@@ -9,13 +9,20 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '/')));
 
 // 2. Conexión a la Base de Datos (Hostinger vía Railway)
-const db = mysql.createConnection({
+// Cambiamos createConnection por createPool
+const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306
+    port: process.env.DB_PORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
+
+// El Pool no necesita .connect(), se conecta solo al recibir una consulta
+console.log('Pool de conexiones a Hostinger configurado');
 
 db.connect(err => {
     if (err) {
