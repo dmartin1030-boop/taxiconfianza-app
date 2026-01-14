@@ -23,8 +23,8 @@
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-primary" href="Login.html">Ingresar</a>
-        <a class="btn btn-ghost" href="Register.html">Registrarse</a>
+        <a class="btn btn-primary" href="login.html">Ingresar</a>
+        <a class="btn btn-ghost" href="register.html">Registrarse</a>
       </div>
     </div>
   </header>
@@ -57,7 +57,7 @@
 
       <p class="auth-footer">
         ¿No tienes una cuenta?
-        <a href="Register.html">Regístrate aquí</a>
+        <a href="register.html">Regístrate aquí</a>
       </p>
 
     </div>
@@ -75,7 +75,6 @@
       };
 
       try {
-        // Enviamos la petición al servidor para validar
         const response = await fetch('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -85,9 +84,17 @@
         const result = await response.json();
 
         if (result.success) {
-          alert('¡Bienvenido a TaxiConfianza!');
-          // Aquí puedes redirigir al panel de control o perfil
-          window.location.href = 'index.html'; 
+          // 1. Guardamos los datos del usuario en el navegador para usarlos en el Dashboard
+          localStorage.setItem('userTaxiConfianza', JSON.stringify(result.user));
+
+          // 2. Redirección basada en el rol guardado en Hostinger
+          if (result.user.tipo === 'PROPIETARIO') {
+             // Redirige al nuevo dashboard innovador que creaste
+             window.location.href = 'propietario-dashboard.html'; 
+          } else {
+             // Redirige al dashboard de conductor (o el general)
+             window.location.href = 'dashboard.html';
+          }
         } else {
           alert('Error: ' + result.message);
         }
