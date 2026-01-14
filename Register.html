@@ -23,23 +23,28 @@
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-ghost" href="Login.html">Ingresar</a>
-        <a class="btn btn-primary" href="Register.html">Registrarse</a>
+        <a class="btn btn-ghost" href="login.html">Ingresar</a>
+        <a class="btn btn-primary" href="register.html">Registrarse</a>
       </div>
     </div>
   </header>
 
   <main class="auth-page">
     <div class="auth-card">
-
       <h2>Crear una cuenta</h2>
       <p class="auth-sub">
         Regístrate para conectarte con conductores o propietarios verificados
       </p>
 
       <form id="registrationForm">
-        <label>Nombre completo</label>
-        <input type="text" id="nombre" placeholder="Ingresa tu nombre completo" required />
+        <label>Nombres</label>
+        <input type="text" id="nombre" placeholder="Ingresa tus nombres" required />
+
+        <label>Apellidos</label>
+        <input type="text" id="apellido" placeholder="Ingresa tus apellidos" required />
+
+        <label>Número de celular</label>
+        <input type="tel" id="celular" placeholder="Ej: 3001234567" required />
 
         <label>Correo electrónico</label>
         <input type="email" id="email" placeholder="correo@ejemplo.com" required />
@@ -68,9 +73,8 @@
 
       <p class="auth-footer">
         ¿Ya tienes una cuenta?
-        <a href="Login.html">Inicia sesión</a>
+        <a href="login.html">Inicia sesión</a>
       </p>
-
     </div>
   </main>
 
@@ -83,27 +87,25 @@
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
-      // Validación básica de contraseñas en el cliente
       if (password !== confirmPassword) {
         alert('Las contraseñas no coinciden');
         return;
       }
 
+      // Captura de todos los campos, incluyendo los nuevos
       const data = {
         nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        celular: document.getElementById('celular').value,
         email: document.getElementById('email').value,
         password: password,
         rol: form.querySelector('input[name="rol"]:checked').value
       };
 
-      console.log("Iniciando envío a Railway...", data);
-
       try {
         const response = await fetch('/register', {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json' 
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
@@ -111,19 +113,14 @@
         
         if (result.success) {
           alert('¡Usuario guardado en Hostinger con éxito!');
-          window.location.href = 'Login.html';
+          window.location.href = 'login.html';
         } else {
-          alert('Error en Hostinger: ' + result.error);
+          alert('Error: ' + result.error);
         }
       } catch (error) {
-        console.error('Error de conexión:', error);
-        alert('No se pudo conectar con el servidor. Verifica que Railway esté activo.');
+        alert('No se pudo conectar con el servidor.');
       }
     });
   </script>
-
 </body>
 </html>
-
-
-
