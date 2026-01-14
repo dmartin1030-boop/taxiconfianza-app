@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/')));
 
-// 1. Configuración del Pool de Conexiones (Evita el error de conexión cerrada)
+// 1. Configuración del Pool de Conexiones (Hostinger)
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -20,30 +20,28 @@ const db = mysql.createPool({
     keepAliveInitialDelay: 10000
 });
 
-// 2. Rutas de Archivos (Soluciona el error "Cannot GET" y "Not Found")
+// 2. Rutas de Archivos (Navegación)
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
 
-// Esta ruta específica permite que funcione el dashboard del propietario
-app.get('/propietario-dashboard.html', (req, res) => {
+// RUTA CLAVE: Muestra el dashboard al ingresar como propietario
+app.get('/dashboard-propietario.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html')); 
 });
 
-// 3. API para el Dashboard (Carga conductores en las tarjetas)
+// 3. API para el Dashboard (Datos de conductores)
 app.get('/api/conductores', (req, res) => {
-    const query = 'SELECT nombres, apellidos, email, tipo FROM usuarios WHERE tipo = "CONDUCTOR"';
+    const query = 'SELECT nombres, apellidos, email, celular, tipo FROM usuarios WHERE tipo = "CONDUCTOR"';
     db.query(query, (err, results) => {
         if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, conductores: results });
     });
 });
 
-// 4. Ruta de Registro (Incluye Apellidos y Celular)
+// 4. Registro (Nombres, Apellidos, Celular, Email, Password, Rol)
 app.post('/register', (req, res) => {
     const { nombre, apellido, celular, email, password, rol } = req.body;
-    
-    // Mapeo exacto a las columnas de tu tabla en Hostinger
     const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password_hash, tipo) VALUES (?, ?, ?, ?, ?, ?)';
     
     db.query(query, [nombre, apellido, celular, email, password, rol.toUpperCase()], (err) => {
@@ -55,7 +53,7 @@ app.post('/register', (req, res) => {
     });
 });
 
-// 5. Ruta de Login
+// 5. Login (Validación de Propietarios y Conductores)
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     const query = 'SELECT * FROM usuarios WHERE email = ? AND password_hash = ?';
@@ -71,8 +69,8 @@ app.post('/login', (req, res) => {
     });
 });
 
-// 6. Configuración del Puerto para Railway
+// 6. Puerto para Railway
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor activo y escuchando en puerto ${PORT}`);
+    console.log(`Servidor de TaxiConfianza activo en puerto ${PORT}`);
 });
