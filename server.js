@@ -26,7 +26,7 @@ app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.ht
 app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
 
 // RUTA CLAVE: Muestra el dashboard al ingresar como propietario
-app.get('/dashboard-propietario.html', (req, res) => {
+app.get('/propietario-dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html')); 
 });
 
