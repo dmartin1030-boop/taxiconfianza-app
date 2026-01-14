@@ -18,7 +18,7 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-// 2. Rutas de Archivos (Minúsculas para GitHub)
+// 2. Rutas de Archivos (Todo en minúsculas para evitar "Not Found")
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
@@ -26,19 +26,25 @@ app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'dash
 
 // 3. API para el Dashboard
 app.get('/api/conductores', (req, res) => {
-    const query = 'SELECT nombres, email, tipo FROM usuarios WHERE tipo = "CONDUCTOR"';
+    const query = 'SELECT nombres, apellidos, email, tipo FROM usuarios WHERE tipo = "CONDUCTOR"';
     db.query(query, (err, results) => {
         if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, conductores: results });
     });
 });
 
-// 4. Registro
+// 4. Registro actualizado con nuevos campos
 app.post('/register', (req, res) => {
-    const { nombre, email, password, rol } = req.body;
-    const query = 'INSERT INTO usuarios (nombres, email, password_hash, tipo) VALUES (?, ?, ?, ?)';
-    db.query(query, [nombre, email, password, rol.toUpperCase()], (err) => {
-        if (err) return res.status(500).json({ success: false, error: err.message });
+    const { nombre, apellido, celular, email, password, rol } = req.body;
+    
+    // Mapeo exacto a las columnas de tu base de datos
+    const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password_hash, tipo) VALUES (?, ?, ?, ?, ?, ?)';
+    
+    db.query(query, [nombre, apellido, celular, email, password, rol.toUpperCase()], (err) => {
+        if (err) {
+            console.error('Error al insertar:', err);
+            return res.status(500).json({ success: false, error: err.message });
+        }
         res.json({ success: true });
     });
 });
