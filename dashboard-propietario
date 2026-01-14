@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Propietario | TaxiConfianza</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --surface:#0f172a;
+      --card:#111c33;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:rgba(255,255,255,.08);
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --brand:#fbbf24;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --info:#38bdf8;
+      --radius:16px;
+      --radius2:12px;
+      --max:1200px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      background: radial-gradient(1100px 600px at 15% 0%, rgba(251,191,36,.12), transparent 60%),
+                  radial-gradient(900px 500px at 90% 15%, rgba(34,197,94,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{display:flex; min-height:100vh;}
+    a{color:inherit; text-decoration:none}
+
+    /* Sidebar */
+    .sidebar{
+      width:280px;
+      background: linear-gradient(180deg, rgba(17,28,51,.9), rgba(15,23,42,.7));
+      border-right:1px solid var(--border);
+      padding:18px 14px;
+      position:sticky; top:0; height:100vh; overflow:auto;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--border);
+    }
+    .logo{
+      width:38px; height:38px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      background: rgba(251,191,36,.18);
+      color: var(--brand);
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+    .brand h1{font-size:14px; margin:0; line-height:1.1}
+    .brand p{margin:0; font-size:12px; color:var(--muted)}
+    .nav{margin-top:16px; display:flex; flex-direction:column; gap:6px;}
+    .nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px;
+      border:1px solid transparent;
+    }
+    .nav a:hover{background:rgba(255,255,255,.04); border-color:var(--border);}
+    .nav a.active{
+      background: rgba(251,191,36,.12);
+      border-color: rgba(251,191,36,.35);
+    }
+    .ico{width:18px;height:18px;opacity:.9}
+    .sep{height:1px;background:var(--border); margin:14px 6px;}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 12px; border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      cursor:pointer; font-size:13px;
+    }
+    .btn:hover{background:rgba(255,255,255,.06)}
+    .btn.primary{border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.14);}
+    .btn.primary:hover{background: rgba(251,191,36,.18);}
+    .btn.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12);}
+
+    /* Main */
+    .main{flex:1; padding:18px 18px 40px;}
+    .topbar{
+      max-width: var(--max);
+      margin:0 auto 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:14px;
+      padding:14px 14px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+    }
+    .title{font-size:18px;margin:0;}
+    .subtitle{margin:4px 0 0; font-size:13px; color:var(--muted)}
+    .top-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      font-size:12px; color:var(--muted);
+    }
+    .badge strong{color:var(--text); font-weight:900}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+      font-size:12px; color:var(--muted);
+      white-space:nowrap;
+    }
+    .chip.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color:#bbf7d0;}
+    .chip.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#fcd34d;}
+    .chip.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#fecaca;}
+    .grid{
+      max-width: var(--max);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media(min-width: 980px){
+      .grid{grid-template-columns: 1fr 1fr;}
+      .span-2{grid-column: 1 / -1;}
+    }
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .card h3{margin:0 0 8px; font-size:14px;}
+    .muted{color:var(--muted); font-size:13px;}
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px; margin-top:10px;
+    }
+    .kpi{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding:12px;
+    }
+    .kpi .v{font-size:22px;font-weight:900;margin:2px 0 4px;}
+    .kpi .l{font-size:12px;color:var(--muted);margin:0;}
+    .row-between{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      margin-top:10px;
+    }
+    .table th, .table td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      font-size:13px;
+      vertical-align:top;
+    }
+    .table th{
+      text-align:left;
+      color:var(--muted);
+      font-weight:700;
+      background: rgba(0,0,0,.18);
+    }
+    .table tr:last-child td{border-bottom:0}
+    .actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .item{
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+      margin-top:10px;
+    }
+    .item strong{font-size:13px;}
+    .foot{
+      max-width: var(--max);
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+    }
+    /* Mobile menu */
+    .mobile-toggle{display:none;}
+    @media(max-width: 980px){
+      .sidebar{position:fixed; left:-320px; top:0; transition:left .22s ease; z-index:50;}
+      .sidebar.open{left:0;}
+      .main{padding:14px;}
+      .mobile-toggle{display:inline-flex;}
+      .overlay{display:none; position:fixed; inset:0; background: rgba(0,0,0,.55); z-index:40;}
+      .overlay.show{display:block;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/" title="Ir al inicio público">
+        <div class="logo">TC</div>
+        <div>
+          <h1>TaxiConfianza</h1>
+          <p>Panel Propietario</p>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Navegación del propietario">
+        <a class="active" href="#" aria-current="page">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Dashboard
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Mis ofertas
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h6M7 16h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v14l-4-2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Postulaciones
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Trabajo actual
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v4H7V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M6 8h12v12H6V8Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Historial de trabajos
+        </a>
+
+        <div class="sep"></div>
+
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M6 17h12M7.5 7h9M8 2h8v4H8V2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Vehículos
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M8 2h8v4H8V2Z" stroke="currentColor" stroke-width="1.6"/><path d="M6 6h12v16H6V6Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Documentos del vehículo
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 17.5l-6.2 3.3 1.2-7-5-4.8 7-1 3-6.4 3 6.4 7 1-5 4.8 1.2 7L12 17.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Calificaciones
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v12H7l-3 3V4Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Notificaciones
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c1.5-4 14.5-4 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Mi perfil
+        </a>
+      </nav>
+
+      <div style="margin:14px 6px 0; padding:12px; border-radius: var(--radius2); border:1px solid var(--border); background: rgba(255,255,255,.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <div>
+            <div class="badge">Estado: <strong id="owner-verif">Verificado</strong></div>
+            <div class="muted" style="margin-top:6px; font-size:12px;">Administra ofertas y documentos al día.</div>
+          </div>
+          <button class="btn danger" type="button">Salir</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 class="title">Hola, <span id="owner-name">María Gómez</span> 👋</h2>
+          <p class="subtitle">Tu panel de propietario: ofertas, postulaciones, documentación y confianza.</p>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn mobile-toggle" id="btnOpenMenu" type="button">☰ Menú</button>
+          <span class="badge">Nivel: <strong id="owner-level">Oro</strong> · ★ <strong id="owner-avg">4.8</strong></span>
+          <a class="btn primary" href="#">+ Publicar oferta</a>
+        </div>
+      </header>
+
+      <section class="grid">
+        <!-- KPIs -->
+        <article class="card">
+          <h3>Estado general</h3>
+          <p class="muted">Resumen rápido para tomar decisiones.</p>
+
+          <div class="kpis">
+            <div class="kpi">
+              <p class="l">Ofertas activas</p>
+              <div class="v" id="kpi-ofertas">2</div>
+              <p class="l">Publicadas</p>
+            </div>
+            <div class="kpi">
+              <p class="l">Postulaciones nuevas</p>
+              <div class="v" id="kpi-postulaciones">7</div>
+              <p class="l">Pendientes</p>
+            </div>
+            <div class="kpi">
+              <p class="l">Trabajo activo</p>
+              <div class="v" id="kpi-trabajo">1</div>
+              <p class="l">Asignación en curso</p>
+            </div>
+            <div class="kpi">
+              <p class="l">Documentos por vencer</p>
+              <div class="v" id="kpi-docs">1</div>
+              <p class="l">Revisión requerida</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Alertas de documentos -->
+        <article class="card">
+          <div class="row-between">
+            <div>
+              <h3>Alertas de documentación</h3>
+              <p class="muted">Mantén tus vehículos al día para evitar bloqueos de oferta.</p>
+            </div>
+            <span class="chip warn" id="docs-alert-chip">1 por vencer</span>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Vehículo ABC123 — SOAT por vencer</strong>
+              <div class="muted">Vence: 2026-01-20 · Recomendado: renovar hoy.</div>
+            </div>
+            <div class="actions">
+              <a class="btn" href="#">Ver vehículo</a>
+              <a class="btn primary" href="#">Subir documento</a>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>Estado de publicación</strong>
+              <div class="muted">Si un documento vence, la oferta puede pasar a “pausada/bloqueada”.</div>
+            </div>
+            <span class="chip danger">Atención</span>
+          </div>
+        </article>
+
+        <!-- Postulaciones recientes -->
+        <article class="card span-2">
+          <div class="row-between">
+            <div>
+              <h3>Postulaciones recientes</h3>
+              <p class="muted">Revisa candidatos y acepta al mejor según reputación y experiencia.</p>
+            </div>
+            <div class="actions">
+              <a class="btn" href="#">Ver todas</a>
+              <a class="btn primary" href="#">Ir a ofertas</a>
+            </div>
+          </div>
+
+          <table class="table" aria-label="Tabla de postulaciones recientes">
+            <thead>
+              <tr>
+                <th>Conductor</th>
+                <th>Oferta</th>
+                <th>Reputación</th>
+                <th>Estado</th>
+                <th style="text-align:right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="applications-table">
+              <tr>
+                <td>
+                  <strong>Juan Pérez</strong>
+                  <div class="muted">Experiencia: 3 años · CV adjunto</div>
+                </td>
+                <td>
+                  <strong>Turno noche — Cuota $120.000</strong>
+                  <div class="muted">Bogotá · Publicada hoy</div>
+                </td>
+                <td>
+                  <span class="chip ok">Plata · 4.6 ★</span>
+                </td>
+                <td>
+                  <span class="chip warn">Pendiente</span>
+                </td>
+                <td style="text-align:right">
+                  <div class="actions">
+                    <a class="btn" href="#">Ver perfil</a>
+                    <a class="btn" href="#">Preseleccionar</a>
+                    <a class="btn primary" href="#">Aceptar</a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <strong>Camila Rojas</strong>
+                  <div class="muted">Experiencia: 6 años · Verificada</div>
+                </td>
+                <td>
+                  <strong>Turno mañana — Porcentaje 30%</strong>
+                  <div class="muted">Soacha · Publicada ayer</div>
+                </td>
+                <td>
+                  <span class="chip ok">Oro · 4.8 ★</span>
+                </td>
+                <td>
+                  <span class="chip">Preseleccionado</span>
+                </td>
+                <td style="text-align:right">
+                  <div class="actions">
+                    <a class="btn" href="#">Ver perfil</a>
+                    <a class="btn primary" href="#">Aceptar</a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="muted" style="margin-top:10px">
+            *Al aceptar se crea una <strong>asignación</strong> y la oferta se <strong>cierra automáticamente</strong>.
+          </p>
+        </article>
+
+        <!-- Trabajo actual -->
+        <article class="card">
+          <h3>Trabajo actual</h3>
+          <p class="muted">Seguimiento de la asignación en curso.</p>
+
+          <div class="item">
+            <div>
+              <strong id="job-title">Asignación activa — Turno noche</strong>
+              <div class="muted">Conductor: <span id="job-driver">Juan Pérez</span> · Placa: <span id="job-plate">ABC123</span></div>
+              <div class="muted">Inicio: <span id="job-start">2026-01-12</span> · Ciudad: <span id="job-city">Bogotá</span></div>
+            </div>
+            <span class="chip ok">Activa</span>
+          </div>
+
+          <div class="actions" style="margin-top:10px">
+            <a class="btn" href="#">Ver detalle</a>
+            <a class="btn primary" href="#">Finalizar</a>
+          </div>
+        </article>
+
+        <!-- Calificaciones recientes -->
+        <article class="card">
+          <h3>Calificaciones recientes</h3>
+          <p class="muted">Tu reputación se construye con trazabilidad y respuestas.</p>
+
+          <div class="item">
+            <div>
+              <strong>★★★★★ — “Muy buen propietario, reglas claras.”</strong>
+              <div class="muted">De: Conductor Camila · Hace 2 días</div>
+            </div>
+            <div class="actions">
+              <a class="btn" href="#">Responder</a>
+              <a class="btn" href="#">Reportar</a>
+            </div>
+          </div>
+
+          <div class="item">
+            <div>
+              <strong>★★★★☆ — “Buen trato, mejorar tiempos de pago.”</strong>
+              <div class="muted">De: Conductor Andrés · Hace 1 semana</div>
+            </div>
+            <div class="actions">
+              <a class="btn" href="#">Responder</a>
+              <a class="btn" href="#">Reportar</a>
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top:10px">
+            <a class="btn primary" href="#">Ir a Calificaciones</a>
+          </div>
+        </article>
+      </section>
+
+      <footer class="foot">
+        © 2026 TaxiConfianza · Panel Propietario · Diseño orientado a confianza.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Menú móvil
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const btn = document.getElementById('btnOpenMenu');
+
+    function openMenu(){
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+    }
+    function closeMenu(){
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+
+    btn?.addEventListener('click', openMenu);
+    overlay?.addEventListener('click', closeMenu);
+
+    // TIP: podrías poblar este dashboard con /api/dashboard/propietario
+  </script>
+</body>
+</html>
