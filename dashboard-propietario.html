@@ -114,8 +114,6 @@
       font-size:12px; color:var(--muted);
     }
     .chip.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color:#bbf7d0;}
-    .chip.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#fcd34d;}
-    .chip.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#fecaca;}
     .grid{
       max-width: var(--max);
       margin:0 auto;
@@ -180,13 +178,13 @@
 <body>
   <div class="wrap">
     <aside class="sidebar" id="sidebar">
-      <div class="brand">
+      <a class="brand" href="/" title="Ir al inicio público">
         <div class="logo">TC</div>
         <div>
           <h1>TaxiConfianza</h1>
           <p>Panel Propietario</p>
         </div>
-      </div>
+      </a>
 
       <nav class="nav">
         <a class="active" href="#"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke-width="1.6"/></svg> Dashboard</a>
@@ -194,9 +192,13 @@
         <a href="#"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke-width="1.6"/><path d="M4 20c1.5-4 14.5-4 16 0" stroke-width="1.6" stroke-linecap="round"/></svg> Mi perfil</a>
       </nav>
 
-      <div style="margin-top:20px; padding:12px; border-radius: var(--radius2); border:1px solid var(--border); background: rgba(255,255,255,.03);">
-        <div class="muted" style="font-size:12px; margin-bottom:8px;">Sesión activa</div>
-        <button class="btn danger" style="width:100%" id="logoutBtn">Cerrar Sesión</button>
+      <div style="margin:14px 6px 0; padding:12px; border-radius: var(--radius2); border:1px solid var(--border); background: rgba(255,255,255,.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <div>
+            <div class="badge">Estado: <strong id="owner-verif">Verificado</strong></div>
+          </div>
+          <button class="btn danger" id="btnLogout" type="button">Salir</button>
+        </div>
       </div>
     </aside>
 
@@ -205,12 +207,12 @@
     <main class="main">
       <header class="topbar">
         <div>
-          <h2 class="title">Hola, <span id="owner-name">...</span> 👋</h2>
-          <p class="subtitle">Bienvenido a tu panel de gestión de confianza.</p>
+          <h2 class="title">Hola, <span id="owner-name">Cargando...</span> 👋</h2>
+          <p class="subtitle">Panel de propietario: gestiona tus vehículos y conductores.</p>
         </div>
         <div class="top-actions">
-          <button class="btn mobile-toggle" id="btnOpenMenu">☰</button>
-          <span class="badge">Nivel: <strong>Oro</strong></span>
+          <button class="btn mobile-toggle" id="btnOpenMenu" type="button">☰ Menú</button>
+          <span class="badge">Nivel: <strong id="owner-level">Oro</strong></span>
         </div>
       </header>
 
@@ -218,24 +220,31 @@
         <article class="card">
           <h3>Estado general</h3>
           <div class="kpis">
-            <div class="kpi"><p class="l">Ofertas</p><div class="v">2</div></div>
-            <div class="kpi"><p class="l">Postulaciones</p><div class="v">7</div></div>
+            <div class="kpi"><p class="l">Ofertas activas</p><div class="v">0</div></div>
+            <div class="kpi"><p class="l">Conductores</p><div class="v" id="count-drivers">0</div></div>
           </div>
         </article>
 
         <article class="card">
-          <h3>Alertas de documentos</h3>
+          <h3>Alertas</h3>
           <div class="item">
-            <div><strong>SOAT Vehículo ABC123</strong><div class="muted">Vence pronto</div></div>
-            <span class="chip warn">Revisar</span>
+            <div><strong>Sin alertas pendientes</strong><div class="muted">Todo está al día.</div></div>
+            <span class="chip ok">OK</span>
           </div>
         </article>
 
         <article class="card span-2">
-          <h3>Conductores Registrados</h3>
+          <h3>Conductores en la red</h3>
           <table class="table">
-            <thead><tr><th>Nombre</th><th>Email</th><th>Estado</th></tr></thead>
-            <tbody id="drivers-list">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Celular</th>
+                <th>Email</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="drivers-table">
               </tbody>
           </table>
         </article>
@@ -244,47 +253,62 @@
   </div>
 
   <script>
-    // 1. Cargar Datos Reales del Propietario
+    // 1. Lógica de Sesión y Nombre Dinámico
     const user = JSON.parse(localStorage.getItem('userTaxiConfianza'));
+    
     if (user) {
-        document.getElementById('owner-name').innerText = `${user.nombres} ${user.apellidos}`;
+      // Reemplaza "María Gómez" por los datos de tu Base de Datos
+      document.getElementById('owner-name').innerText = `${user.nombres} ${user.apellidos}`;
     } else {
-        window.location.href = 'login.html';
+      // Si no hay sesión, volver al login
+      window.location.href = 'login.html';
     }
 
-    // 2. Cargar Lista de Conductores Reales
-    async function cargarConductores() {
-        const res = await fetch('/api/conductores');
-        const data = await res.json();
-        const list = document.getElementById('drivers-list');
-        if(data.success) {
-            list.innerHTML = data.conductores.map(c => `
-                <tr>
-                    <td><strong>${c.nombres} ${c.apellidos}</strong></td>
-                    <td>${c.email}</td>
-                    <td><span class="chip ok">Disponible</span></td>
-                </tr>
-            `).join('');
+    // 2. Cargar conductores desde la API que ya creamos en server.js
+    async function loadDrivers() {
+      try {
+        const response = await fetch('/api/conductores');
+        const data = await response.json();
+        
+        if (data.success) {
+          const table = document.getElementById('drivers-table');
+          document.getElementById('count-drivers').innerText = data.conductores.length;
+          
+          table.innerHTML = data.conductores.map(c => `
+            <tr>
+              <td><strong>${c.nombres} ${c.apellidos}</strong></td>
+              <td>${c.celular || 'N/A'}</td>
+              <td>${c.email}</td>
+              <td><button class="btn primary">Contactar</button></td>
+            </tr>
+          `).join('');
         }
+      } catch (err) {
+        console.error("Error cargando conductores:", err);
+      }
     }
-    cargarConductores();
+
+    // Ejecutar carga al iniciar
+    loadDrivers();
 
     // 3. Menú Móvil
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
+    
     document.getElementById('btnOpenMenu').onclick = () => {
-        sidebar.classList.add('open');
-        overlay.classList.add('show');
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
     };
+    
     overlay.onclick = () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('show');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
     };
 
-    // 4. Cerrar Sesión
-    document.getElementById('logoutBtn').onclick = () => {
-        localStorage.removeItem('userTaxiConfianza');
-        window.location.href = 'index.html';
+    // 4. Botón Salir
+    document.getElementById('btnLogout').onclick = () => {
+      localStorage.removeItem('userTaxiConfianza');
+      window.location.href = 'index.html';
     };
   </script>
 </body>
