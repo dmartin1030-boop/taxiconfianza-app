@@ -137,3 +137,155 @@
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap:10px; margin-top:10px;
+    }
+    .kpi{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding:12px;
+    }
+    .kpi .v{font-size:22px;font-weight:900;margin:2px 0 4px;}
+    .kpi .l{font-size:12px;color:var(--muted);margin:0;}
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      margin-top:10px;
+    }
+    .table th, .table td{
+      padding:10px;
+      border-bottom:1px solid var(--border);
+      font-size:13px;
+    }
+    .table th{background: rgba(0,0,0,.18); color:var(--muted); text-align:left;}
+    .item{
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+      margin-top:10px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .mobile-toggle{display:none;}
+    .overlay{display:none; position:fixed; inset:0; background: rgba(0,0,0,.55); z-index:40;}
+    @media(max-width: 980px){
+      .sidebar{position:fixed; left:-320px; transition:left .22s ease; z-index:50;}
+      .sidebar.open{left:0;}
+      .mobile-toggle{display:inline-flex;}
+      .overlay.show{display:block;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">TC</div>
+        <div>
+          <h1>TaxiConfianza</h1>
+          <p>Panel Propietario</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="active" href="#"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke-width="1.6"/></svg> Dashboard</a>
+        <a href="#"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h10M4 17h16" stroke-width="1.6" stroke-linecap="round"/></svg> Mis ofertas</a>
+        <a href="#"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke-width="1.6"/><path d="M4 20c1.5-4 14.5-4 16 0" stroke-width="1.6" stroke-linecap="round"/></svg> Mi perfil</a>
+      </nav>
+
+      <div style="margin-top:20px; padding:12px; border-radius: var(--radius2); border:1px solid var(--border); background: rgba(255,255,255,.03);">
+        <div class="muted" style="font-size:12px; margin-bottom:8px;">Sesión activa</div>
+        <button class="btn danger" style="width:100%" id="logoutBtn">Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 class="title">Hola, <span id="owner-name">...</span> 👋</h2>
+          <p class="subtitle">Bienvenido a tu panel de gestión de confianza.</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn mobile-toggle" id="btnOpenMenu">☰</button>
+          <span class="badge">Nivel: <strong>Oro</strong></span>
+        </div>
+      </header>
+
+      <section class="grid">
+        <article class="card">
+          <h3>Estado general</h3>
+          <div class="kpis">
+            <div class="kpi"><p class="l">Ofertas</p><div class="v">2</div></div>
+            <div class="kpi"><p class="l">Postulaciones</p><div class="v">7</div></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Alertas de documentos</h3>
+          <div class="item">
+            <div><strong>SOAT Vehículo ABC123</strong><div class="muted">Vence pronto</div></div>
+            <span class="chip warn">Revisar</span>
+          </div>
+        </article>
+
+        <article class="card span-2">
+          <h3>Conductores Registrados</h3>
+          <table class="table">
+            <thead><tr><th>Nombre</th><th>Email</th><th>Estado</th></tr></thead>
+            <tbody id="drivers-list">
+              </tbody>
+          </table>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // 1. Cargar Datos Reales del Propietario
+    const user = JSON.parse(localStorage.getItem('userTaxiConfianza'));
+    if (user) {
+        document.getElementById('owner-name').innerText = `${user.nombres} ${user.apellidos}`;
+    } else {
+        window.location.href = 'login.html';
+    }
+
+    // 2. Cargar Lista de Conductores Reales
+    async function cargarConductores() {
+        const res = await fetch('/api/conductores');
+        const data = await res.json();
+        const list = document.getElementById('drivers-list');
+        if(data.success) {
+            list.innerHTML = data.conductores.map(c => `
+                <tr>
+                    <td><strong>${c.nombres} ${c.apellidos}</strong></td>
+                    <td>${c.email}</td>
+                    <td><span class="chip ok">Disponible</span></td>
+                </tr>
+            `).join('');
+        }
+    }
+    cargarConductores();
+
+    // 3. Menú Móvil
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    document.getElementById('btnOpenMenu').onclick = () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('show');
+    };
+    overlay.onclick = () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    };
+
+    // 4. Cerrar Sesión
+    document.getElementById('logoutBtn').onclick = () => {
+        localStorage.removeItem('userTaxiConfianza');
+        window.location.href = 'index.html';
+    };
+  </script>
+</body>
+</html>
