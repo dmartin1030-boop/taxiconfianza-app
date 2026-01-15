@@ -1,37 +1,139 @@
-<script>
-  // 1. Cargar datos del usuario desde el LocalStorage
-  const userData = JSON.parse(localStorage.getItem('userTaxiConfianza'));
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Propietario | TaxiConfianza</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --surface:#0f172a;
+      --card:#111c33;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:rgba(255,255,255,.08);
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --brand:#fbbf24;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --info:#38bdf8;
+      --radius:16px;
+      --radius2:12px;
+      --max:1200px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      background: radial-gradient(1100px 600px at 15% 0%, rgba(251,191,36,.12), transparent 60%),
+                  radial-gradient(900px 500px at 90% 15%, rgba(34,197,94,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{display:flex; min-height:100vh;}
+    a{color:inherit; text-decoration:none}
 
-  if (userData) {
-    // 2. Personalizar el saludo con Nombres y Apellidos reales
-    document.getElementById('owner-name').innerText = `${userData.nombres} ${userData.apellidos}`;
-    
-    // 3. (Opcional) Si quieres mostrar el nivel del propietario basado en datos
-    // document.getElementById('owner-level').innerText = userData.nivel || 'Bronce';
-  } else {
-    // Si no hay datos, redirigir al login por seguridad
-    window.location.href = 'login.html';
-  }
+    /* Sidebar */
+    .sidebar{
+      width:280px;
+      background: linear-gradient(180deg, rgba(17,28,51,.9), rgba(15,23,42,.7));
+      border-right:1px solid var(--border);
+      padding:18px 14px;
+      position:sticky; top:0; height:100vh; overflow:auto;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--border);
+    }
+    .logo{
+      width:38px; height:38px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      background: rgba(251,191,36,.18);
+      color: var(--brand);
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+    .brand h1{font-size:14px; margin:0; line-height:1.1}
+    .brand p{margin:0; font-size:12px; color:var(--muted)}
+    .nav{margin-top:16px; display:flex; flex-direction:column; gap:6px;}
+    .nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px;
+      border:1px solid transparent;
+    }
+    .nav a:hover{background:rgba(255,255,255,.04); border-color:var(--border);}
+    .nav a.active{
+      background: rgba(251,191,36,.12);
+      border-color: rgba(251,191,36,.35);
+    }
+    .ico{width:18px;height:18px;opacity:.9}
+    .sep{height:1px;background:var(--border); margin:14px 6px;}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 12px; border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      cursor:pointer; font-size:13px;
+    }
+    .btn:hover{background:rgba(255,255,255,.06)}
+    .btn.primary{border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.14);}
+    .btn.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12);}
 
-  // 4. Configurar el botón "Salir"
-  const btnSalir = document.querySelector('.btn.danger');
-  btnSalir?.addEventListener('click', () => {
-    localStorage.removeItem('userTaxiConfianza');
-    window.location.href = 'index.html';
-  });
-
-  // 5. Menú móvil (tu código existente)
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
-  const btnOpenMenu = document.getElementById('btnOpenMenu');
-
-  btnOpenMenu?.addEventListener('click', () => {
-    sidebar.classList.add('open');
-    overlay.classList.add('show');
-  });
-
-  overlay?.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
-  });
-</script>
+    /* Main */
+    .main{flex:1; padding:18px 18px 40px;}
+    .topbar{
+      max-width: var(--max);
+      margin:0 auto 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:14px;
+      padding:14px 14px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+    }
+    .title{font-size:18px;margin:0;}
+    .subtitle{margin:4px 0 0; font-size:13px; color:var(--muted)}
+    .top-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      font-size:12px; color:var(--muted);
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+      font-size:12px; color:var(--muted);
+    }
+    .chip.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color:#bbf7d0;}
+    .chip.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#fcd34d;}
+    .chip.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#fecaca;}
+    .grid{
+      max-width: var(--max);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media(min-width: 980px){
+      .grid{grid-template-columns: 1fr 1fr;}
+      .span-2{grid-column: 1 / -1;}
+    }
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border-radius: var(--radius);
+      padding:14px;
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px; margin-top:10px;
