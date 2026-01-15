@@ -90,10 +90,10 @@
           // 2. Redirección basada en el rol guardado en Hostinger
           if (result.user.tipo === 'PROPIETARIO') {
              // Redirige al nuevo dashboard innovador que creaste
-             window.location.href = 'propietario-dashboard.html'; 
+             window.location.href = 'dashboard-propietario.html'; 
           } else {
              // Redirige al dashboard de conductor (o el general)
-             window.location.href = 'dashboard.html';
+             window.location.href = 'dashboard-conductor.html';
           }
         } else {
           alert('Error: ' + result.message);
@@ -107,3 +107,4 @@
 
 </body>
 </html>
+
