@@ -3,205 +3,147 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Propietario | TaxiConfianza</title>
+  <title>Dashboard FULL | TaxiConfianza</title>
   <style>
+    /* VERSION 2.0 - FULL DESIGN */
     :root {
-      --bg: #0b1220;
-      --card: #111c33;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: rgba(255, 255, 255, .08);
-      --brand: #fbbf24;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --danger: #ef4444;
-      --radius: 12px;
+      --bg: #0b1220; --surface: #0f172a; --card: #111c33;
+      --text: #e5e7eb; --muted: #9ca3af; --border: rgba(255, 255, 255, .08);
+      --brand: #fbbf24; --ok: #22c55e; --warn: #f59e0b; --danger: #ef4444;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0; font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text);
-      display: flex; min-height: 100vh;
-    }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
-    /* Sidebar Profesional */
-    .sidebar {
-      width: 280px; background: #0f172a;
-      border-right: 1px solid var(--border); padding: 25px 15px;
-      display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
-    }
-    .nav-group { margin-bottom: 25px; }
-    .nav-item {
-      display: flex; align-items: center; padding: 12px 15px;
-      color: var(--muted); text-decoration: none; border-radius: 10px;
-      margin-bottom: 5px; font-size: 14px; transition: 0.3s;
-    }
-    .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
-    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); border: 1px solid rgba(251, 191, 36, 0.2); }
+    /* Sidebar Ancha y Completa */
+    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+    .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--muted); text-decoration: none; border-radius: 12px; margin-bottom: 5px; font-size: 14px; border: 1px solid transparent; }
+    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); border-color: rgba(251, 191, 36, 0.2); font-weight: 600; }
     
-    /* Contenido Principal */
-    .main { flex: 1; padding: 30px; overflow-y: auto; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+    /* Main Layout */
+    .main { flex: 1; padding: 35px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .grid-main { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     
-    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 25px; }
+    /* Estilos de Tabla y Listas */
+    .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .table th { text-align: left; color: var(--muted); font-size: 12px; padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+    .table td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
     
-    /* Estadísticas */
-    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-    .stat-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
-    .stat-val { font-size: 24px; font-weight: bold; margin-top: 5px; }
-
-    /* Tablas */
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; color: var(--muted); font-size: 12px; padding: 12px; border-bottom: 1px solid var(--border); }
-    .table td { padding: 15px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
-
-    /* Botones y Chips */
-    .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-weight: 600; font-size: 12px; }
+    .btn { padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
     .btn-primary { background: var(--brand); color: #000; border: none; }
-    .chip { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .chip-warn { background: rgba(245, 158, 11, 0.1); color: var(--warn); border: 1px solid rgba(245, 158, 11, 0.2); }
-    .chip-ok { background: rgba(34, 197, 94, 0.1); color: var(--ok); border: 1px solid rgba(34, 197, 94, 0.2); }
+    .chip { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <div style="padding: 0 15px 30px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div style="background:var(--brand); color:#000; padding:5px 8px; border-radius:8px; font-weight:900;">TC</div>
-        <div>
-          <strong style="display:block; font-size:16px;">TaxiConfianza</strong>
-          <small style="color:var(--muted)">Panel Propietario</small>
-        </div>
-      </div>
+    <div style="margin-bottom: 40px;">
+      <div style="background:var(--brand); color:#000; width:40px; height:40px; display:grid; place-items:center; border-radius:10px; font-weight:900; float:left; margin-right:12px;">TC</div>
+      <strong style="font-size:18px; display:block;">TaxiConfianza</strong>
+      <small style="color:var(--muted)">Panel Propietario</small>
     </div>
 
     <nav style="flex: 1;">
-      <div class="nav-group">
-        <a href="#" class="nav-item active">Dashboard</a>
-        <a href="#" class="nav-item">Mis ofertas</a>
-        <a href="#" class="nav-item">Postulaciones</a>
-        <a href="#" class="nav-item">Trabajo actual</a>
-        <a href="#" class="nav-item">Historial de trabajos</a>
-      </div>
-      <div class="nav-group">
-        <a href="#" class="nav-item">Vehículos</a>
-        <a href="#" class="nav-item">Documentos del vehículo</a>
-        <a href="#" class="nav-item">Calificaciones</a>
-        <a href="#" class="nav-item">Notificaciones</a>
-        <a href="#" class="nav-item">Mi perfil</a>
-      </div>
+      <a href="#" class="nav-item active">Dashboard</a>
+      <a href="#" class="nav-item">Mis ofertas</a>
+      <a href="#" class="nav-item">Postulaciones</a>
+      <a href="#" class="nav-item">Trabajo actual</a>
+      <a href="#" class="nav-item">Historial de trabajos</a>
+      <div style="margin: 20px 0; border-top: 1px solid var(--border);"></div>
+      <a href="#" class="nav-item">Vehículos</a>
+      <a href="#" class="nav-item">Documentos del vehículo</a>
+      <a href="#" class="nav-item">Calificaciones</a>
+      <a href="#" class="nav-item">Mi perfil</a>
     </nav>
 
-    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
-      <small style="color:var(--muted); display:block; margin-bottom:10px;">Estado: <strong>Verificado</strong></small>
-      <button class="btn" style="width:100%; color:var(--danger); border-color:var(--danger);" id="btnLogout">Salir</button>
+    <div style="padding-top:20px;">
+      <button class="btn" style="width:100%; border-color:var(--danger); color:var(--danger);" id="btnExit">Cerrar Sesión</button>
     </div>
   </aside>
 
   <main class="main">
-    <header class="header">
+    <header style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:35px;">
       <div>
-        <h2 style="margin:0">Hola, <span id="nombre-user">...</span> 👋</h2>
-        <p style="color: var(--muted); margin: 5px 0 0; font-size: 14px;">Tu panel de propietario: ofertas, postulaciones, documentación y confianza.</p>
+        <h1 style="margin:0; font-size:26px;">Hola, <span id="owner-name">Usuario</span> 👋</h1>
+        <p style="color:var(--muted); margin:5px 0;">Tu panel completo: ofertas, postulaciones y control de confianza.</p>
       </div>
-      <div style="display:flex; align-items:center; gap:15px;">
-        <span class="chip" style="background:rgba(255,255,255,0.05)">Nivel: <strong>Oro ★ 4.8</strong></span>
-        <button class="btn btn-primary">+ Publicar oferta</button>
-      </div>
+      <button class="btn btn-primary">+ Publicar nueva oferta</button>
     </header>
 
-    <div class="grid">
-      <div>
+    <div class="grid-main">
+      <section>
         <div class="card">
-          <h3 style="margin-top:0; font-size:16px;">Estado general</h3>
-          <p style="color:var(--muted); font-size:12px; margin-bottom:20px;">Resumen rápido para tomar decisiones.</p>
-          <div class="stats-grid">
-            <div class="stat-box"><small class="muted">Ofertas activas</small><div class="stat-val">2</div><small style="color:var(--muted)">Publicadas</small></div>
-            <div class="stat-box"><small class="muted">Postulaciones nuevas</small><div class="stat-val">7</div><small style="color:var(--muted)">Pendientes</small></div>
-            <div class="stat-box"><small class="muted">Trabajo activo</small><div class="stat-val">1</div><small style="color:var(--muted)">Asignación en curso</small></div>
-            <div class="stat-box"><small class="muted">Documentos por vencer</small><div class="stat-val">1</div><small style="color:var(--muted)">Revisión requerida</small></div>
+          <h3 style="margin:0 0 20px;">Estado general</h3>
+          <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px;">
+            <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:12px; border:1px solid var(--border);">
+              <small style="color:var(--muted)">Ofertas activas</small><div style="font-size:28px; font-weight:bold;">2</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:12px; border:1px solid var(--border);">
+              <small style="color:var(--muted)">Postulaciones nuevas</small><div style="font-size:28px; font-weight:bold;">7</div>
+            </div>
           </div>
         </div>
 
         <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; font-size:16px;">Postulaciones recientes</h3>
-            <div>
-                <button class="btn">Ver todas</button>
-                <button class="btn">Ir a ofertas</button>
-            </div>
+            <h3 style="margin:0;">Postulaciones recientes</h3>
+            <button class="btn">Ver todas</button>
           </div>
           <table class="table">
             <thead>
-              <tr><th>Conductor</th><th>Oferta</th><th>Reputación</th><th>Estado</th><th>Acciones</th></tr>
+              <tr><th>Conductor</th><th>Oferta</th><th>Estado</th><th>Acción</th></tr>
             </thead>
             <tbody>
               <tr>
-                <td><strong>Juan Pérez</strong><br><small class="muted">Experiencia: 3 años</small></td>
-                <td>Turno noche — Cuota $120.000</td>
-                <td><span class="chip chip-ok">Plata · 4.6 ★</span></td>
-                <td><span class="chip-warn" style="padding:2px 8px; border-radius:4px; font-size:10px;">Pendiente</span></td>
-                <td><button class="btn">Ver perfil</button> <button class="btn btn-primary">Aceptar</button></td>
+                <td><strong>Juan Pérez</strong><br><small class="muted">3 años exp.</small></td>
+                <td>Turno noche</td>
+                <td><span class="chip" style="color:var(--warn)">Pendiente</span></td>
+                <td><button class="btn btn-primary" style="padding:5px 10px;">Aceptar</button></td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <div>
-        <div class="card" style="border-top: 4px solid var(--warn);">
-          <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <h3 style="margin:0; font-size:16px;">Alertas de documentación</h3>
-            <span class="chip chip-warn">1 por vencer</span>
+      <section>
+        <div class="card" style="border-left: 4px solid var(--warn);">
+          <h3>Alertas urgentes</h3>
+          <div style="background:rgba(245,158,11,0.05); padding:15px; border-radius:12px; border:1px solid rgba(245,158,11,0.2);">
+            <strong>SOAT Vehículo ABC123</strong><br>
+            <p style="font-size:13px; color:var(--muted); margin:10px 0;">Vence en 5 días. Sube el nuevo documento para evitar bloqueos.</p>
+            <button class="btn btn-primary" style="width:100%">Subir SOAT ahora</button>
           </div>
-          <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px; border:1px solid var(--border);">
-            <strong>Vehículo ABC123 — SOAT por vencer</strong><br>
-            <small class="muted">Vence: 2026-01-20 · Recomendado: renovar hoy.</small>
-            <div style="margin-top:12px; display:flex; gap:10px;">
-                <button class="btn">Ver vehículo</button>
-                <button class="btn btn-primary">Subir documento</button>
+        </div>
+
+        <div class="card">
+          <h3>Trabajo en curso</h3>
+          <div style="border-left:4px solid var(--ok); padding-left:15px;">
+            <strong style="color:var(--ok)">Activo: Camila Rojas</strong><br>
+            <small>Placa: ABC123 | Bogotá</small>
+            <div style="margin-top:15px;">
+              <button class="btn" style="width:100%">Ver ubicación GPS</button>
             </div>
           </div>
         </div>
 
         <div class="card">
-          <h3 style="margin-top:0; font-size:16px;">Trabajo actual</h3>
-          <div style="border-left:3px solid var(--ok); padding-left:15px; margin-top:15px;">
-            <strong style="color:var(--ok)">Asignación activa — Turno noche</strong><br>
-            <small>Conductor: Juan Pérez · Placa: ABC123</small><br>
-            <small class="muted">Inicio: 2026-01-12 · Ciudad: Bogotá</small>
-            <div style="margin-top:10px;">
-                <button class="btn">Ver detalle</button>
-                <button class="btn" style="color:var(--warn); border-color:var(--warn);">Finalizar</button>
-            </div>
+          <h3>Calificaciones</h3>
+          <div style="font-size:14px;">
+            <p>"Excelente dueño, pagos a tiempo."</p>
+            <small class="muted">★★★★★ - Andres M.</small>
           </div>
         </div>
-
-        <div class="card">
-            <h3 style="margin-top:0; font-size:16px;">Calificaciones recientes</h3>
-            <div style="margin-top:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
-                <strong>★★★★★ "Muy buen propietario, reglas claras."</strong><br>
-                <small class="muted">De: Conductor Camila · Hace 2 días</small>
-            </div>
-            <button class="btn" style="width:100%; margin-top:10px;">Ver todas las reseñas</button>
-        </div>
-      </div>
+      </section>
     </div>
   </main>
 
   <script>
     const user = JSON.parse(localStorage.getItem('userTaxiConfianza'));
-    if (user) {
-        document.getElementById('nombre-user').innerText = `${user.nombres} ${user.apellidos}`;
-    } else {
-        window.location.href = 'login.html';
-    }
-
-    document.getElementById('btnLogout').onclick = () => {
-        localStorage.removeItem('userTaxiConfianza');
-        window.location.href = 'index.html';
+    if(user) document.getElementById('owner-name').innerText = user.nombres;
+    
+    document.getElementById('btnExit').onclick = () => {
+      localStorage.removeItem('userTaxiConfianza');
+      window.location.href = 'index.html';
     };
   </script>
 </body>
