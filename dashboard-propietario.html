@@ -1,85 +1,139 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Dashboard Propietario | TaxiConfianza</title>
-    <style>
-        :root { --bg: #0b1220; --card: #111c33; --brand: #fbbf24; --text: #e5e7eb; --border: rgba(255,255,255,0.08); }
-        body { margin: 0; display: flex; background: var(--bg); color: var(--text); font-family: sans-serif; min-height: 100vh; }
-        
-        /* Sidebar que ocupa TODO el alto */
-        .sidebar { width: 280px; background: #0f172a; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
-        .nav-item { padding: 12px; color: #9ca3af; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }
-        .nav-item.active { background: rgba(251,191,36,0.1); color: var(--brand); border: 1px solid rgba(251,191,36,0.2); }
-        
-        /* Contenedor con margen para no chocar con la sidebar */
-        .content { flex: 1; margin-left: 280px; padding: 30px; }
-        .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        
-        .btn { padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-primary { background: var(--brand); color: #000; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .table td, .table th { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Propietario | TaxiConfianza</title>
+  <style>
+    :root {
+      --bg: #0b1220; --card: #111c33; --brand: #fbbf24;
+      --text: #e5e7eb; --muted: #9ca3af; --border: rgba(255,255,255,0.08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; font-family: 'Segoe UI', sans-serif; 
+      background: var(--bg); color: var(--text); 
+      display: flex; min-height: 100vh; overflow-x: hidden;
+    }
+
+    /* Sidebar Fija a la izquierda */
+    .sidebar {
+      width: 260px; background: #0f172a; border-right: 1px solid var(--border);
+      padding: 25px 15px; display: flex; flex-direction: column;
+      position: fixed; height: 100vh; left: 0; top: 0; z-index: 100;
+    }
+    .nav-item {
+      display: flex; align-items: center; padding: 12px 15px;
+      color: var(--muted); text-decoration: none; border-radius: 10px;
+      margin-bottom: 5px; font-size: 14px; transition: 0.3s;
+    }
+    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); font-weight: 600; }
+    
+    /* Contenedor Principal con MARGEN para que no lo tape la sidebar */
+    .main-content {
+      flex: 1; margin-left: 260px; /* Igual al ancho de la sidebar */
+      padding: 40px; width: calc(100% - 260px);
+    }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; margin-bottom: 25px; }
+    
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .stat-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+    
+    .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .table th { text-align: left; color: var(--muted); font-size: 12px; padding: 10px; border-bottom: 1px solid var(--border); }
+    .table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+    .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .btn-brand { background: var(--brand); color: #000; }
+    .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; background: rgba(255,255,255,0.05); }
+  </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <div style="margin-bottom:30px;"><strong>TaxiConfianza</strong></div>
-        <nav style="flex:1">
-            <a href="#" class="nav-item active">Dashboard</a>
-            <a href="#" class="nav-item">Mis ofertas</a>
-            <a href="#" class="nav-item">Postulaciones</a>
-            <a href="#" class="nav-item">Trabajo actual</a>
-            <a href="#" class="nav-item">Historial de trabajos</a>
-            <div style="margin:15px 0; border-top:1px solid var(--border)"></div>
-            <a href="#" class="nav-item">Vehículos</a>
-            <a href="#" class="nav-item">Documentos del vehículo</a>
-            <a href="#" class="nav-item">Calificaciones</a>
-            <a href="#" class="nav-item">Notificaciones</a>
-        </nav>
-        <button class="btn" style="color:#ef4444; background:none; border:1px solid #ef4444;" onclick="localStorage.clear(); location.href='index.html'">Salir</button>
-    </aside>
 
-    <main class="content">
-        <header style="display:flex; justify-content:space-between; margin-bottom:30px;">
-            <h2>Hola, lolo melo 👋</h2>
-            <button class="btn btn-primary">+ Publicar oferta</button>
-        </header>
+  <aside class="sidebar">
+    <div style="margin-bottom: 40px; padding: 0 10px;">
+      <strong style="font-size: 18px; color: var(--brand);">TaxiConfianza</strong><br>
+      <small style="color: var(--muted)">Panel Propietario</small>
+    </div>
+    <nav style="flex: 1;">
+      <a href="#" class="nav-item active">Dashboard</a>
+      <a href="#" class="nav-item">Mis ofertas</a>
+      <a href="#" class="nav-item">Postulaciones</a>
+      <a href="#" class="nav-item">Trabajo actual</a>
+      <a href="#" class="nav-item">Historial de trabajos</a>
+      <div style="height: 1px; background: var(--border); margin: 15px 10px;"></div>
+      <a href="#" class="nav-item">Vehículos</a>
+      <a href="#" class="nav-item">Documentos del vehículo</a>
+      <a href="#" class="nav-item">Calificaciones</a>
+      <a href="#" class="nav-item">Notificaciones</a>
+      <a href="#" class="nav-item">Mi perfil</a>
+    </nav>
+    <button class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; width: 100%; border: 1px solid #ef4444;" onclick="location.href='index.html'">Salir</button>
+  </aside>
 
-        <div class="grid">
-            <div>
-                <div class="card">
-                    <h3>Estado general</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                        <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px;">Ofertas: <strong>2</strong></div>
-                        <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px;">Postulaciones: <strong>7</strong></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Postulaciones recientes</h3>
-                    <table class="table">
-                        <tr><th>Conductor</th><th>Oferta</th><th>Estado</th></tr>
-                        <tr><td>Juan Pérez</td><td>Turno noche</td><td><span style="color:var(--brand)">Pendiente</span></td></tr>
-                    </table>
-                </div>
-            </div>
-            <div>
-                <div class="card" style="border-left:4px solid var(--brand)">
-                    <h3>Alertas</h3>
-                    <p style="font-size:12px">SOAT Vehículo ABC123 por vencer.</p>
-                    <button class="btn btn-primary" style="width:100%">Subir documento</button>
-                </div>
-                <div class="card">
-                    <h3>Trabajo actual</h3>
-                    <p style="font-size:12px; color:#22c55e">● Activo: Camila Rojas</p>
-                </div>
-                <div class="card">
-                    <h3>Calificaciones</h3>
-                    <p style="font-size:12px">"Excelente propietario" ★★★★★</p>
-                </div>
-            </div>
+  <main class="main-content">
+    <header class="header">
+      <div>
+        <h1 style="margin:0; font-size: 24px;">Hola, lolo melo 👋</h1>
+        <p style="color: var(--muted); margin: 5px 0 0;">Tu panel de propietario: ofertas, postulaciones y documentación.</p>
+      </div>
+      <button class="btn btn-brand">+ Publicar oferta</button>
+    </header>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h3 style="margin-top:0;">Estado general</h3>
+          <div class="stats-row">
+            <div class="stat-item"><small class="muted">Ofertas activas</small><div style="font-size: 24px; font-weight: bold;">2</div></div>
+            <div class="stat-item"><small class="muted">Postulaciones</small><div style="font-size: 24px; font-weight: bold;">7</div></div>
+          </div>
         </div>
-    </main>
+
+        <div class="card">
+          <h3 style="margin-top:0;">Postulaciones recientes</h3>
+          <table class="table">
+            <thead>
+              <tr><th>Conductor</th><th>Oferta</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Juan Pérez</strong><br><small class="muted">3 años exp.</small></td>
+                <td>Turno noche</td>
+                <td><span style="color: var(--brand)">Pendiente</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="border-left: 4px solid var(--brand);">
+          <h3 style="margin:0 0 10px;">Alertas</h3>
+          <p style="font-size: 13px;">SOAT Vehículo ABC123 por vencer en 5 días.</p>
+          <button class="btn btn-brand" style="width: 100%; margin-top: 10px;">Subir documento</button>
+        </div>
+
+        <div class="card">
+          <h3>Trabajo actual</h3>
+          <div style="color: #22c55e; font-size: 14px; font-weight: 600;">● Activo: Camila Rojas</div>
+          <p style="font-size: 12px; color: var(--muted); margin: 5px 0;">Placa: ABC123 | Inicio: 2026-01-12</p>
+        </div>
+
+        <div class="card">
+          <h3>Calificaciones</h3>
+          <div style="font-size: 13px; line-height: 1.6;">
+            "Excelente propietario, muy serio."<br>
+            <span style="color: var(--brand)">★★★★★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
 </body>
 </html>
