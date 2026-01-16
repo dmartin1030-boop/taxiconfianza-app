@@ -6,57 +6,54 @@
   <title>Dashboard Propietario | TaxiConfianza</title>
   <style>
     :root {
-      --bg: #0b1220; --card: #111c33; --brand: #fbbf24;
-      --text: #e5e7eb; --muted: #9ca3af; --border: rgba(255,255,255,0.08);
-      --radius: 12px;
+      --bg: #0b1220; --surface: #0f172a; --card: #111c33;
+      --text: #e5e7eb; --muted: #9ca3af; --border: rgba(255,255,255,0.06);
+      --brand: #fbbf24; --ok: #22c55e; --warn: #f59e0b; --danger: #ef4444;
     }
     * { box-sizing: border-box; }
-    body { 
-      margin: 0; font-family: 'Segoe UI', sans-serif; 
-      background: var(--bg); color: var(--text); 
-      display: flex; min-height: 100vh; overflow-x: hidden;
-    }
+    body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; }
 
-    /* Sidebar Fija a la izquierda */
-    .sidebar {
-      width: 260px; background: #0f172a; border-right: 1px solid var(--border);
-      padding: 25px 15px; display: flex; flex-direction: column;
-      position: fixed; height: 100vh; left: 0; top: 0; z-index: 100;
-    }
-    .nav-item {
-      display: flex; align-items: center; padding: 12px 15px;
-      color: var(--muted); text-decoration: none; border-radius: 10px;
-      margin-bottom: 5px; font-size: 14px; transition: 0.3s;
-    }
-    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); font-weight: 600; }
+    /* Sidebar Profesional */
+    .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 25px 15px; position: fixed; height: 100vh; }
+    .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--muted); text-decoration: none; border-radius: 10px; font-size: 14px; margin-bottom: 4px; }
+    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); font-weight: 600; border: 1px solid rgba(251, 191, 36, 0.1); }
     
-    /* Contenedor Principal con MARGEN para que no lo tape la sidebar */
-    .main-content {
-      flex: 1; margin-left: 260px; /* Igual al ancho de la sidebar */
-      padding: 40px; width: calc(100% - 260px);
-    }
+    /* Contenedor Principal */
+    .main { flex: 1; margin-left: 260px; padding: 30px; max-width: 1400px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    
+    /* Grid de Contenido */
+    .dashboard-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    .card-title { font-size: 16px; font-weight: 600; margin: 0 0 15px 0; display: flex; justify-content: space-between; align-items: center; }
 
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; margin-bottom: 25px; }
-    
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-    .stat-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
-    
-    .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    .table th { text-align: left; color: var(--muted); font-size: 12px; padding: 10px; border-bottom: 1px solid var(--border); }
+    /* Resumen de 4 paneles */
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .summary-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+    .summary-box small { color: var(--muted); font-size: 11px; }
+    .summary-box div { font-size: 22px; font-weight: bold; margin-top: 5px; }
+
+    /* Tablas y Chips */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; color: var(--muted); font-size: 11px; padding: 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
     .table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-oro { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+    .badge-plata { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .badge-warn { background: rgba(245, 158, 11, 0.1); color: var(--warn); }
 
-    .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; }
-    .btn-brand { background: var(--brand); color: #000; }
-    .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; background: rgba(255,255,255,0.05); }
+    /* Botones Estilo Imagen */
+    .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-primary { background: var(--brand); color: #000; border: none; }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <div style="margin-bottom: 40px; padding: 0 10px;">
-      <strong style="font-size: 18px; color: var(--brand);">TaxiConfianza</strong><br>
+    <div style="margin-bottom: 35px; padding-left: 10px;">
+      <strong style="color: var(--brand); font-size: 18px;">TaxiConfianza</strong><br>
       <small style="color: var(--muted)">Panel Propietario</small>
     </div>
     <nav style="flex: 1;">
@@ -72,68 +69,93 @@
       <a href="#" class="nav-item">Notificaciones</a>
       <a href="#" class="nav-item">Mi perfil</a>
     </nav>
-    <button class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; width: 100%; border: 1px solid #ef4444;" onclick="location.href='index.html'">Salir</button>
+    <button class="btn" style="color: var(--danger); border-color: var(--danger); width: 100%;" onclick="location.href='index.html'">Salir</button>
   </aside>
 
-  <main class="main-content">
+  <main class="main">
     <header class="header">
       <div>
-        <h1 style="margin:0; font-size: 24px;">Hola, lolo melo 👋</h1>
-        <p style="color: var(--muted); margin: 5px 0 0;">Tu panel de propietario: ofertas, postulaciones y documentación.</p>
+        <h2 style="margin:0">Hola, <span id="nombre-user">María Gómez</span> 👋</h2>
+        <p style="color: var(--muted); margin: 5px 0 0; font-size: 13px;">Tu panel de propietario: ofertas, postulaciones, documentación y confianza.</p>
       </div>
-      <button class="btn btn-brand">+ Publicar oferta</button>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge" style="background:rgba(255,255,255,0.05)">Nivel: <strong>Oro ★ 4.8</strong></span>
+        <button class="btn btn-primary">+ Publicar oferta</button>
+      </div>
     </header>
 
-    <div class="grid">
+    <div class="dashboard-grid">
       <div>
         <div class="card">
-          <h3 style="margin-top:0;">Estado general</h3>
-          <div class="stats-row">
-            <div class="stat-item"><small class="muted">Ofertas activas</small><div style="font-size: 24px; font-weight: bold;">2</div></div>
-            <div class="stat-item"><small class="muted">Postulaciones</small><div style="font-size: 24px; font-weight: bold;">7</div></div>
+          <div class="card-title">Estado general</div>
+          <div class="summary-grid">
+            <div class="summary-box"><small>Ofertas activas</small><div>2</div><small>Publicadas</small></div>
+            <div class="summary-box"><small>Postulaciones nuevas</small><div>7</div><small>Pendientes</small></div>
+            <div class="summary-box"><small>Trabajo activo</small><div>1</div><small>Asignación en curso</small></div>
+            <div class="summary-box"><small>Documentos por vencer</small><div style="color:var(--warn)">1</div><small>Revisión requerida</small></div>
           </div>
         </div>
 
         <div class="card">
-          <h3 style="margin-top:0;">Postulaciones recientes</h3>
+          <div class="card-title">
+            Postulaciones recientes
+            <div><button class="btn btn-sm">Ver todas</button> <button class="btn btn-sm">Ir a ofertas</button></div>
+          </div>
           <table class="table">
             <thead>
-              <tr><th>Conductor</th><th>Oferta</th><th>Estado</th></tr>
+              <tr><th>Conductor</th><th>Oferta</th><th>Reputación</th><th>Estado</th><th>Acciones</th></tr>
             </thead>
             <tbody>
               <tr>
-                <td><strong>Juan Pérez</strong><br><small class="muted">3 años exp.</small></td>
-                <td>Turno noche</td>
-                <td><span style="color: var(--brand)">Pendiente</span></td>
+                <td><strong>Juan Pérez</strong><br><small class="muted">Experiencia: 3 años</small></td>
+                <td>Turno noche<br><small class="muted">Bogotá</small></td>
+                <td><span class="badge badge-plata">Plata · 4.6 ★</span></td>
+                <td><span class="badge badge-warn">Pendiente</span></td>
+                <td><button class="btn btn-sm">Ver perfil</button> <button class="btn btn-primary btn-sm">Aceptar</button></td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <div class="card">
+          <div class="card-title">Trabajo actual</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:var(--ok)">Asignación activa — Turno noche</strong><br>
+              <small class="muted">Conductor: Juan Pérez · Placa: ABC123</small>
+            </div>
+            <div>
+              <button class="btn btn-sm">Ver detalle</button>
+              <button class="btn btn-sm" style="color:var(--warn)">Finalizar</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
-        <div class="card" style="border-left: 4px solid var(--brand);">
-          <h3 style="margin:0 0 10px;">Alertas</h3>
-          <p style="font-size: 13px;">SOAT Vehículo ABC123 por vencer en 5 días.</p>
-          <button class="btn btn-brand" style="width: 100%; margin-top: 10px;">Subir documento</button>
-        </div>
-
         <div class="card">
-          <h3>Trabajo actual</h3>
-          <div style="color: #22c55e; font-size: 14px; font-weight: 600;">● Activo: Camila Rojas</div>
-          <p style="font-size: 12px; color: var(--muted); margin: 5px 0;">Placa: ABC123 | Inicio: 2026-01-12</p>
-        </div>
-
-        <div class="card">
-          <h3>Calificaciones</h3>
-          <div style="font-size: 13px; line-height: 1.6;">
-            "Excelente propietario, muy serio."<br>
-            <span style="color: var(--brand)">★★★★★</span>
+          <div class="card-title">Alertas de documentación <span class="badge badge-warn">1 por vencer</span></div>
+          <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid var(--border);">
+            <strong>Vehículo ABC123 — SOAT</strong><br>
+            <small class="muted">Vence: 2026-01-20 · Recomendado: renovar hoy.</small>
+            <div style="margin-top:10px; display:flex; gap:5px;">
+              <button class="btn btn-sm">Ver vehículo</button>
+              <button class="btn btn-primary btn-sm">Subir documento</button>
+            </div>
           </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Calificaciones recientes</div>
+          <div style="margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+            <div style="color:var(--brand)">★★★★★</div>
+            <p style="font-size:13px; margin:5px 0;">"Muy buen propietario, reglas claras."</p>
+            <small class="muted">De: Conductor Camila · Hace 2 días</small>
+          </div>
+          <button class="btn" style="width:100%">Ver todas las reseñas</button>
         </div>
       </div>
     </div>
   </main>
-
 </body>
 </html>
