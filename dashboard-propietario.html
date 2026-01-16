@@ -1,127 +1,85 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Completo | TaxiConfianza</title>
-  <style>
-    :root {
-      --bg: #0b1220; --surface: #0f172a; --card: #111c33;
-      --text: #e5e7eb; --muted: #9ca3af; --border: rgba(255,255,255,0.08);
-      --brand: #fbbf24; --ok: #22c55e; --warn: #f59e0b; --danger: #ef4444;
-    }
-    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
-    
-    /* Sidebar Completa */
-    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
-    .nav-item { display: flex; align-items: center; padding: 12px; color: var(--muted); text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-size: 14px; }
-    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); border: 1px solid rgba(251, 191, 36, 0.2); }
-    
-    /* Cuerpo Principal */
-    .main { flex: 1; padding: 30px; }
-    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; color: var(--muted); font-size: 12px; padding: 10px; border-bottom: 1px solid var(--border); }
-    .table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; }
-    .btn-primary { background: var(--brand); color: #000; }
-    .chip { padding: 3px 10px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); }
-  </style>
+    <meta charset="utf-8">
+    <title>Dashboard Propietario | TaxiConfianza</title>
+    <style>
+        :root { --bg: #0b1220; --card: #111c33; --brand: #fbbf24; --text: #e5e7eb; --border: rgba(255,255,255,0.08); }
+        body { margin: 0; display: flex; background: var(--bg); color: var(--text); font-family: sans-serif; min-height: 100vh; }
+        
+        /* Sidebar que ocupa TODO el alto */
+        .sidebar { width: 280px; background: #0f172a; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .nav-item { padding: 12px; color: #9ca3af; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }
+        .nav-item.active { background: rgba(251,191,36,0.1); color: var(--brand); border: 1px solid rgba(251,191,36,0.2); }
+        
+        /* Contenedor con margen para no chocar con la sidebar */
+        .content { flex: 1; margin-left: 280px; padding: 30px; }
+        .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        
+        .btn { padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-primary { background: var(--brand); color: #000; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table td, .table th { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
+    </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div style="margin-bottom: 30px;">
-      <strong style="color: var(--brand); font-size: 18px;">TaxiConfianza</strong><br>
-      <small style="color: var(--muted)">Panel Propietario</small>
-    </div>
-    <nav style="flex: 1;">
-      <a href="#" class="nav-item active">Dashboard</a>
-      <a href="#" class="nav-item">Mis ofertas</a>
-      <a href="#" class="nav-item">Postulaciones</a>
-      <a href="#" class="nav-item">Trabajo actual</a>
-      <a href="#" class="nav-item">Historial de trabajos</a>
-      <div style="height: 1px; background: var(--border); margin: 15px 0;"></div>
-      <a href="#" class="nav-item">Vehículos</a>
-      <a href="#" class="nav-item">Documentos del vehículo</a>
-      <a href="#" class="nav-item">Calificaciones</a>
-      <a href="#" class="nav-item">Notificaciones</a>
-      <a href="#" class="nav-item">Mi perfil</a>
-    </nav>
-    <button class="btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); width: 100%;" id="btnExit">Salir</button>
-  </aside>
+    <aside class="sidebar">
+        <div style="margin-bottom:30px;"><strong>TaxiConfianza</strong></div>
+        <nav style="flex:1">
+            <a href="#" class="nav-item active">Dashboard</a>
+            <a href="#" class="nav-item">Mis ofertas</a>
+            <a href="#" class="nav-item">Postulaciones</a>
+            <a href="#" class="nav-item">Trabajo actual</a>
+            <a href="#" class="nav-item">Historial de trabajos</a>
+            <div style="margin:15px 0; border-top:1px solid var(--border)"></div>
+            <a href="#" class="nav-item">Vehículos</a>
+            <a href="#" class="nav-item">Documentos del vehículo</a>
+            <a href="#" class="nav-item">Calificaciones</a>
+            <a href="#" class="nav-item">Notificaciones</a>
+        </nav>
+        <button class="btn" style="color:#ef4444; background:none; border:1px solid #ef4444;" onclick="localStorage.clear(); location.href='index.html'">Salir</button>
+    </aside>
 
-  <main class="main">
-    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-      <div>
-        <h2 style="margin:0">Hola, <span id="userName">...</span> 👋</h2>
-        <p style="color: var(--muted); margin: 5px 0 0;">Tu panel de propietario: ofertas, postulaciones y confianza.</p>
-      </div>
-      <button class="btn btn-primary">+ Publicar oferta</button>
-    </header>
+    <main class="content">
+        <header style="display:flex; justify-content:space-between; margin-bottom:30px;">
+            <h2>Hola, lolo melo 👋</h2>
+            <button class="btn btn-primary">+ Publicar oferta</button>
+        </header>
 
-    <div class="grid">
-      <div>
-        <div class="card">
-          <h3>Estado general</h3>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-              <small class="muted">Ofertas activas</small><div style="font-size: 24px; font-weight: bold;">2</div>
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <h3>Estado general</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px;">Ofertas: <strong>2</strong></div>
+                        <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px;">Postulaciones: <strong>7</strong></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Postulaciones recientes</h3>
+                    <table class="table">
+                        <tr><th>Conductor</th><th>Oferta</th><th>Estado</th></tr>
+                        <tr><td>Juan Pérez</td><td>Turno noche</td><td><span style="color:var(--brand)">Pendiente</span></td></tr>
+                    </table>
+                </div>
             </div>
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-              <small class="muted">Postulaciones nuevas</small><div style="font-size: 24px; font-weight: bold;">7</div>
+            <div>
+                <div class="card" style="border-left:4px solid var(--brand)">
+                    <h3>Alertas</h3>
+                    <p style="font-size:12px">SOAT Vehículo ABC123 por vencer.</p>
+                    <button class="btn btn-primary" style="width:100%">Subir documento</button>
+                </div>
+                <div class="card">
+                    <h3>Trabajo actual</h3>
+                    <p style="font-size:12px; color:#22c55e">● Activo: Camila Rojas</p>
+                </div>
+                <div class="card">
+                    <h3>Calificaciones</h3>
+                    <p style="font-size:12px">"Excelente propietario" ★★★★★</p>
+                </div>
             </div>
-          </div>
         </div>
-
-        <div class="card">
-          <h3>Postulaciones recientes</h3>
-          <table class="table">
-            <thead>
-              <tr><th>Conductor</th><th>Oferta</th><th>Estado</th><th>Acciones</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Juan Pérez</strong><br><small>3 años exp.</small></td>
-                <td>Turno noche</td>
-                <td><span class="chip" style="color: var(--warn)">Pendiente</span></td>
-                <td><button class="btn btn-primary">Aceptar</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 20px;">
-        <div class="card" style="border-left: 4px solid var(--warn);">
-          <h3>Alertas de documentación</h3>
-          <p style="font-size: 13px;">Vehículo ABC123 — SOAT por vencer<br><small class="muted">Vence: 2026-01-20</small></p>
-          <button class="btn btn-primary" style="width: 100%;">Subir documento</button>
-        </div>
-
-        <div class="card">
-          <h3>Trabajo actual</h3>
-          <div style="border-left: 3px solid var(--ok); padding-left: 15px;">
-            <strong style="color: var(--ok);">● Asignación activa</strong><br>
-            <small>Camila Rojas — Placa: ABC123</small>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Calificaciones recientes</h3>
-          <p style="font-size: 13px;">"Excelente dueño, muy serio."<br><small class="muted">★★★★★ · Hace 2 días</small></p>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <script>
-    const user = JSON.parse(localStorage.getItem('userTaxiConfianza'));
-    if(user) document.getElementById('userName').innerText = user.nombres;
-    document.getElementById('btnExit').onclick = () => {
-      localStorage.removeItem('userTaxiConfianza');
-      window.location.href = 'index.html';
-    };
-  </script>
+    </main>
 </body>
 </html>
