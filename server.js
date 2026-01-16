@@ -27,8 +27,8 @@ app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'regis
 
 // RUTA CLAVE: Muestra el dashboard al ingresar como propietario
 app.get('/dashboard-propietario.html', (req, res) => {
-   res.sendFile(path.join(__dirname, 'dashboard.html'));
-});
+    res.sendFile(path.join(__dirname, 'dashboard-propietario.html'));
+})
 
 // 3. API para el Dashboard (Datos de conductores)
 app.get('/api/conductores', (req, res) => {
