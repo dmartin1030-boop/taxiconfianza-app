@@ -13,47 +13,64 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; }
 
-    /* Sidebar Profesional */
-    .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 25px 15px; position: fixed; height: 100vh; }
+    /* Sidebar con ancho fijo */
+    .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 25px 15px; position: fixed; height: 100vh; z-index: 10; }
     .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--muted); text-decoration: none; border-radius: 10px; font-size: 14px; margin-bottom: 4px; }
-    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); font-weight: 600; border: 1px solid rgba(251, 191, 36, 0.1); }
+    .nav-item.active { background: rgba(251, 191, 36, 0.1); color: var(--brand); font-weight: 600; }
     
-    /* Contenedor Principal */
-    .main { flex: 1; margin-left: 260px; padding: 30px; max-width: 1400px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    /* Contenedor Principal con simetría */
+    .main { flex: 1; margin-left: 260px; padding: 35px; width: calc(100% - 260px); }
     
-    /* Grid de Contenido */
-    .dashboard-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
-    .card-title { font-size: 16px; font-weight: 600; margin: 0 0 15px 0; display: flex; justify-content: space-between; align-items: center; }
+    /* Layout de dos columnas balanceado */
+    .dashboard-grid { 
+      display: grid; 
+      grid-template-columns: 1.8fr 1fr; /* Mantiene la proporción de la referencia */
+      gap: 24px; 
+      align-items: start;
+    }
 
-    /* Resumen de 4 paneles */
-    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .summary-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-    .summary-box small { color: var(--muted); font-size: 11px; }
-    .summary-box div { font-size: 22px; font-weight: bold; margin-top: 5px; }
+    .card { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      border-radius: 16px; 
+      padding: 24px; 
+      margin-bottom: 24px; 
+      height: fit-content;
+    }
 
-    /* Tablas y Chips */
+    /* Ajuste de Estado General para simetría */
+    .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .summary-box { 
+      background: rgba(0,0,0,0.15); 
+      padding: 18px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Tablas alineadas */
     .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; color: var(--muted); font-size: 11px; padding: 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
-    .table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .table th { text-align: left; color: var(--muted); font-size: 11px; padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+    .table td { padding: 18px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
     
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge-oro { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
     .badge-plata { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
-    .badge-warn { background: rgba(245, 158, 11, 0.1); color: var(--warn); }
 
-    /* Botones Estilo Imagen */
-    .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-size: 12px; font-weight: 600; }
+    /* Botones */
+    .btn { padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
     .btn-primary { background: var(--brand); color: #000; border: none; }
-    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+
+    header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <div style="margin-bottom: 35px; padding-left: 10px;">
-      <strong style="color: var(--brand); font-size: 18px;">TaxiConfianza</strong><br>
+    <div style="margin-bottom: 35px; padding: 0 10px;">
+      <strong style="color: var(--brand); font-size: 20px;">TaxiConfianza</strong><br>
       <small style="color: var(--muted)">Panel Propietario</small>
     </div>
     <nav style="flex: 1;">
@@ -62,100 +79,102 @@
       <a href="#" class="nav-item">Postulaciones</a>
       <a href="#" class="nav-item">Trabajo actual</a>
       <a href="#" class="nav-item">Historial de trabajos</a>
-      <div style="height: 1px; background: var(--border); margin: 15px 10px;"></div>
+      <div style="height: 1px; background: var(--border); margin: 20px 10px;"></div>
       <a href="#" class="nav-item">Vehículos</a>
       <a href="#" class="nav-item">Documentos del vehículo</a>
       <a href="#" class="nav-item">Calificaciones</a>
       <a href="#" class="nav-item">Notificaciones</a>
-      <a href="#" class="nav-item">Mi perfil</a>
     </nav>
-    <button class="btn" style="color: var(--danger); border-color: var(--danger); width: 100%;" onclick="location.href='index.html'">Salir</button>
+    <button class="btn" style="color: var(--danger); border-color: var(--danger); width: 100%;" onclick="location.href='index.html'">Cerrar Sesión</button>
   </aside>
 
   <main class="main">
-    <header class="header">
+    <header>
       <div>
-        <h2 style="margin:0">Hola, <span id="nombre-user">María Gómez</span> 👋</h2>
-        <p style="color: var(--muted); margin: 5px 0 0; font-size: 13px;">Tu panel de propietario: ofertas, postulaciones, documentación y confianza.</p>
+        <h1 style="margin:0; font-size: 26px;">Hola, María Gómez 👋</h1>
+        <p style="color: var(--muted); margin: 5px 0 0;">Tu panel de propietario: ofertas, postulaciones y documentación.</p>
       </div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <span class="badge" style="background:rgba(255,255,255,0.05)">Nivel: <strong>Oro ★ 4.8</strong></span>
-        <button class="btn btn-primary">+ Publicar oferta</button>
-      </div>
+      <button class="btn btn-primary">+ Publicar nueva oferta</button>
     </header>
 
     <div class="dashboard-grid">
       <div>
         <div class="card">
-          <div class="card-title">Estado general</div>
+          <h3 style="margin-top:0; font-size: 16px;">Estado general</h3>
           <div class="summary-grid">
-            <div class="summary-box"><small>Ofertas activas</small><div>2</div><small>Publicadas</small></div>
-            <div class="summary-box"><small>Postulaciones nuevas</small><div>7</div><small>Pendientes</small></div>
-            <div class="summary-box"><small>Trabajo activo</small><div>1</div><small>Asignación en curso</small></div>
-            <div class="summary-box"><small>Documentos por vencer</small><div style="color:var(--warn)">1</div><small>Revisión requerida</small></div>
+            <div class="summary-box"><small>Ofertas activas</small><div style="font-size: 24px; font-weight: bold; margin: 4px 0;">2</div><small>Publicadas</small></div>
+            <div class="summary-box"><small>Postulaciones</small><div style="font-size: 24px; font-weight: bold; margin: 4px 0;">7</div><small>Pendientes</small></div>
+            <div class="summary-box"><small>Trabajo activo</small><div style="font-size: 24px; font-weight: bold; margin: 4px 0;">1</div><small>En curso</small></div>
+            <div class="summary-box"><small>Docs por vencer</small><div style="font-size: 24px; font-weight: bold; color:var(--warn); margin: 4px 0;">1</div><small>Revisión hoy</small></div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">
-            Postulaciones recientes
-            <div><button class="btn btn-sm">Ver todas</button> <button class="btn btn-sm">Ir a ofertas</button></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0; font-size: 16px;">Postulaciones recientes</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-sm">Ver todas</button>
+              <button class="btn btn-sm">Ir a ofertas</button>
+            </div>
           </div>
           <table class="table">
             <thead>
-              <tr><th>Conductor</th><th>Oferta</th><th>Reputación</th><th>Estado</th><th>Acciones</th></tr>
+              <tr><th>Conductor</th><th>Oferta</th><th>Reputación</th><th>Acciones</th></tr>
             </thead>
             <tbody>
               <tr>
-                <td><strong>Juan Pérez</strong><br><small class="muted">Experiencia: 3 años</small></td>
+                <td><strong>Juan Pérez</strong><br><small class="muted">3 años exp.</small></td>
                 <td>Turno noche<br><small class="muted">Bogotá</small></td>
                 <td><span class="badge badge-plata">Plata · 4.6 ★</span></td>
-                <td><span class="badge badge-warn">Pendiente</span></td>
-                <td><button class="btn btn-sm">Ver perfil</button> <button class="btn btn-primary btn-sm">Aceptar</button></td>
+                <td>
+                  <button class="btn btn-sm">Ver perfil</button>
+                  <button class="btn btn-primary btn-sm">Aceptar</button>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="card">
-          <div class="card-title">Trabajo actual</div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <strong style="color:var(--ok)">Asignación activa — Turno noche</strong><br>
-              <small class="muted">Conductor: Juan Pérez · Placa: ABC123</small>
+            <h3 style="margin:0; font-size: 16px;">Trabajo actual</h3>
+            <div style="display:flex; gap:8px;">
+                <button class="btn btn-sm">Ver detalle</button>
+                <button class="btn btn-sm" style="color:var(--warn)">Finalizar</button>
             </div>
-            <div>
-              <button class="btn btn-sm">Ver detalle</button>
-              <button class="btn btn-sm" style="color:var(--warn)">Finalizar</button>
-            </div>
+          </div>
+          <div style="margin-top:15px; border-left: 3px solid var(--ok); padding-left: 15px;">
+            <strong style="color:var(--ok)">Asignación activa</strong><br>
+            <small class="muted">Conductor: Juan Pérez · Placa: ABC123</small>
           </div>
         </div>
       </div>
 
       <div>
-        <div class="card">
-          <div class="card-title">Alertas de documentación <span class="badge badge-warn">1 por vencer</span></div>
-          <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid var(--border);">
-            <strong>Vehículo ABC123 — SOAT</strong><br>
-            <small class="muted">Vence: 2026-01-20 · Recomendado: renovar hoy.</small>
-            <div style="margin-top:10px; display:flex; gap:5px;">
-              <button class="btn btn-sm">Ver vehículo</button>
-              <button class="btn btn-primary btn-sm">Subir documento</button>
+        <div class="card" style="border-top: 4px solid var(--warn);">
+          <h3 style="margin:0 0 15px; font-size: 16px;">Alertas de documentación</h3>
+          <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
+            <strong>SOAT Vehículo ABC123</strong><br>
+            <p style="font-size: 12px; color: var(--muted); margin: 8px 0;">Vence en 5 días. Recomendamos renovar para evitar bloqueos.</p>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <button class="btn btn-sm" style="flex:1">Ver vehículo</button>
+                <button class="btn btn-primary btn-sm" style="flex:1">Subir SOAT</button>
             </div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">Calificaciones recientes</div>
-          <div style="margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
-            <div style="color:var(--brand)">★★★★★</div>
-            <p style="font-size:13px; margin:5px 0;">"Muy buen propietario, reglas claras."</p>
-            <small class="muted">De: Conductor Camila · Hace 2 días</small>
+          <h3 style="margin:0 0 15px; font-size: 16px;">Calificaciones</h3>
+          <div style="margin-bottom:15px; padding-bottom:15px; border-bottom: 1px solid var(--border);">
+            <div style="color: var(--brand); margin-bottom: 5px;">★★★★★</div>
+            <p style="font-size: 13px; margin: 0; font-style: italic;">"Muy buen propietario, reglas claras y cumplimiento en pagos."</p>
+            <small class="muted" style="display:block; margin-top:8px;">— Conductor Camila · Hace 2 días</small>
           </div>
-          <button class="btn" style="width:100%">Ver todas las reseñas</button>
+          <button class="btn" style="width: 100%;">Ver todas las reseñas</button>
         </div>
       </div>
     </div>
   </main>
+
 </body>
 </html>
