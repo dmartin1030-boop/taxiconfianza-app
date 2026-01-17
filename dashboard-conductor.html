@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Conductor | TaxiConfianza</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --surface:#0f172a;
+      --card:#111c33;
+      --card2:#0f1a2f;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:rgba(255,255,255,.08);
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --brand:#fbbf24;      /* taxi yellow */
+      --brand2:#22c55e;     /* success */
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --info:#38bdf8;
+      --link:#93c5fd;
+      --chip:#0b1326;
+      --radius:16px;
+      --radius2:12px;
+      --max:1200px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      background: radial-gradient(1100px 600px at 15% 0%, rgba(251,191,36,.12), transparent 60%),
+                  radial-gradient(900px 500px at 90% 15%, rgba(56,189,248,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit; text-decoration:none}
+    .wrap{display:flex; min-height:100vh;}
+    /* Sidebar */
+    .sidebar{
+      width:280px;
+      background: linear-gradient(180deg, rgba(17,28,51,.9), rgba(15,23,42,.7));
+      border-right:1px solid var(--border);
+      padding:18px 14px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--border);
+    }
+    .logo{
+      width:38px; height:38px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      background: rgba(251,191,36,.18);
+      color: var(--brand);
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+    .brand h1{font-size:14px; margin:0; line-height:1.1}
+    .brand p{margin:0; font-size:12px; color:var(--muted)}
+    .nav{margin-top:16px; display:flex; flex-direction:column; gap:6px;}
+    .nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      color:var(--text);
+      border:1px solid transparent;
+    }
+    .nav a:hover{background:rgba(255,255,255,.04); border-color:var(--border);}
+    .nav a.active{
+      background: rgba(251,191,36,.12);
+      border-color: rgba(251,191,36,.35);
+    }
+    .ico{
+      width:18px;height:18px; flex:0 0 auto;
+      opacity:.9;
+    }
+    .sep{height:1px;background:var(--border); margin:14px 6px;}
+    .mini{
+      margin: 10px 6px 0;
+      padding: 12px;
+      border-radius: var(--radius2);
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+    }
+    .mini .row{display:flex; justify-content:space-between; gap:10px; align-items:center;}
+    .mini small{color:var(--muted)}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      font-size:12px;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--brand2)}
+    /* Main */
+    .main{flex:1; padding:18px 18px 40px;}
+    .topbar{
+      max-width: var(--max);
+      margin:0 auto 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:14px;
+      padding:14px 14px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+    }
+    .topbar .left{display:flex; flex-direction:column; gap:4px;}
+    .title{font-size:18px; margin:0;}
+    .subtitle{margin:0; font-size:13px; color:var(--muted)}
+    .top-actions{display:flex; gap:10px; align-items:center;}
+    .search{
+      display:flex; align-items:center; gap:8px;
+      background: rgba(0,0,0,.25);
+      border:1px solid var(--border);
+      border-radius: 999px;
+      padding:10px 12px;
+      min-width: 260px;
+    }
+    .search input{
+      border:0; outline:0; background:transparent; color:var(--text);
+      width:100%;
+      font-size:13px;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{background:rgba(255,255,255,.06)}
+    .btn.primary{
+      border-color: rgba(251,191,36,.35);
+      background: rgba(251,191,36,.14);
+    }
+    .btn.primary:hover{background: rgba(251,191,36,.18);}
+    .btn.danger{
+      border-color: rgba(239,68,68,.35);
+      background: rgba(239,68,68,.12);
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      font-size:12px;
+      color: var(--muted);
+    }
+    .badge strong{color:var(--text); font-weight:800}
+    .notif{
+      position:relative;
+    }
+    .bubble{
+      position:absolute;
+      top:-6px; right:-6px;
+      width:18px;height:18px;border-radius:999px;
+      background: var(--danger);
+      color:white;
+      font-size:11px;
+      display:grid; place-items:center;
+      border:2px solid var(--bg);
+    }
+    /* Grid cards */
+    .grid{
+      max-width: var(--max);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media(min-width: 980px){
+      .grid{grid-template-columns: 1.2fr .8fr;}
+      .span-2{grid-column: 1 / -1;}
+    }
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .card h3{margin:0 0 8px; font-size:14px;}
+    .muted{color:var(--muted); font-size:13px;}
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding:12px;
+    }
+    .kpi .v{font-size:20px; font-weight:900; margin:2px 0 4px;}
+    .kpi .l{font-size:12px; color:var(--muted); margin:0;}
+    .stars{color:var(--brand); letter-spacing:1px; font-size:14px;}
+    .row-between{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+    .progress{
+      height:10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      overflow:hidden;
+      margin-top:10px;
+    }
+    .progress > div{
+      height:100%;
+      width: 62%; /* placeholder */
+      background: linear-gradient(90deg, rgba(251,191,36,.35), rgba(34,197,94,.35));
+    }
+    .list{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
+    .item{
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+    }
+    .item .left{display:flex; flex-direction:column; gap:4px;}
+    .item strong{font-size:13px;}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: var(--chip);
+      font-size:12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .chip.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#fcd34d;}
+    .chip.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color:#bbf7d0;}
+    .chip.info{border-color: rgba(56,189,248,.35); background: rgba(56,189,248,.10); color:#bae6fd;}
+    .quick{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(min-width: 980px){
+      .quick{grid-template-columns: repeat(4, minmax(0,1fr));}
+    }
+    .qbtn{
+      display:flex; flex-direction:column; gap:6px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      cursor:pointer;
+    }
+    .qbtn:hover{background: rgba(0,0,0,.24);}
+    .qbtn .t{font-weight:800; font-size:13px;}
+    .qbtn .d{color:var(--muted); font-size:12px;}
+    .foot{
+      max-width: var(--max);
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+    }
+    /* Mobile */
+    .mobile-toggle{display:none;}
+    @media(max-width: 980px){
+      .sidebar{
+        position:fixed; left:-320px; top:0;
+        transition:left .22s ease;
+        z-index:50;
+      }
+      .sidebar.open{left:0;}
+      .main{padding:14px;}
+      .search{display:none;}
+      .mobile-toggle{display:inline-flex;}
+      .overlay{
+        display:none;
+        position:fixed; inset:0;
+        background: rgba(0,0,0,.55);
+        z-index:40;
+      }
+      .overlay.show{display:block;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/" title="Ir al inicio público">
+        <div class="logo">TC</div>
+        <div>
+          <h1>TaxiConfianza</h1>
+          <p>Panel Conductor</p>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Navegación del conductor">
+        <a class="active" href="#" aria-current="page">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Dashboard
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Ofertas
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h6M7 16h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v14l-4-2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Mis postulaciones
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Trabajo actual
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v4H7V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M6 8h12v12H6V8Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Historial de trabajos
+        </a>
+
+        <div class="sep"></div>
+
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 17.5l-6.2 3.3 1.2-7-5-4.8 7-1 3-6.4 3 6.4 7 1-5 4.8 1.2 7L12 17.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Calificaciones
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 18V6m0 12c2-2 4-3 8-3s6 1 8 3V6c-2-2-4-3-8-3S6 4 4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Reputación y nivel
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M8 2h8v4H8V2Z" stroke="currentColor" stroke-width="1.6"/><path d="M6 6h12v16H6V6Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Documentos
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Puntos
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v12H7l-3 3V4Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Notificaciones
+        </a>
+        <a href="#">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c1.5-4 14.5-4 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Mi perfil
+        </a>
+      </nav>
+
+      <div class="mini">
+        <div class="row">
+          <div>
+            <small>Sesión</small>
+            <div class="pill" title="Estado de verificación">
+              <span class="dot"></span>
+              <span id="badge-verificacion">Verificado</span>
+            </div>
+          </div>
+          <button class="btn danger" type="button">Salir</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="left">
+          <h2 class="title">Hola, <span id="user-name">Juan Pérez</span> 👋</h2>
+          <p class="subtitle">Tu panel de conductor: ofertas, trabajo activo, reputación y alertas.</p>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn mobile-toggle" id="btnOpenMenu" type="button" aria-label="Abrir menú">
+            ☰ Menú
+          </button>
+
+          <div class="search" role="search" aria-label="Buscar en el panel">
+            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M10.5 18a7.5 7.5 0 1 1 7.5-7.5A7.5 7.5 0 0 1 10.5 18Z" stroke="currentColor" stroke-width="1.6"/><path d="M16.8 16.8 21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input placeholder="Buscar ofertas, calificaciones, historial…" />
+          </div>
+
+          <a class="btn notif" href="#" title="Ver notificaciones">
+            🔔
+            <span class="bubble" id="notif-count">3</span>
+          </a>
+
+          <a class="btn primary" href="#">Explorar ofertas</a>
+        </div>
+      </header>
+
+      <section class="grid">
+        <!-- Reputación -->
+        <article class="card">
+          <div class="row-between">
+            <div>
+              <h3>Mi reputación</h3>
+              <div class="badge">
+                Nivel: <strong id="nivel">Plata</strong> · Score <strong id="score">812</strong>
+              </div>
+              <div style="margin-top:8px" class="stars" aria-label="Estrellas promedio">
+                <span id="stars">★★★★☆</span>
+                <span class="muted">(<span id="avg">4.6</span>)</span>
+              </div>
+              <p class="muted" style="margin:8px 0 0">
+                Basado en <strong id="reviews">32</strong> calificaciones · Rating 90 días: <strong id="rating90">4.7</strong>
+              </p>
+              <div class="progress" aria-label="Progreso al siguiente nivel">
+                <div id="progress-bar" style="width:62%"></div>
+              </div>
+              <p class="muted" style="margin:8px 0 0">Te faltan <strong id="faltan">8</strong> trabajos para llegar a <strong>Oro</strong>.</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+              <a class="btn" href="#">Ver historial</a>
+              <a class="btn primary" href="#">Ver reputación</a>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <p class="l">Trabajos finalizados</p>
+              <div class="v" id="jobs">27</div>
+              <p class="l">Historial confirmado</p>
+            </div>
+            <div class="kpi">
+              <p class="l">Puntos de carrera</p>
+              <div class="v" id="points">1500</div>
+              <p class="l">Acumulados</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Trabajo actual -->
+        <article class="card">
+          <h3>Trabajo actual</h3>
+          <p class="muted" id="job-status">Tienes una asignación activa.</p>
+
+          <div class="list">
+            <div class="item">
+              <div class="left">
+                <strong id="job-title">Turno noche — Taxi Chevrolet Sail</strong>
+                <span class="muted">Propietario: <span id="job-owner">Carlos R.</span> · Placa: <span id="job-placa">ABC123</span></span>
+                <span class="muted">Inicio: <span id="job-start">2026-01-12</span> · Ciudad: <span id="job-city">Bogotá</span></span>
+              </div>
+              <span class="chip ok">Activa</span>
+            </div>
+
+            <div class="item">
+              <div class="left">
+                <strong>Documentación</strong>
+                <span class="muted">Verifica tus documentos para recibir más ofertas.</span>
+              </div>
+              <span class="chip warn" id="docs-chip">1 por verificar</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
+            <a class="btn" href="#">Ver detalle</a>
+            <a class="btn primary" href="#">Calificar al finalizar</a>
+          </div>
+
+          <p class="muted" style="margin-top:10px">
+            *La calificación solo se habilita cuando la asignación esté <strong>finalizada</strong>.
+          </p>
+        </article>
+
+        <!-- Acciones rápidas -->
+        <article class="card span-2">
+          <h3>Acciones rápidas</h3>
+          <p class="muted">Atajos para mantener tu perfil confiable y aumentar tus oportunidades.</p>
+
+          <div class="quick">
+            <a class="qbtn" href="#">
+              <div class="t">Postular a oferta</div>
+              <div class="d">Encuentra nuevas oportunidades</div>
+            </a>
+            <a class="qbtn" href="#">
+              <div class="t">Actualizar CV</div>
+              <div class="d">Sube tu hoja de vida</div>
+            </a>
+            <a class="qbtn" href="#">
+              <div class="t">Subir documentos</div>
+              <div class="d">Acelera tu verificación</div>
+            </a>
+            <a class="qbtn" href="#">
+              <div class="t">Ver postulaciones</div>
+              <div class="d">Estado: pendientes y aceptadas</div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Ofertas recomendadas -->
+        <article class="card">
+          <h3>Ofertas recomendadas</h3>
+          <p class="muted">Basado en tu ciudad, disponibilidad y reputación.</p>
+
+          <div class="list" id="offers-list">
+            <div class="item">
+              <div class="left">
+                <strong>Turno mañana — Cuota $90.000</strong>
+                <span class="muted">Bogotá · Propietario 4.8 ★ · Publicada hace 2h</span>
+              </div>
+              <a class="btn primary" href="#">Ver</a>
+            </div>
+            <div class="item">
+              <div class="left">
+                <strong>Turno noche — Porcentaje 30%</strong>
+                <span class="muted">Soacha · Propietario 4.6 ★ · Publicada ayer</span>
+              </div>
+              <a class="btn" href="#">Ver</a>
+            </div>
+            <div class="item">
+              <div class="left">
+                <strong>Turno completo — Cuota $120.000</strong>
+                <span class="muted">Bogotá · Propietario 4.9 ★ · Publicada hoy</span>
+              </div>
+              <a class="btn" href="#">Ver</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Notificaciones -->
+        <article class="card">
+          <h3>Notificaciones</h3>
+          <p class="muted">Alertas importantes: documentos, ofertas y calificaciones.</p>
+
+          <div class="list" id="notifications-list">
+            <div class="item">
+              <div class="left">
+                <strong>Documento por verificar</strong>
+                <span class="muted">Subiste tu licencia. Pendiente de aprobación.</span>
+              </div>
+              <span class="chip info">Pendiente</span>
+            </div>
+            <div class="item">
+              <div class="left">
+                <strong>Nueva oferta en tu ciudad</strong>
+                <span class="muted">Hay una oferta de turno noche disponible.</span>
+              </div>
+              <span class="chip">Info</span>
+            </div>
+            <div class="item">
+              <div class="left">
+                <strong>Calificación recibida</strong>
+                <span class="muted">Te calificaron con 5★ en tu último trabajo.</span>
+              </div>
+              <span class="chip ok">OK</span>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <a class="btn" href="#">Ver todas</a>
+          </div>
+        </article>
+
+        <!-- Calificaciones recientes -->
+        <article class="card span-2">
+          <h3>Calificaciones recientes</h3>
+          <p class="muted">Responde o reporta si algo es incorrecto. Eso alimenta el “Centro de Confianza”.</p>
+
+          <div class="list" id="ratings-list">
+            <div class="item">
+              <div class="left">
+                <strong>★★★★★ — “Excelente conductor, puntual y cuidadoso.”</strong>
+                <span class="muted">De: Propietario Carlos R. · Hace 1 día</span>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end">
+                <a class="btn" href="#">Responder</a>
+                <a class="btn" href="#">Reportar</a>
+              </div>
+            </div>
+            <div class="item">
+              <div class="left">
+                <strong>★★★★☆ — “Buen trabajo, mejorar comunicación.”</strong>
+                <span class="muted">De: Propietario Ana M. · Hace 5 días</span>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end">
+                <a class="btn" href="#">Responder</a>
+                <a class="btn" href="#">Reportar</a>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <a class="btn primary" href="#">Ir a Calificaciones</a>
+          </div>
+        </article>
+      </section>
+
+      <footer class="foot">
+        © 2026 TaxiConfianza · Panel Conductor · Diseñado para crear confianza real.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Menú móvil
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const btn = document.getElementById('btnOpenMenu');
+
+    function openMenu(){
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+    }
+    function closeMenu(){
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+
+    btn?.addEventListener('click', openMenu);
+    overlay?.addEventListener('click', closeMenu);
+
+    // TIP: aquí podrías hacer fetch a /api/dashboard/conductor y rellenar los IDs:
+    // fetch('/api/dashboard/conductor').then(r => r.json()).then(data => {...})
+  </script>
+</body>
+</html>
