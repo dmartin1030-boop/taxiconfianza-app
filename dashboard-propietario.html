@@ -1,245 +1,86 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Propietario | TaxiConfianza</title>
-  <style>
-    :root {
-      --bg: #0b1220;
-      --surface: #0f172a;
-      --card: #111c33;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: rgba(255,255,255,.08);
-      --shadow: 0 10px 25px rgba(0,0,0,.35);
-      --brand: #fbbf24;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --danger: #ef4444;
-      --radius: 16px;
-      --radius2: 12px;
-      --max: 1200px;
-      --font: ui-sans-serif, system-ui, -apple-system, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: var(--font);
-      background: radial-gradient(1100px 600px at 15% 0%, rgba(251,191,36,.08), transparent 60%), var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-    .wrap { display: flex; min-height: 100vh; }
-    
-    /* SIDEBAR */
-    .sidebar {
-      width: 280px;
-      background: rgba(15, 23, 42, 0.8);
-      border-right: 1px solid var(--border);
-      padding: 20px;
-      position: sticky; top: 0; height: 100vh;
-      display: flex; flex-direction: column;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
-    .logo { 
-      width: 40px; height: 40px; background: var(--brand); color: #000; 
-      border-radius: 10px; display: grid; place-items: center; font-weight: bold; 
-    }
-    .nav { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-    .nav a { 
-      padding: 12px; border-radius: 10px; color: var(--muted); text-decoration: none;
-      display: flex; align-items: center; gap: 10px; transition: 0.2s;
-    }
-    .nav a.active, .nav a:hover { background: rgba(255,255,255,0.05); color: #white; border: 1px solid var(--border); }
-    
-    /* PERFIL SIDEBAR (Imagen 1) */
-    .user-card {
-      background: rgba(255,255,255,0.03);
-      padding: 15px; border-radius: var(--radius2); border: 1px solid var(--border);
-      margin-top: auto;
-    }
-    .user-card small { color: var(--muted); font-size: 11px; }
-    .user-card strong { display: block; margin: 4px 0 10px; font-size: 14px; }
-    
-    /* MAIN CONTENT */
-    .main { flex: 1; padding: 30px; max-width: var(--max); margin: 0 auto; width: 100%; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-    .header h2 { margin: 0; font-size: 24px; }
-    .header p { margin: 5px 0 0; color: var(--muted); }
-
-    .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
-    .span-2 { grid-column: 1 / -1; }
-    
-    .card { 
-      background: var(--card); border: 1px solid var(--border); 
-      border-radius: var(--radius); padding: 20px; 
-    }
-    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; }
-    
-    /* ELEMENTOS ESPECIFICOS */
-    .kpi-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .kpi { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-    .kpi span { font-size: 12px; color: var(--muted); }
-    .kpi div { font-size: 24px; font-weight: bold; margin-top: 5px; }
-
-    .btn { 
-      padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
-      cursor: pointer; font-size: 13px; transition: 0.2s; background: rgba(255,255,255,0.05); color: white;
-    }
-    .btn-primary { background: var(--brand); color: #000; border: none; font-weight: 600; }
-    .btn-danger { border-color: rgba(239,68,68,0.3); color: #ef4444; }
-    .btn-warn { background: rgba(251,191,36,0.1); color: var(--brand); border-color: var(--brand); }
-
-    .status-chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .status-ok { background: rgba(34,197,94,0.1); color: var(--ok); }
-    .status-warn { background: rgba(245,158,11,0.1); color: var(--warn); }
-
-    .list-item { 
-      background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; 
-      margin-bottom: 10px; border: 1px solid var(--border);
-    }
-    .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .table th { text-align: left; color: var(--muted); font-size: 12px; padding: 10px; border-bottom: 1px solid var(--border); }
-    .table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
-  </style>
-</head>
-<body>
-
-  <div class="wrap">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="logo">TC</div>
-        <div><strong>TaxiConfianza</strong><br><small style="color:var(--muted)">Panel Propietario</small></div>
-      </div>
-      
-      <nav class="nav">
-        <a href="#" class="active">🏠 Dashboard</a>
-        <a href="#">📋 Mis ofertas</a>
-        <a href="#">👥 Postulaciones</a>
-        <a href="#">🚗 Vehículos</a>
-        <a href="#">👤 Mi perfil</a>
-      </nav>
-
-      <div class="user-card">
-        <small>Sesión iniciada como:</small>
-        <strong id="sidebar-user-name">Usuario</strong>
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <span class="status-chip status-ok" style="font-size: 9px;">Estado: Verificado</span>
-            <button onclick="cerrarSesion()" class="btn btn-danger" style="padding: 4px 8px;">Salir</button>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="header">
-        <div>
-          <h2>Hola, <span id="welcome-name" style="color:var(--brand)">lolo melo</span> 👋</h2>
-          <p>Bienvenido a tu gestión de flota y confianza.</p>
-        </div>
-        <button class="btn btn-primary">+ Publicar oferta</button>
-      </header>
-
-      <div class="grid">
+<section class="grid">
         <article class="card">
-          <div class="card-title">Estado general</div>
-          <div class="kpi-group">
-            <div class="kpi"><span>Ofertas activas</span><div id="kpi-ofertas">2</div></div>
-            <div class="kpi"><span>Postulaciones</span><div id="kpi-postulaciones">7</div></div>
-            <div class="kpi"><span>Activos</span><div id="kpi-activos">1</div></div>
-            <div class="kpi"><span>Alertas</span><div id="kpi-alertas" style="color:var(--warn)">1</div></div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-title">
-            Alertas de documentación
-            <span class="status-chip status-warn">1 por vencer</span>
-          </div>
-          <div class="list-item" style="border-left: 3px solid var(--warn);">
-            <strong>SOAT Vehículo ABC123</strong>
-            <p class="muted" style="font-size: 12px; margin: 5px 0;">Vence en 5 días (2026-01-20).</p>
-            <button class="btn btn-warn" style="width: 100%;">Renovar Ahora</button>
-          </div>
-        </article>
-
-        <article class="card span-2">
-          <div class="card-title">Postulaciones recientes</div>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Conductor</th>
-                <th>Oferta</th>
-                <th>Estado</th>
-                <th style="text-align:right">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Juan Pérez</strong><br><small class="muted">3 años exp.</small></td>
-                <td>Turno Noche</td>
-                <td><span class="status-chip status-warn">Pendiente</span></td>
-                <td style="text-align:right"><button class="btn">Aceptar</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </article>
-
-        <article class="card">
-          <div class="card-title">Trabajo actual <span class="status-chip status-ok">Activa</span></div>
-          <div class="list-item">
-            <strong>Asignación activa — Turno noche</strong>
-            <div class="muted" style="font-size: 12px; margin-top: 5px;">
-              Conductor: Juan Pérez · Placa: ABC123<br>
-              Inicio: 2026-01-12 | Ciudad: Bogotá
+          <div class="row-between">
+            <div>
+              <h3>Trabajo actual</h3>
+              <p class="muted">Seguimiento de la asignación en curso.</p>
             </div>
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
-              <button class="btn" style="flex:1">Ver detalle</button>
-              <button class="btn btn-warn" style="flex:1">Finalizar</button>
+            <span class="chip ok">Activa</span>
+          </div>
+
+          <div class="item" style="border-left: 4px solid var(--ok);">
+            <div>
+              <strong id="current-job-title">Asignación activa — Turno noche</strong>
+              <div class="muted">Conductor: <span id="current-driver">Juan Pérez</span> · Placa: <span id="current-plate">ABC123</span></div>
+              <div class="muted">Inicio: 2026-01-12 · Ciudad: Bogotá</div>
+            </div>
+            <div class="actions" style="margin-top: 10px;">
+              <button class="btn" type="button">Ver detalle</button>
+              <button class="btn warn" type="button">Finalizar</button>
             </div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-title">Calificaciones recientes</div>
-          <div class="list-item" style="margin-bottom: 10px;">
-            <div style="color:var(--brand)">★★★★★</div>
-            <p style="margin: 5px 0; font-size: 13px;">“Muy buen propietario, reglas claras.”</p>
-            <small class="muted">De: Conductor Camila · Hace 2 días</small>
+          <div class="row-between">
+            <div>
+              <h3>Calificaciones recientes</h3>
+              <p class="muted">Tu reputación se construye con trazabilidad y respuestas.</p>
+            </div>
           </div>
-          <div style="text-align: right;">
-            <button class="btn btn-warn">Ir a Calificaciones</button>
+
+          <div class="item">
+            <div style="flex: 1;">
+              <div style="color: var(--brand); margin-bottom: 4px;">★★★★★</div>
+              <strong>“Muy buen propietario, reglas claras.”</strong>
+              <div class="muted">De: Conductor Camila · Hace 2 días</div>
+            </div>
+            <div class="actions">
+              <button class="btn" type="button">Responder</button>
+              <button class="btn" type="button">Reportar</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div style="flex: 1;">
+              <div style="color: var(--brand); margin-bottom: 4px;">★★★★★</div>
+              <strong>“Buen trato, mejorar tiempos de pago.”</strong>
+              <div class="muted">De: Conductor Andrés · Hace 1 semana</div>
+            </div>
+            <div class="actions">
+              <button class="btn" type="button">Responder</button>
+              <button class="btn" type="button">Reportar</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 15px; text-align: right;">
+            <a class="btn primary" href="#">Ir a Calificaciones</a>
           </div>
         </article>
-      </div>
+      </section>
 
-      <footer style="margin-top: 40px; text-align: center; font-size: 12px; color: var(--muted);">
+      <footer class="foot">
         © 2026 TaxiConfianza · Panel Propietario · Diseño orientado a confianza.
       </footer>
     </main>
   </div>
 
   <script>
-    // CARGAR DATOS DINÁMICOS
+    // Se mantienen las funciones de carga de nombre y cerrar sesión
     document.addEventListener('DOMContentLoaded', () => {
       const userData = JSON.parse(localStorage.getItem('userTaxiConfianza'));
-
       if (userData && userData.nombres) {
-        // Actualiza el nombre en el saludo y en el sidebar (Imagen 1)
-        document.getElementById('welcome-name').innerText = userData.nombres;
-        document.getElementById('sidebar-user-name').innerText = userData.nombres;
+        document.getElementById('owner-name').innerText = userData.nombres;
+        document.getElementById('sidebar-name').innerText = userData.nombres;
       } else {
-        // Si no hay sesión, redirigir al login
         window.location.href = 'index.html';
       }
     });
 
-    // FUNCION CERRAR SESIÓN
     function cerrarSesion() {
       localStorage.removeItem('userTaxiConfianza');
       window.location.href = 'index.html';
     }
   </script>
-
 </body>
 </html>
