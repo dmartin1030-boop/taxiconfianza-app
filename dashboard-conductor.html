@@ -602,38 +602,65 @@
   </div>
 
   <script>
-    <script>
-  // 1. Verificación de Seguridad: Se ejecuta apenas carga la página
-  document.addEventListener('DOMContentLoaded', () => {
-    // Obtenemos los datos guardados durante el Login
-    const userData = JSON.parse(localStorage.getItem('userTaxiConfianza'));
+    // 1. Verificación de Seguridad y Carga de Datos
+    document.addEventListener('DOMContentLoaded', () => {
+      // Intentamos obtener los datos del usuario logueado
+      const userData = JSON.parse(localStorage.getItem('userTaxiConfianza'));
 
-    // Validamos: Si no hay datos o el usuario no es CONDUCTOR, lo sacamos
-    if (!userData || userData.tipo.toUpperCase() !== 'CONDUCTOR') {
-      console.warn("Acceso denegado: Usuario no es conductor o no ha iniciado sesión.");
-      window.location.href = 'login.html';
-      return;
+      // SEGURIDAD: Si no hay datos o el tipo no es CONDUCTOR, enviamos al login
+      if (!userData || userData.tipo.toUpperCase() !== 'CONDUCTOR') {
+        console.warn("Acceso denegado: Redirigiendo al login...");
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // CARGA DE NOMBRE: Usamos los IDs que tienes en tu HTML actual
+      // El ID de tu saludo es 'user-name' (Línea 337 de tu código)
+      const welcomeName = document.getElementById('user-name');
+      
+      if (welcomeName) {
+        welcomeName.innerText = userData.nombres + " " + (userData.apellidos || "");
+      }
+
+      console.log("Panel cargado exitosamente para:", userData.nombres);
+    });
+
+    // 2. Configuración del Botón Salir
+    // Buscamos el botón de la línea 320 y le asignamos la función
+    const btnSalir = document.querySelector('.btn.danger');
+    if (btnSalir) {
+      btnSalir.addEventListener('click', cerrarSesion);
     }
 
-    // 2. Carga de Nombres: Si todo está bien, ponemos su nombre en la interfaz
-    // Asegúrate de que en tu HTML existan estos IDs: id="welcome-driver-name" y id="sidebar-driver-name"
-    const welcomeName = document.getElementById('welcome-driver-name');
-    const sidebarName = document.getElementById('sidebar-driver-name');
+    function cerrarSesion() {
+      if(confirm("¿Estás seguro que deseas cerrar sesión?")) {
+        localStorage.removeItem('userTaxiConfianza');
+        window.location.href = 'index.html';
+      }
+    }
 
-    if (welcomeName) welcomeName.innerText = userData.nombres;
-    if (sidebarName) sidebarName.innerText = userData.nombres;
+    // 3. Lógica para el Menú Móvil (Para que funcione el botón ☰ Menú)
+    const btnOpenMenu = document.getElementById('btnOpenMenu');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-    console.log("Sesión de conductor cargada correctamente para:", userData.nombres);
-  });
+    if (btnOpenMenu) {
+      btnOpenMenu.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('show');
+      });
+    }
 
-  // 3. Función del Botón Salir
-  function cerrarSesion() {
-    // Borramos la 'llave' de acceso del navegador
-    localStorage.removeItem('userTaxiConfianza');
-    // Redirigimos al inicio
-    window.location.href = 'index.html';
-  }
-</script>
+    if (overlay) {
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+      });
+    }
+  </script>
 </body>
 </html>
+</body>
+</html>
+
 
