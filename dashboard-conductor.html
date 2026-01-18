@@ -602,25 +602,38 @@
   </div>
 
   <script>
-    // Menú móvil
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const btn = document.getElementById('btnOpenMenu');
+    <script>
+  // 1. Verificación de Seguridad: Se ejecuta apenas carga la página
+  document.addEventListener('DOMContentLoaded', () => {
+    // Obtenemos los datos guardados durante el Login
+    const userData = JSON.parse(localStorage.getItem('userTaxiConfianza'));
 
-    function openMenu(){
-      sidebar.classList.add('open');
-      overlay.classList.add('show');
+    // Validamos: Si no hay datos o el usuario no es CONDUCTOR, lo sacamos
+    if (!userData || userData.tipo.toUpperCase() !== 'CONDUCTOR') {
+      console.warn("Acceso denegado: Usuario no es conductor o no ha iniciado sesión.");
+      window.location.href = 'login.html';
+      return;
     }
-    function closeMenu(){
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
-    }
 
-    btn?.addEventListener('click', openMenu);
-    overlay?.addEventListener('click', closeMenu);
+    // 2. Carga de Nombres: Si todo está bien, ponemos su nombre en la interfaz
+    // Asegúrate de que en tu HTML existan estos IDs: id="welcome-driver-name" y id="sidebar-driver-name"
+    const welcomeName = document.getElementById('welcome-driver-name');
+    const sidebarName = document.getElementById('sidebar-driver-name');
 
-    // TIP: aquí podrías hacer fetch a /api/dashboard/conductor y rellenar los IDs:
-    // fetch('/api/dashboard/conductor').then(r => r.json()).then(data => {...})
-  </script>
+    if (welcomeName) welcomeName.innerText = userData.nombres;
+    if (sidebarName) sidebarName.innerText = userData.nombres;
+
+    console.log("Sesión de conductor cargada correctamente para:", userData.nombres);
+  });
+
+  // 3. Función del Botón Salir
+  function cerrarSesion() {
+    // Borramos la 'llave' de acceso del navegador
+    localStorage.removeItem('userTaxiConfianza');
+    // Redirigimos al inicio
+    window.location.href = 'index.html';
+  }
+</script>
 </body>
 </html>
+
