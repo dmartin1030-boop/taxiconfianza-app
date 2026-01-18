@@ -1,69 +1,4 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ingresar | TaxiConfianza</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-
-<body>
-
-  <header class="nav">
-    <div class="container nav-inner">
-      <div class="brand">
-        <div class="brand-badge">TC</div>
-        <span class="brand-name">TaxiConfianza</span>
-      </div>
-
-      <nav class="nav-links">
-        <a href="index.html">Inicio</a>
-        <a href="index.html#como">Sobre Nosotros</a>
-        <a href="index.html#contacto">Contacto</a>
-      </nav>
-
-      <div class="nav-actions">
-        <a class="btn btn-primary" href="login.html">Ingresar</a>
-        <a class="btn btn-ghost" href="register.html">Registrarse</a>
-      </div>
-    </div>
-  </header>
-
-  <main class="auth-page">
-    <div class="auth-card">
-
-      <h2>Iniciar sesión</h2>
-      <p class="auth-sub">
-        Ingresa con tu correo y contraseña para acceder a TaxiConfianza
-      </p>
-
-      <form id="loginForm">
-        <label>Correo electrónico</label>
-        <input type="email" id="loginEmail" placeholder="correo@ejemplo.com" required />
-
-        <label>Contraseña</label>
-        <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña" required />
-
-        <div class="auth-row">
-          <label class="remember">
-            <input type="checkbox" />
-            Recuérdame
-          </label>
-          <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
-      </form>
-
-      <p class="auth-footer">
-        ¿No tienes una cuenta?
-        <a href="register.html">Regístrate aquí</a>
-      </p>
-
-    </div>
-  </main>
-
-  <script>
+<script>
     const loginForm = document.getElementById('loginForm');
 
     loginForm.addEventListener('submit', async (e) => {
@@ -84,27 +19,27 @@
         const result = await response.json();
 
         if (result.success) {
-          // 1. Guardamos los datos del usuario en el navegador para usarlos en el Dashboard
+          // 1. Guardamos los datos completos del usuario
           localStorage.setItem('userTaxiConfianza', JSON.stringify(result.user));
 
-          // 2. Redirección basada en el rol guardado en Hostinger
-          if (result.user.tipo === 'PROPIETARIO') {
-             // Redirige al nuevo dashboard innovador que creaste
-             window.location.href = 'dashboard-propietario.html'; 
+          // 2. Redirección Robusta
+          // Convertimos a mayúsculas para evitar errores si en la DB está distinto
+          const rol = result.user.tipo.toUpperCase(); 
+
+          if (rol === 'PROPIETARIO') {
+            window.location.href = 'dashboard-propietario.html'; 
+          } else if (rol === 'CONDUCTOR') {
+            window.location.href = 'dashboard-conductor.html';
           } else {
-             // Redirige al dashboard de conductor (o el general)
-             window.location.href = 'dashboard-conductor.html';
+            alert('Rol de usuario no reconocido.');
           }
+          
         } else {
-          alert('Error: ' + result.message);
+          alert('Atención: ' + result.message);
         }
       } catch (error) {
         console.error('Error al iniciar sesión:', error);
-        alert('Problema de conexión con el servidor.');
+        alert('Error de conexión. Asegúrate de que el servidor esté corriendo.');
       }
     });
   </script>
-
-</body>
-</html>
-
