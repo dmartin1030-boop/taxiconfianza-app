@@ -1,76 +1,79 @@
-const express = require('express');
-const mysql = require('mysql2');
-const path = require('path');
-const app = express();
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ingresar | TaxiConfianza</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '/')));
+  <main class="auth-page">
+    <div class="auth-card">
+      <h2>Iniciar sesión</h2>
+      <p class="auth-sub">Ingresa para acceder a TaxiConfianza</p>
 
-// 1. Configuración del Pool de Conexiones (Hostinger)
-const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 10000
-});
+      <form id="loginForm">
+        <label>Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="correo@ejemplo.com" required />
 
-// 2. Rutas de Archivos (Navegación)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="Tu contraseña" required />
 
-// RUTA CLAVE: Muestra el dashboard al ingresar como propietario
-app.get('/dashboard-propietario.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dashboard-propietario.html'));
-})
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px; width: 100%; padding: 10px; cursor: pointer;">
+          Entrar
+        </button>
+      </form>
 
-// 3. API para el Dashboard (Datos de conductores)
-app.get('/api/conductores', (req, res) => {
-    const query = 'SELECT nombres, apellidos, email, celular, tipo FROM usuarios WHERE tipo = "CONDUCTOR"';
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ success: false, error: err.message });
-        res.json({ success: true, conductores: results });
-    });
-});
+      <p class="auth-footer" style="margin-top: 20px; text-align: center;">
+        ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+      </p>
+    </div>
+  </main>
 
-// 4. Registro (Nombres, Apellidos, Celular, Email, Password, Rol)
-app.post('/register', (req, res) => {
-    const { nombre, apellido, celular, email, password, rol } = req.body;
-    const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password_hash, tipo) VALUES (?, ?, ?, ?, ?, ?)';
-    
-    db.query(query, [nombre, apellido, celular, email, password, rol.toUpperCase()], (err) => {
-        if (err) {
-            console.error('Error al insertar:', err);
-            return res.status(500).json({ success: false, error: err.message });
-        }
-        res.json({ success: true });
-    });
-});
+  <script>
+    // Seleccionamos el formulario por su ID
+    const loginForm = document.getElementById('loginForm');
 
-// 5. Login (Validación de Propietarios y Conductores)
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    const query = 'SELECT * FROM usuarios WHERE email = ? AND password_hash = ?';
-    
-    db.query(query, [email, password], (err, results) => {
-        if (err) return res.status(500).json({ success: false, error: err.message });
-        
-        if (results.length > 0) {
-            res.json({ success: true, user: results[0] });
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Evita que la página se recargue
+
+      // Capturamos los datos de los inputs
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        // Petición al servidor (Railway)
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // 1. Guardamos la sesión en el navegador
+          localStorage.setItem('userTaxiConfianza', JSON.stringify(result.user));
+
+          // 2. Redirección inteligente basada en el ROL
+          // Convertimos a mayúsculas por seguridad
+          const rol = result.user.tipo.toUpperCase(); 
+          
+          if (rol === 'PROPIETARIO') {
+            window.location.href = 'dashboard-propietario.html';
+          } else {
+            window.location.href = 'dashboard-conductor.html';
+          }
         } else {
-            res.json({ success: false, message: 'Correo o contraseña incorrectos' });
+          // Si el servidor responde success: false
+          alert('Error: ' + result.message);
         }
+      } catch (error) {
+        console.error('Error de conexión:', error);
+        alert('No se pudo conectar con el servidor de Railway.');
+      }
     });
-});
-
-// 6. Puerto para Railway
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor de TaxiConfianza activo en puerto ${PORT}`);
-});
+  </script>
+</body>
+</html>
