@@ -4,67 +4,124 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Explorar ofertas | TaxiConfianza</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <!-- NUEVO: mismo estilo del dashboard -->
+  <link rel="stylesheet" href="css/dashboard-theme.css" />
+
+  <!-- Extra mínimo SOLO para esta vista -->
   <style>
-    /* Mini estilos extra por si styles.css no cubre esta vista */
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-    .card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 14px; }
-    .muted { color:#9ca3af; font-size:13px; }
-    .btn { cursor:pointer; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:#e5e7eb;
-      padding:10px 12px; border-radius:12px; font-size:13px; text-decoration:none; display:inline-block; }
-    .btn.primary { border-color:rgba(251,191,36,.35); background:rgba(251,191,36,.16); }
-    .btn.danger { border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.14); }
-    table { width:100%; border-collapse:collapse; margin-top: 10px; }
-    th, td { border-bottom:1px solid rgba(255,255,255,.12); padding:10px; font-size:13px; text-align:left; vertical-align:top; }
-    th { color:#9ca3af; }
-    input { width: 260px; max-width: 100%; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.25); color:#e5e7eb; }
+    .table{width:100%; border-collapse:collapse}
+    .table th,.table td{padding:12px; border-bottom:1px solid var(--border); text-align:left; font-size:13px; vertical-align:top}
+    .table th{color:var(--muted); font-weight:700}
+    .right{text-align:right}
+    .filters{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .input{
+      width:260px; max-width:100%;
+      background: rgba(0,0,0,.25);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:10px 12px;
+      color: var(--text);
+      outline: none;
+      font-size:13px;
+    }
+    .hint{color:var(--muted); font-size:13px}
   </style>
 </head>
+
 <body>
-
   <div class="wrap">
-    <div class="card row">
-      <div>
-        <h2 style="margin:0">Explorar ofertas</h2>
-        <div class="muted">Conductor: <span id="who">—</span></div>
-      </div>
-      <div class="row">
-        <a class="btn" href="dashboard-conductor.html">⬅ Volver al dashboard</a>
-        <button class="btn danger" id="btnLogout">Salir</button>
-      </div>
-    </div>
 
-    <div class="card" style="margin-top:12px">
-      <div class="row">
+    <!-- SIDEBAR (igual al dashboard) -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">TC</div>
         <div>
-          <h3 style="margin:0 0 6px">Ofertas activas</h3>
-          <div class="muted">Filtra por ciudad si quieres.</div>
-        </div>
-        <div class="row">
-          <input id="cityFilter" placeholder="Ciudad (ej: Bogotá)" />
-          <button class="btn" id="btnRefresh">Actualizar</button>
+          <h1>TaxiConfianza</h1>
+          <p>Panel Conductor</p>
         </div>
       </div>
 
-      <div class="muted" id="msg" style="margin-top:10px"></div>
+      <nav class="nav">
+        <a href="dashboard-conductor.html">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2v-9Z" stroke="currentColor" stroke-width="2"/></svg>
+          Inicio
+        </a>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Oferta</th>
-            <th>Acuerdo</th>
-            <th>Vehículo</th>
-            <th>Creada</th>
-            <th style="text-align:right">Acción</th>
-          </tr>
-        </thead>
-        <tbody id="offersTable">
-          <tr><td colspan="5" class="muted">Cargando…</td></tr>
-        </tbody>
-      </table>
-    </div>
+        <a class="active" href="conductor-ofertas.html">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2"/></svg>
+          Explorar ofertas
+        </a>
+
+        <a href="dashboard-conductor.html#perfil">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2"/><path d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2"/></svg>
+          Mi perfil
+        </a>
+
+        <a href="dashboard-conductor.html#documentos">
+          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" stroke="currentColor" stroke-width="2"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="2"/></svg>
+          Documentos
+        </a>
+      </nav>
+
+      <div class="sep"></div>
+
+      <div class="mini">
+        <div class="row">
+          <div>
+            <small>Sesión</small>
+            <div class="pill"><span class="dot"></span><span id="who">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <button class="btn danger" id="btnLogout" style="width:100%; justify-content:center">Salir</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="left">
+          <h2 class="title">Explorar ofertas</h2>
+          <p class="subtitle">Mira ofertas activas y postúlate.</p>
+        </div>
+
+        <div class="top-actions">
+          <div class="filters">
+            <input class="input" id="cityFilter" placeholder="Filtrar por ciudad (ej: Bogotá)" />
+            <button class="btn" id="btnRefresh">Actualizar</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid" style="max-width: var(--max); margin: 0 auto;">
+        <article class="card">
+          <h3>Ofertas activas</h3>
+          <p class="hint" id="msg"></p>
+
+          <div style="overflow:auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Oferta</th>
+                  <th>Acuerdo</th>
+                  <th>Vehículo</th>
+                  <th>Creada</th>
+                  <th class="right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="offersTable">
+                <tr><td colspan="5" class="hint">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+    </main>
   </div>
 
   <script src="js/tc-session.js"></script>
@@ -72,3 +129,4 @@
   <script src="js/tc-conductor-ofertas.js"></script>
 </body>
 </html>
+
