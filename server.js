@@ -580,6 +580,130 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
     res.status(500).json({ success: false, message: err.message || "Error dashboard conductor" });
   }
 });
+// ==============================
+// API CONDUCTOR: Ofertas (con detalle + estado de mi postulación)
+// ==============================
+
+// GET /api/conductor/ofertas?ciudad=Bogotá&turno=noche&q=...
+app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ success: false, message: "Usuario no existe" });
+
+    if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "conductor") {
+      return res.status(403).json({ success: false, message: "Solo conductor" });
+    }
+
+    // Perfil conductor
+    const perfil = await ensurePerfilConductor(u.id);
+    const conductorId = perfil?.id;
+    if (!conductorId) return res.status(400).json({ success: false, message: "Perfil conductor no existe" });
+
+    const ciudad = (req.query.ciudad || "").toString().trim();
+    const turno = (req.query.turno || "").toString().trim();
+    const qtxt = (req.query.q || "").toString().trim();
+
+    const params = [conductorId];
+    let where = `
+      WHERE o.estado = 'activa'
+        AND (o.bloqueada IS NULL OR o.bloqueada = 0)
+        AND (o.deleted_at IS NULL)
+    `;
+
+    if (ciudad) { where += ` AND o.ciudad = ?`; params.push(ciudad); }
+    if (turno) { where += ` AND o.turno = ?`; params.push(turno); }
+
+    if (qtxt) {
+      where += ` AND (o.titulo LIKE ? OR o.descripcion LIKE ? OR o.requisitos LIKE ?)`;
+      const like = `%${qtxt}%`;
+      params.push(like, like, like);
+    }
+
+    const rows = await q(
+      `
+      SELECT
+        o.id,
+        o.titulo,
+        o.descripcion,
+        o.ciudad,
+        o.turno,
+        o.cuota_diaria,
+        o.porcentaje_propietario,
+        o.requisitos,
+        DATE_FORMAT(o.fecha_creacion, '%Y-%m-%d') AS fecha_creacion,
+        v.placa,
+        v.modelo,
+        CONCAT(up.nombres, ' ', up.apellidos) AS propietario_nombre,
+        p.estado AS mi_postulacion_estado,
+        DATE_FORMAT(p.fecha_postulacion, '%Y-%m-%d') AS mi_fecha_postulacion
+      FROM ofertas_trabajo o
+      LEFT JOIN vehiculos v ON v.id = o.vehiculo_id
+      LEFT JOIN perfiles_propietarios pp ON pp.id = o.propietario_id
+      LEFT JOIN usuarios up ON up.id = pp.usuario_id
+      LEFT JOIN postulaciones p ON p.oferta_id = o.id AND p.conductor_id = ?
+      ${where}
+      ORDER BY o.fecha_creacion DESC
+      LIMIT 100
+      `,
+      params
+    );
+
+    res.json({ success: true, ofertas: rows || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message || "Error listando ofertas" });
+  }
+});
+
+// POST /api/conductor/ofertas/:id/postular  body: {mensaje, cv_url}
+app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ success: false, message: "Usuario no existe" });
+
+    if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "conductor") {
+      return res.status(403).json({ success: false, message: "Solo conductor" });
+    }
+
+    const perfil = await ensurePerfilConductor(u.id);
+    const conductorId = perfil?.id;
+    if (!conductorId) return res.status(400).json({ success: false, message: "Perfil conductor no existe" });
+
+    const ofertaId = Number(req.params.id);
+    if (!ofertaId) return res.status(400).json({ success: false, message: "Oferta inválida" });
+
+    const mensaje = (req.body?.mensaje || "").toString().trim() || null;
+    const cv_url = (req.body?.cv_url || "").toString().trim() || null;
+
+    // validar oferta activa (si no tienes bloqueada/deleted_at, te lo ajusto)
+    const oferta = await q(
+      "SELECT id FROM ofertas_trabajo WHERE id = ? AND estado = 'activa' LIMIT 1",
+      [ofertaId]
+    );
+    if (!oferta[0]) return res.status(404).json({ success: false, message: "Oferta no existe o no está activa" });
+
+    // evitar doble postulación
+    const ya = await q(
+      "SELECT id FROM postulaciones WHERE oferta_id = ? AND conductor_id = ? LIMIT 1",
+      [ofertaId, conductorId]
+    );
+    if (ya[0]) return res.json({ success: true, message: "Ya estabas postulado a esta oferta." });
+
+    await q(
+      "INSERT INTO postulaciones (oferta_id, conductor_id, mensaje, cv_url, estado, fecha_postulacion) VALUES (?, ?, ?, ?, 'pendiente', NOW())",
+      [ofertaId, conductorId, mensaje, cv_url]
+    );
+
+    res.json({ success: true, message: "✅ Postulación enviada." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message || "Error postulando" });
+  }
+});
 
 // 6. Configuración del Servidor
 const PORT = process.env.PORT || 3000;
