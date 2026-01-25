@@ -66,27 +66,33 @@ app.post('/register', (req, res) => {
     });
 });
 
-// 5. API - Login (Punto Crítico para Redirección)
+// // 5. API - Login (CORREGIDO)
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const query = 'SELECT nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password_hash = ?';
+
+    // Cambiamos password_hash por password para que coincida con tu INSERT del punto 4
+    const query = 'SELECT nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password = ?';
     
     db.query(query, [email, password], (err, results) => {
-        if (err) return res.status(500).json({ success: false, error: err.message });
+        if (err) {
+            console.error("Error en DB:", err.message);
+            // Enviamos un mensaje claro en lugar de dejarlo indefinido
+            return res.status(500).json({ success: false, message: 'Error interno del servidor' });
+        }
         
         if (results.length > 0) {
             const user = results[0];
-            // Enviamos los datos necesarios al frontend
             res.json({ 
                 success: true, 
                 user: {
                     nombres: user.nombres,
                     apellidos: user.apellidos,
                     email: user.email,
-                    tipo: user.tipo.toLowerCase() // 'propietario' o 'conductor'
+                    tipo: user.tipo.toUpperCase() // Usamos mayúsculas para evitar fallos de coincidencia
                 }
-            });
+            }); 
         } else {
+            // Este mensaje es el que leerá el alert() de tu login.html
             res.json({ success: false, message: 'Correo o contraseña incorrectos' });
         }
     });
