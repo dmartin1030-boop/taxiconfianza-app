@@ -55,7 +55,7 @@ app.post('/register', (req, res) => {
     
     // Validar que el rol sea válido
     const rolValido = rol.toUpperCase(); 
-    const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password_hash, tipo) VALUES (?, ?, ?, ?, ?, ?)';
+    const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password, tipo) VALUES (?, ?, ?, ?, ?, ?)';
     
     db.query(query, [nombre, apellido, celular, email, password, rolValido], (err) => {
         if (err) {
