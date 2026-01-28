@@ -42,7 +42,7 @@ app.get('/dashboard-conductor.html', (req, res) => res.sendFile(path.join(__dirn
 
 // 3. API - Listado de conductores para el Propietario
 app.get('/api/conductores', (req, res) => {
-    const query = "SELECT nombres, apellidos, email, celular, rol FROM usuarios WHERE rol = 'conductor'";
+    const query = 'SELECT nombres, apellidos, email, celular, tipo FROM usuarios WHERE tipo = "conductor"';
     db.query(query, (err, results) => {
         if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, conductores: results });
@@ -54,8 +54,8 @@ app.post('/register', (req, res) => {
     const { nombre, apellido, celular, email, password, rol } = req.body;
     
     // Validar que el rol sea válido
-    const rolValido = (rol || '').toLowerCase(); // 'conductor' o 'propietario'
-    const query = 'INSERT INTO usuarios(nombres, apellidos, celular, email, password, rol) VALUES (?, ?, ?, ?, ?, ?)';
+    const rolValido = rol.toUpperCase(); // 'conductor' o 'propietario'
+    const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password, tipo) VALUES (?, ?, ?, ?, ?, ?)';
 
     db.query(query, [nombre, apellido, celular, email, password, rolValido], (err) => {
         if (err) {
