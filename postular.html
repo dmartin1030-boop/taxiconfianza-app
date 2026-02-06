@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Postular a oferta | Taxi Confianza</title>
+
+  <!-- TU TEMA -->
+  <link rel="stylesheet" href="/css/dashboard-theme.css" />
+
+  <style>
+    /* Ajustes mínimos sin romper tu theme */
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
+    .grid { display: grid; gap: 14px; grid-template-columns: 1.2fr .8fr; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card { padding: 16px; border-radius: 16px; }
+    .muted { opacity: .82; }
+    .field { display: grid; gap: 6px; margin-top: 10px; }
+    textarea { width: 100%; min-height: 110px; resize: vertical; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .badge { padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+    .ok { display:none; margin-top: 12px; }
+    .err { display:none; margin-top: 12px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between; margin-bottom: 14px;">
+      <div>
+        <h1 class="h1">Postular a oferta</h1>
+        <div class="muted">Envía tu postulación con un mensaje breve.</div>
+      </div>
+      <div class="row">
+        <a class="btn btn-ghost" href="/conductor/ofertas.html">Volver</a>
+        <a class="btn btn-ghost" href="/conductor/postulaciones.html">Mis postulaciones</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Detalle -->
+      <section class="card panel">
+        <div class="row" style="justify-content:space-between;">
+          <h2 class="h2" id="ofertaTitulo">Cargando oferta...</h2>
+          <span class="badge" id="ofertaEstado">—</span>
+        </div>
+
+        <div class="muted" id="ofertaMeta" style="margin-top:6px;">—</div>
+
+        <hr class="sep" style="margin: 14px 0;" />
+
+        <div id="ofertaDetalle" class="muted">
+          Cargando información...
+        </div>
+      </section>
+
+      <!-- Form postulación -->
+      <aside class="card panel">
+        <h3 class="h3">Tu postulación</h3>
+
+        <div class="field">
+          <label for="mensaje" class="label">Mensaje al propietario</label>
+          <textarea id="mensaje" class="input" maxlength="500" placeholder="Ej: Estoy disponible hoy, tengo experiencia, puedo iniciar de inmediato..."></textarea>
+          <div class="muted"><span id="contador">0</span>/500</div>
+        </div>
+
+        <div class="row" style="margin-top: 12px;">
+          <button id="btnPostular" class="btn btn-primary">Postular</button>
+          <button id="btnLimpiar" class="btn btn-ghost" type="button">Limpiar</button>
+        </div>
+
+        <div id="okBox" class="ok alert alert-success">✅ Postulación enviada.</div>
+        <div id="errBox" class="err alert alert-danger">❌ Error.</div>
+
+        <div class="muted" style="margin-top: 12px;">
+          Nota: Solo puedes postular una vez por oferta.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const ofertaId = qs.get("id");
+
+    const ofertaTitulo = document.getElementById("ofertaTitulo");
+    const ofertaEstado = document.getElementById("ofertaEstado");
+    const ofertaMeta = document.getElementById("ofertaMeta");
+    const ofertaDetalle = document.getElementById("ofertaDetalle");
+
+    const mensaje = document.getElementById("mensaje");
+    const contador = document.getElementById("contador");
+    const btnPostular = document.getElementById("btnPostular");
+    const btnLimpiar = document.getElementById("btnLimpiar");
+
+    const okBox = document.getElementById("okBox");
+    const errBox = document.getElementById("errBox");
+
+    function showOk(text) {
+      okBox.style.display = "block";
+      okBox.textContent = text || "✅ Listo";
+      errBox.style.display = "none";
+    }
+    function showErr(text) {
+      errBox.style.display = "block";
+      errBox.textContent = text || "❌ Error";
+      okBox.style.display = "none";
+    }
+
+    mensaje.addEventListener("input", () => contador.textContent = String(mensaje.value.length));
+    btnLimpiar.addEventListener("click", () => { mensaje.value = ""; contador.textContent = "0"; });
+
+    if (!ofertaId) {
+      ofertaTitulo.textContent = "Falta el id de la oferta";
+      ofertaDetalle.textContent = "Vuelve a explorar ofertas y entra desde un botón de 'Postular'.";
+      btnPostular.disabled = true;
+    } else {
+      cargarOferta();
+    }
+
+    async function cargarOferta() {
+      try {
+        const r = await fetch(`/api/ofertas/${ofertaId}`, { credentials: "include" });
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || "No se pudo cargar");
+
+        const o = data.oferta;
+
+        ofertaTitulo.textContent = o.titulo || `Oferta #${o.id}`;
+        ofertaEstado.textContent = (o.estado || "—");
+        ofertaMeta.textContent = [
+          o.ciudad ? `📍 ${o.ciudad}` : null,
+          o.created_at ? `🕒 ${new Date(o.created_at).toLocaleString()}` : null
+        ].filter(Boolean).join(" • ") || "—";
+
+        // Render flexible (si tienes campos distintos, igual no se rompe)
+        ofertaDetalle.innerHTML = `
+          <div><strong>Descripción:</strong> ${escapeHtml(o.descripcion || "—")}</div>
+          <div style="margin-top:8px;"><strong>Pago:</strong> ${escapeHtml(o.pago || o.tarifa || "—")}</div>
+          <div style="margin-top:8px;"><strong>Duración:</strong> ${escapeHtml(o.duracion || "—")}</div>
+        `;
+
+        // si no está abierta, bloquea
+        if (String(o.estado || "").toUpperCase() !== "ABIERTA") {
+          btnPostular.disabled = true;
+          showErr("Esta oferta ya no está disponible para postular.");
+        }
+      } catch (e) {
+        console.error(e);
+        ofertaTitulo.textContent = "Error cargando oferta";
+        ofertaDetalle.textContent = "No se pudo obtener la información. Revisa sesión o API.";
+        btnPostular.disabled = true;
+      }
+    }
+
+    btnPostular.addEventListener("click", async () => {
+      okBox.style.display = "none";
+      errBox.style.display = "none";
+
+      btnPostular.disabled = true;
+      btnPostular.textContent = "Enviando...";
+
+      try {
+        const r = await fetch(`/api/ofertas/${ofertaId}/postular`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ mensaje: mensaje.value.trim() })
+        });
+
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || "No se pudo postular");
+
+        showOk(data.message || "✅ Postulación enviada");
+        // opcional: redirigir luego de 1s
+        // setTimeout(() => location.href = "/conductor/postulaciones.html", 900);
+
+      } catch (e) {
+        console.error(e);
+        showErr(e.message);
+        btnPostular.disabled = false;
+      } finally {
+        btnPostular.textContent = "Postular";
+        // Si fue ok, lo dejamos deshabilitado para evitar spam:
+        if (okBox.style.display === "block") btnPostular.disabled = true;
+      }
+    });
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[s]));
+    }
+  </script>
+</body>
+</html>
