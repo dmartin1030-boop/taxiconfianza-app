@@ -723,11 +723,12 @@ function requireAuth(req, res, next) {
 // Ajusta si tu tabla se llama diferente:
 async function getConductorIdByUserId(pool, userId) {
   const [rows] = await pool.query(
-    `SELECT id FROM conductores WHERE usuario_id = ? LIMIT 1`,
+    `SELECT id FROM perfiles_conductores WHERE usuario_id = ? LIMIT 1`,
     [userId]
   );
   return rows?.[0]?.id || null;
 }
+
 
 // 1) Detalle de oferta
 app.get("/api/ofertas-trabajo/:id", requireAuth, async (req, res) => {
