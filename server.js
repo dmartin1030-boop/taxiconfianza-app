@@ -317,6 +317,75 @@ app.get("/api/propietario/vehiculos", requireUser, async (req, res) => {
   }
 });
 
+app.post("/api/propietario/vehiculos", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+
+    if (String(u.tipo).toLowerCase() !== String(tipo).toLowerCase() || String(u.tipo).toLowerCase() !== "propietario") {
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
+    }
+
+    const perfil = await ensurePerfilPropietario(u.id);
+
+    const { placa, modelo } = req.body || {};
+    if (!placa || !modelo) {
+      return res.status(400).json({ ok: false, error: "Faltan campos: placa, modelo" });
+    }
+
+    // Normaliza placa
+    const placaNorm = String(placa).trim().toUpperCase();
+    const modeloNorm = String(modelo).trim();
+
+    // Evitar duplicado de placa para el mismo propietario
+    const dup = await q(
+      "SELECT id FROM vehiculos WHERE propietario_id = ? AND placa = ? LIMIT 1",
+      [perfil.id, placaNorm]
+    );
+    if (dup[0]) return res.status(409).json({ ok: false, error: "Ya tienes un vehículo con esa placa" });
+
+    const r = await q(
+      "INSERT INTO vehiculos (propietario_id, placa, modelo) VALUES (?, ?, ?)",
+      [perfil.id, placaNorm, modeloNorm]
+    );
+
+    res.status(201).json({ ok: true, id: r.insertId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message || "Error creando vehículo" });
+  }
+});
+app.delete("/api/propietario/vehiculos/:id", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+
+    if (String(u.tipo).toLowerCase() !== String(tipo).toLowerCase() || String(u.tipo).toLowerCase() !== "propietario") {
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
+    }
+
+    const perfil = await ensurePerfilPropietario(u.id);
+    const id = Number(req.params.id);
+
+    // Si tienes soft delete en vehiculos (ej deleted_at), lo cambiamos.
+    // Si NO tienes, hacemos hard delete:
+    const r = await q(
+      "DELETE FROM vehiculos WHERE id = ? AND propietario_id = ?",
+      [id, perfil.id]
+    );
+
+    if (!r || r.affectedRows === 0) return res.status(404).json({ ok: false, error: "Vehículo no encontrado" });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message || "Error eliminando vehículo" });
+  }
+});
+
+
 // =====================================================
 // PROPIETARIO: OFERTAS (CRUD básico para tu HTML)
 // Tabla: ofertas_trabajo
