@@ -710,6 +710,130 @@ app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) =>
     res.status(500).json({ success: false, message: err.message || "Error postulando" });
   }
 });
+// ===============================
+// POSTULAR A OFERTA (MVP #2)
+// ===============================
+
+// Middleware ejemplo: asume que req.user existe (login)
+function requireAuth(req, res, next) {
+  if (!req.user || !req.user.id) return res.status(401).json({ ok: false, error: "No autenticado" });
+  next();
+}
+
+// Helper: obtener conductor_id a partir del usuario logueado
+async function getConductorIdByUserId(pool, userId) {
+  const [rows] = await pool.query(
+    `SELECT id FROM conductores WHERE usuario_id = ? LIMIT 1`,
+    [userId]
+  );
+  return rows?.[0]?.id || null;
+}
+
+// 1) Detalle de oferta
+app.get("/api/ofertas/:id", requireAuth, async (req, res) => {
+  try {
+    const ofertaId = Number(req.params.id);
+    if (!ofertaId) return res.status(400).json({ ok: false, error: "ID inválido" });
+
+    const [ofertaRows] = await pool.query(
+      `SELECT * FROM ofertas WHERE id = ? LIMIT 1`,
+      [ofertaId]
+    );
+    if (ofertaRows.length === 0) return res.status(404).json({ ok: false, error: "Oferta no existe" });
+
+    return res.json({ ok: true, oferta: ofertaRows[0] });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Error obteniendo oferta" });
+  }
+});
+
+// 2) Postular a oferta
+app.post("/api/ofertas/:id/postular", requireAuth, async (req, res) => {
+  const conn = await pool.getConnection();
+  try {
+    const ofertaId = Number(req.params.id);
+    const mensaje = (req.body?.mensaje || "").trim();
+
+    if (!ofertaId) return res.status(400).json({ ok: false, error: "ID inválido" });
+    if (mensaje.length > 500) return res.status(400).json({ ok: false, error: "Mensaje muy largo (máx 500)" });
+
+    const conductorId = await getConductorIdByUserId(pool, req.user.id);
+    if (!conductorId) return res.status(403).json({ ok: false, error: "Este usuario no está registrado como conductor" });
+
+    await conn.beginTransaction();
+
+    // a) Validar oferta existe y está abierta
+    const [ofertaRows] = await conn.query(
+      `SELECT id, estado, cupos FROM ofertas WHERE id = ? FOR UPDATE`,
+      [ofertaId]
+    );
+    if (ofertaRows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ ok: false, error: "Oferta no existe" });
+    }
+
+    const oferta = ofertaRows[0];
+    if (String(oferta.estado).toUpperCase() !== "ABIERTA") {
+      await conn.rollback();
+      return res.status(409).json({ ok: false, error: "La oferta ya no está disponible" });
+    }
+
+    // b) Evitar doble postulación
+    const [yaRows] = await conn.query(
+      `SELECT id FROM postulaciones WHERE oferta_id = ? AND conductor_id = ? LIMIT 1`,
+      [ofertaId, conductorId]
+    );
+    if (yaRows.length > 0) {
+      await conn.rollback();
+      return res.status(409).json({ ok: false, error: "Ya te postulaste a esta oferta" });
+    }
+
+    // c) Insertar postulación
+    await conn.query(
+      `INSERT INTO postulaciones (oferta_id, conductor_id, mensaje, estado, created_at)
+       VALUES (?, ?, ?, 'ENVIADA', NOW())`,
+      [ofertaId, conductorId, mensaje]
+    );
+
+    await conn.commit();
+    return res.json({ ok: true, message: "Postulación enviada" });
+
+  } catch (err) {
+    await conn.rollback();
+    // Si existe UNIQUE uq_postulacion, también cae aquí
+    if (String(err?.code) === "ER_DUP_ENTRY") {
+      return res.status(409).json({ ok: false, error: "Ya te postulaste a esta oferta" });
+    }
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Error al postular" });
+  } finally {
+    conn.release();
+  }
+});
+
+// 3) Mis postulaciones (para el paso 3 del MVP)
+app.get("/api/postulaciones/mias", requireAuth, async (req, res) => {
+  try {
+    const conductorId = await getConductorIdByUserId(pool, req.user.id);
+    if (!conductorId) return res.status(403).json({ ok: false, error: "No eres conductor" });
+
+    const [rows] = await pool.query(
+      `SELECT p.*, o.titulo, o.estado AS oferta_estado
+       FROM postulaciones p
+       JOIN ofertas o ON o.id = p.oferta_id
+       WHERE p.conductor_id = ?
+       ORDER BY p.created_at DESC`,
+      [conductorId]
+    );
+
+    return res.json({ ok: true, postulaciones: rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Error obteniendo postulaciones" });
+  }
+});
+
 
 // 6. Configuración del Servidor
 const PORT = process.env.PORT || 3000;
