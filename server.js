@@ -1,109 +1,68 @@
-const express = require('express');
-const mysql = require('mysql2');
-const path = require('path');
+const express = require("express");
+const mysql = require("mysql2");
+const path = require("path");
+
 const app = express();
 
-// Middleware para leer JSON y servir archivos estáticos
+// ==============================
+// Middleware
+// ==============================
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '/')));
+app.use(express.static(path.join(__dirname, "/")));
 
-// 1. Configuración del Pool de Conexiones (Optimizado para Hostinger/Railway)
+// ==============================
+// DB Pool (Hostinger/Railway)
+// ==============================
 const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 10000
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD, // puede venir vacío
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000,
 });
 
-// Verificación de conexión a la base de datos
+// Verificación de conexión
 db.getConnection((err, connection) => {
-    if (err) {
-        console.error('Error conectando a la base de datos:', err.message);
-    } else {
-        console.log('✅ Conexión a Base de Datos exitosa.');
-        connection.release();
-    }
+  if (err) {
+    console.error("Error conectando a la base de datos:", err.message);
+  } else {
+    console.log("✅ Conexión a Base de Datos exitosa.");
+    connection.release();
+  }
 });
 
-// 2. Rutas de Navegación (HTML)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/register.html', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
-
-// Rutas de Dashboards (Diferenciadas)
-app.get('/dashboard-propietario.html', (req, res) => res.sendFile(path.join(__dirname, 'dashboard-propietario.html')));
-app.get('/dashboard-conductor.html', (req, res) => res.sendFile(path.join(__dirname, 'dashboard-conductor.html')));
-
-// 3. API - Listado de conductores para el Propietario
-app.get('/api/conductores', (req, res) => {
-    const query = 'SELECT nombres, apellidos, email, celular, tipo FROM usuarios WHERE tipo = "conductor"';
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ success: false, error: err.message });
-        res.json({ success: true, conductores: results });
-    });
-});
-
-// 4. API - Registro de Usuarios (Propietario o Conductor)
-app.post('/register', (req, res) => {
-    const { nombre, apellido, celular, email, password, rol } = req.body;
-    
-    // Validar que el rol sea válido
-    const rolValido = rol.toUpperCase(); // 'conductor' o 'propietario'
-    const query = 'INSERT INTO usuarios (nombres, apellidos, celular, email, password, tipo) VALUES (?, ?, ?, ?, ?, ?)';
-
-    db.query(query, [nombre, apellido, celular, email, password, rolValido], (err) => {
-        if (err) {
-            console.error('Error al registrar usuario:', err);
-            return res.status(500).json({ success: false, error: 'Este correo ya está registrado o hay un error en los datos.' });
-        }
-        res.json({ success: true, message: 'Registro exitoso' });
-    });
-});
-
-// // 5. API - Login (CORREGIDO)
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    // Cambiamos password_hash por password para que coincida con tu INSERT del punto 4
-    const query = 'SELECT nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password = ?';
-    
-    db.query(query, [email, password], (err, results) => {
-        if (err) {
-            console.error("Error en DB:", err.message);
-            // Enviamos un mensaje claro en lugar de dejarlo indefinido
-            return res.status(500).json({ success: false, message: 'Error interno del servidor' });
-        }
-        
-        if (results.length > 0) {
-            const user = results[0];
-            res.json({ 
-                success: true, 
-                user: {
-                    nombres: user.nombres,
-                    apellidos: user.apellidos,
-                    email: user.email,
-                    tipo: user.tipo.toUpperCase() // Usamos mayúsculas para evitar fallos de coincidencia
-                }
-            }); 
-        } else {
-            // Este mensaje es el que leerá el alert() de tu login.html
-            res.json({ success: false, message: 'Correo o contraseña incorrectos' });
-        }
-    });
-});
 // ==============================
-// 5.1 API NUEVA (Dashboards + Acciones)
-// Pegar este bloque antes de: "// 6. Configuración del Servidor"
+// Helpers DB (promisify mysql2 pool)
 // ==============================
+function q(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.query(sql, params, (err, rows) => (err ? reject(err) : resolve(rows)));
+  });
+}
 
-// Middleware simple: toma el usuario desde headers (porque tú no tienes JWT aún)
-// El frontend (JS) envía: X-User-Email y X-User-Tipo
+async function getUsuarioByEmail(email) {
+  const rows = await q(
+    "SELECT id, nombres, apellidos, email, tipo, nivel_actual, score_reputacion, total_reviews, rating_90d, puntos_carrera FROM usuarios WHERE email = ? LIMIT 1",
+    [email]
+  );
+  return rows[0] || null;
+}
+
+function tipoLower(t) {
+  return String(t || "").trim().toLowerCase();
+}
+
+// ==============================
+// Auth simple por headers (sin JWT aún)
+// Frontend debe enviar:
+//   X-User-Email: correo@...
+//   X-User-Tipo: propietario | conductor
+// ==============================
 function requireUser(req, res, next) {
   const email = (req.headers["x-user-email"] || "").toString().trim().toLowerCase();
   const tipo = (req.headers["x-user-tipo"] || "").toString().trim().toLowerCase();
@@ -119,69 +78,135 @@ function requireUser(req, res, next) {
   next();
 }
 
-
-// Helpers DB (promisify mysql2 pool)
-function q(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.query(sql, params, (err, rows) => (err ? reject(err) : resolve(rows)));
-  });
-}
-
-async function getUsuarioByEmail(email) {
-  const rows = await q(
-    "SELECT id, nombres, apellidos, email, tipo, nivel_actual, score_reputacion, total_reviews, rating_90d, puntos_carrera FROM usuarios WHERE email = ? LIMIT 1",
-    [email]
-  );
-  return rows[0] || null;
-}
-
-function tipoUpper(t) {
-  return String(t || "").trim().toUpperCase();
-}
-function tipoLower(t) {
-  return String(t || "").trim().toLowerCase();
-}
-
+// ==============================
+// Ensure perfiles
+// ==============================
 async function ensurePerfilPropietario(usuarioId) {
-  const rows = await q("SELECT id, usuario_id, verificado_legalmente FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1", [
-    usuarioId,
-  ]);
+  const rows = await q(
+    "SELECT id, usuario_id, verificado_legalmente FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1",
+    [usuarioId]
+  );
   if (rows[0]) return rows[0];
 
-  // Crear perfil "vacío" si no existe
   await q("INSERT INTO perfiles_propietarios (usuario_id) VALUES (?)", [usuarioId]);
-  const rows2 = await q("SELECT id, usuario_id, verificado_legalmente FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1", [
-    usuarioId,
-  ]);
+  const rows2 = await q(
+    "SELECT id, usuario_id, verificado_legalmente FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1",
+    [usuarioId]
+  );
   return rows2[0] || null;
 }
 
 async function ensurePerfilConductor(usuarioId) {
-  const rows = await q("SELECT id, usuario_id, documento_verificado FROM perfiles_conductores WHERE usuario_id = ? LIMIT 1", [
-    usuarioId,
-  ]);
+  const rows = await q(
+    "SELECT id, usuario_id, documento_verificado FROM perfiles_conductores WHERE usuario_id = ? LIMIT 1",
+    [usuarioId]
+  );
   if (rows[0]) return rows[0];
 
-  // Crear perfil "vacío" si no existe
   await q("INSERT INTO perfiles_conductores (usuario_id) VALUES (?)", [usuarioId]);
-  const rows2 = await q("SELECT id, usuario_id, documento_verificado FROM perfiles_conductores WHERE usuario_id = ? LIMIT 1", [
-    usuarioId,
-  ]);
+  const rows2 = await q(
+    "SELECT id, usuario_id, documento_verificado FROM perfiles_conductores WHERE usuario_id = ? LIMIT 1",
+    [usuarioId]
+  );
   return rows2[0] || null;
 }
 
-// ----------------------------------
-// API Dashboard PROPIETARIO
-// GET /api/dashboard/propietario
-// Devuelve: owner + kpis + trabajo + postulaciones
-// ----------------------------------
+// ==============================
+// Rutas HTML
+// ==============================
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.get("/login.html", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+app.get("/register.html", (req, res) => res.sendFile(path.join(__dirname, "register.html")));
+
+app.get("/dashboard-propietario.html", (req, res) =>
+  res.sendFile(path.join(__dirname, "dashboard-propietario.html"))
+);
+app.get("/dashboard-conductor.html", (req, res) =>
+  res.sendFile(path.join(__dirname, "dashboard-conductor.html"))
+);
+
+// ==============================
+// API - Listado conductores (para propietario)
+// ==============================
+app.get("/api/conductores", (req, res) => {
+  const query =
+    'SELECT nombres, apellidos, email, celular, tipo FROM usuarios WHERE tipo = "conductor"';
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).json({ success: false, error: err.message });
+    res.json({ success: true, conductores: results });
+  });
+});
+
+// ==============================
+// API - Registro
+// ==============================
+app.post("/register", (req, res) => {
+  const { nombre, apellido, celular, email, password, rol } = req.body;
+
+  if (!nombre || !apellido || !celular || !email || !password || !rol) {
+    return res.status(400).json({ success: false, error: "Faltan campos requeridos." });
+  }
+
+  const rolValido = String(rol).trim().toLowerCase(); // conductor | propietario
+  if (!["conductor", "propietario"].includes(rolValido)) {
+    return res.status(400).json({ success: false, error: "Rol inválido." });
+  }
+
+  const query =
+    "INSERT INTO usuarios (nombres, apellidos, celular, email, password, tipo) VALUES (?, ?, ?, ?, ?, ?)";
+
+  db.query(query, [nombre, apellido, celular, email, password, rolValido], (err) => {
+    if (err) {
+      console.error("Error al registrar usuario:", err);
+      return res.status(500).json({
+        success: false,
+        error: "Este correo ya está registrado o hay un error en los datos.",
+      });
+    }
+    res.json({ success: true, message: "Registro exitoso" });
+  });
+});
+
+// ==============================
+// API - Login
+// ==============================
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const query = "SELECT nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password = ?";
+
+  db.query(query, [email, password], (err, results) => {
+    if (err) {
+      console.error("Error en DB:", err.message);
+      return res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+
+    if (results.length > 0) {
+      const user = results[0];
+      res.json({
+        success: true,
+        user: {
+          nombres: user.nombres,
+          apellidos: user.apellidos,
+          email: user.email,
+          tipo: String(user.tipo || "").toLowerCase(),
+        },
+      });
+    } else {
+      res.json({ success: false, message: "Correo o contraseña incorrectos" });
+    }
+  });
+});
+
+// =====================================================
+// DASHBOARD PROPIETARIO
+// =====================================================
 app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
     const u = await getUsuarioByEmail(email);
     if (!u) return res.status(404).json({ success: false, message: "Usuario no existe" });
 
-    // Validar rol
     if (tipoLower(u.tipo) !== tipoLower(tipo)) {
       return res.status(403).json({ success: false, message: "Rol no coincide" });
     }
@@ -192,27 +217,26 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
     const perfil = await ensurePerfilPropietario(u.id);
     const propietarioId = perfil?.id;
 
-    // KPIs
     const ofertasActivas = await q(
-      "SELECT COUNT(*) AS n FROM ofertas_trabajo WHERE propietario_id = ? AND estado = 'activa'",
+      "SELECT COUNT(*) AS n FROM ofertas_trabajo WHERE propietario_id = ? AND estado = 'activa' AND deleted_at IS NULL",
       [propietarioId]
     );
     const postulPend = await q(
       `SELECT COUNT(*) AS n
        FROM postulaciones p
        JOIN ofertas_trabajo o ON o.id = p.oferta_id
-       WHERE o.propietario_id = ? AND p.estado IN ('pendiente','preseleccionado')`,
+       WHERE o.propietario_id = ? AND o.deleted_at IS NULL AND p.estado IN ('pendiente','preseleccionado')`,
       [propietarioId]
     );
-    const trabajoActivo = await q("SELECT COUNT(*) AS n FROM asignaciones WHERE propietario_id = ? AND estado = 'activa'", [
-      propietarioId,
-    ]);
+    const trabajoActivo = await q(
+      "SELECT COUNT(*) AS n FROM asignaciones WHERE propietario_id = ? AND estado = 'activa'",
+      [propietarioId]
+    );
 
-    // Trabajo actual (si existe)
     const trabajoRows = await q(
       `SELECT
           a.id,
-          o.descripcion AS oferta_titulo,
+          o.titulo AS oferta_titulo,
           o.ciudad,
           DATE_FORMAT(a.fecha_inicio, '%Y-%m-%d') AS fecha_inicio,
           v.placa,
@@ -228,7 +252,6 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
       [propietarioId]
     );
 
-    // Postulaciones recientes
     const postRows = await q(
       `SELECT
           p.id,
@@ -236,13 +259,13 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
           p.conductor_id,
           p.estado,
           o.ciudad,
-          o.descripcion AS oferta_titulo,
+          o.titulo AS oferta_titulo,
           u2.nombres AS conductor_nombre
        FROM postulaciones p
        JOIN ofertas_trabajo o ON o.id = p.oferta_id
        JOIN perfiles_conductores pc ON pc.id = p.conductor_id
        JOIN usuarios u2 ON u2.id = pc.usuario_id
-       WHERE o.propietario_id = ?
+       WHERE o.propietario_id = ? AND o.deleted_at IS NULL
        ORDER BY p.fecha_postulacion DESC
        LIMIT 10`,
       [propietarioId]
@@ -250,10 +273,7 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
 
     res.json({
       success: true,
-      owner: {
-        id: propietarioId,
-        verificado_legalmente: !!perfil?.verificado_legalmente,
-      },
+      owner: { id: propietarioId, verificado_legalmente: !!perfil?.verificado_legalmente },
       kpis: {
         ofertas_activas: ofertasActivas[0]?.n || 0,
         postulaciones_pendientes: postulPend[0]?.n || 0,
@@ -268,83 +288,224 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
   }
 });
 
-// ----------------------------------
-// API PROPIETARIO: vehiculos
-// GET /api/propietario/vehiculos
-// ----------------------------------
+// =====================================================
+// PROPIETARIO: VEHICULOS (para el select)
+// Devuelve { ok:true, data:[...] } para tu HTML
+// =====================================================
 app.get("/api/propietario/vehiculos", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
     const u = await getUsuarioByEmail(email);
-    if (!u) return res.status(404).json({ success: false, message: "Usuario no existe" });
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
 
     if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "propietario") {
-      return res.status(403).json({ success: false, message: "Solo propietario" });
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
     }
 
     const perfil = await ensurePerfilPropietario(u.id);
-    const rows = await q("SELECT id, placa, modelo FROM vehiculos WHERE propietario_id = ? ORDER BY id DESC", [perfil.id]);
 
-    res.json({ success: true, vehiculos: rows || [] });
+    // Ajusta columnas si tu tabla tiene más (marca, etc.)
+    const rows = await q(
+      "SELECT id, placa, modelo FROM vehiculos WHERE propietario_id = ? ORDER BY id DESC",
+      [perfil.id]
+    );
+
+    res.json({ ok: true, data: rows || [] });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: err.message || "Error vehiculos propietario" });
+    res.status(500).json({ ok: false, error: err.message || "Error vehiculos propietario" });
   }
 });
 
-// ----------------------------------
-// API PROPIETARIO: crear oferta
-// POST /api/propietario/ofertas
-// body: { vehiculo_id, ciudad, tipo_acuerdo, cuota_diaria, porcentaje_propietario, descripcion }
-// ----------------------------------
-app.post("/api/propietario/ofertas", requireUser, async (req, res) => {
+// =====================================================
+// PROPIETARIO: OFERTAS (CRUD básico para tu HTML)
+// Tabla: ofertas_trabajo
+// =====================================================
+
+// POST /api/ofertas  (crear)
+app.post("/api/ofertas", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
     const u = await getUsuarioByEmail(email);
-    if (!u) return res.status(404).json({ success: false, message: "Usuario no existe" });
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
 
     if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "propietario") {
-      return res.status(403).json({ success: false, message: "Solo propietario" });
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
     }
 
     const perfil = await ensurePerfilPropietario(u.id);
 
-    const { vehiculo_id, ciudad, tipo_acuerdo, cuota_diaria, porcentaje_propietario, descripcion } = req.body || {};
+    const {
+      vehiculo_id,
+      titulo,
+      descripcion,
+      ciudad,
+      turno,
+      cuota_diaria,
+      porcentaje_propietario,
+      requisitos,
+      estado,
+    } = req.body || {};
 
-    if (!vehiculo_id || !ciudad || !tipo_acuerdo) {
-      return res.status(400).json({ success: false, message: "Faltan campos: vehiculo_id, ciudad, tipo_acuerdo" });
+    if (!vehiculo_id || !titulo || !ciudad) {
+      return res.status(400).json({ ok: false, error: "Faltan campos: vehiculo_id, titulo, ciudad" });
     }
 
-    // validar que el vehiculo es del propietario
-    const v = await q("SELECT id FROM vehiculos WHERE id = ? AND propietario_id = ? LIMIT 1", [vehiculo_id, perfil.id]);
-    if (!v[0]) return res.status(400).json({ success: false, message: "Vehículo inválido" });
+    // validar que el vehículo es del propietario
+    const v = await q("SELECT id FROM vehiculos WHERE id = ? AND propietario_id = ? LIMIT 1", [
+      vehiculo_id,
+      perfil.id,
+    ]);
+    if (!v[0]) return res.status(400).json({ ok: false, error: "Vehículo inválido" });
+
+    const allowedTurno = new Set(["dia", "noche", "mixto"]);
+    const t = allowedTurno.has(String(turno || "")) ? String(turno) : "dia";
+
+    const allowedEstado = new Set(["activa", "pausada", "cerrada"]);
+    const e = allowedEstado.has(String(estado || "")) ? String(estado) : "activa";
+
+    const cuota = Number(cuota_diaria || 0);
+    const pct = Number(porcentaje_propietario || 0);
+    if (cuota <= 0 && pct <= 0) {
+      return res.status(400).json({ ok: false, error: "Ingresa cuota_diaria o porcentaje_propietario (al menos uno)" });
+    }
 
     await q(
       `INSERT INTO ofertas_trabajo
-        (propietario_id, vehiculo_id, tipo_acuerdo, cuota_diaria, porcentaje_propietario, ciudad, descripcion, estado, fecha_creacion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'activa', NOW())`,
+       (propietario_id, vehiculo_id, titulo, descripcion, ciudad, turno,
+        cuota_diaria, porcentaje_propietario, requisitos, estado, fecha_creacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         perfil.id,
         vehiculo_id,
-        tipo_acuerdo,
-        cuota_diaria === "" ? null : cuota_diaria ?? null,
-        porcentaje_propietario === "" ? null : porcentaje_propietario ?? null,
-        ciudad,
-        descripcion ?? null,
+        String(titulo).trim(),
+        descripcion ? String(descripcion).trim() : null,
+        String(ciudad).trim(),
+        t,
+        cuota > 0 ? cuota : 0,
+        pct > 0 ? pct : 0,
+        requisitos ? String(requisitos).trim() : null,
+        e,
       ]
     );
 
-    res.status(201).json({ success: true, message: "Oferta publicada" });
+    res.status(201).json({ ok: true, message: "Oferta publicada" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: err.message || "Error creando oferta" });
+    res.status(500).json({ ok: false, error: err.message || "Error creando oferta" });
   }
 });
 
-// ----------------------------------
-// API PROPIETARIO: preseleccionar postulación
-// PATCH /api/propietario/postulaciones/:id/preseleccionar
-// ----------------------------------
+// GET /api/propietario/ofertas (mis ofertas)
+app.get("/api/propietario/ofertas", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+
+    if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "propietario") {
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
+    }
+
+    const perfil = await ensurePerfilPropietario(u.id);
+
+    const rows = await q(
+      `SELECT
+         id, propietario_id, vehiculo_id, titulo, descripcion, ciudad, turno,
+         cuota_diaria, porcentaje_propietario, requisitos,
+         estado, fecha_creacion, bloqueada, motivo_bloqueo
+       FROM ofertas_trabajo
+       WHERE propietario_id = ?
+         AND deleted_at IS NULL
+       ORDER BY fecha_creacion DESC`,
+      [perfil.id]
+    );
+
+    res.json({ ok: true, data: rows || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message || "Error cargando ofertas" });
+  }
+});
+
+// PATCH /api/ofertas/:id (cambiar estado)
+app.patch("/api/ofertas/:id", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+
+    if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "propietario") {
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
+    }
+
+    const perfil = await ensurePerfilPropietario(u.id);
+    const ofertaId = Number(req.params.id);
+    const estado = String(req.body?.estado || "");
+
+    const allowed = new Set(["activa", "pausada", "cerrada"]);
+    if (!allowed.has(estado)) {
+      return res.status(400).json({ ok: false, error: "Estado inválido" });
+    }
+
+    const r = await q(
+      `UPDATE ofertas_trabajo
+       SET estado = ?
+       WHERE id = ?
+         AND propietario_id = ?
+         AND deleted_at IS NULL
+         AND (bloqueada IS NULL OR bloqueada = 0)`,
+      [estado, ofertaId, perfil.id]
+    );
+
+    if (!r || r.affectedRows === 0) {
+      return res.status(404).json({ ok: false, error: "Oferta no encontrada o bloqueada" });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message || "Error actualizando estado" });
+  }
+});
+
+// DELETE /api/ofertas/:id (soft delete)
+app.delete("/api/ofertas/:id", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+
+    if (tipoLower(u.tipo) !== tipoLower(tipo) || tipoLower(u.tipo) !== "propietario") {
+      return res.status(403).json({ ok: false, error: "Solo propietario" });
+    }
+
+    const perfil = await ensurePerfilPropietario(u.id);
+    const ofertaId = Number(req.params.id);
+
+    const r = await q(
+      `UPDATE ofertas_trabajo
+       SET deleted_at = NOW()
+       WHERE id = ?
+         AND propietario_id = ?
+         AND deleted_at IS NULL`,
+      [ofertaId, perfil.id]
+    );
+
+    if (!r || r.affectedRows === 0) {
+      return res.status(404).json({ ok: false, error: "Oferta no encontrada" });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message || "Error eliminando oferta" });
+  }
+});
+
+// =====================================================
+// PROPIETARIO: Postulaciones (tus endpoints ya estaban bien)
+// =====================================================
 app.patch("/api/propietario/postulaciones/:id/preseleccionar", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
@@ -358,12 +519,11 @@ app.patch("/api/propietario/postulaciones/:id/preseleccionar", requireUser, asyn
     const perfil = await ensurePerfilPropietario(u.id);
     const postId = Number(req.params.id);
 
-    // asegurar que la postulación es de una oferta del propietario
     const own = await q(
       `SELECT p.id
        FROM postulaciones p
        JOIN ofertas_trabajo o ON o.id = p.oferta_id
-       WHERE p.id = ? AND o.propietario_id = ?
+       WHERE p.id = ? AND o.propietario_id = ? AND o.deleted_at IS NULL
        LIMIT 1`,
       [postId, perfil.id]
     );
@@ -377,29 +537,23 @@ app.patch("/api/propietario/postulaciones/:id/preseleccionar", requireUser, asyn
   }
 });
 
-// ----------------------------------
-// API PROPIETARIO: aceptar postulación (crea asignación + cierra oferta)
-// POST /api/propietario/postulaciones/:id/aceptar
-// ----------------------------------
+// Aceptar postulación (transacción) — se mantiene tu lógica
 app.post("/api/propietario/postulaciones/:id/aceptar", requireUser, (req, res) => {
   const postId = Number(req.params.id);
 
-  // Usamos conexión directa para transacción (mysql2 pool)
   db.getConnection(async (err, conn) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ success: false, message: "No se pudo obtener conexión" });
     }
 
+    const qConn = (sql, params = []) =>
+      new Promise((resolve, reject) => conn.query(sql, params, (e, rows) => (e ? reject(e) : resolve(rows))));
+
     try {
       const { email, tipo } = req.tcAuth;
-      const uRows = await new Promise((resolve, reject) => {
-        conn.query(
-          "SELECT id, email, tipo FROM usuarios WHERE email = ? LIMIT 1",
-          [email],
-          (e, rows) => (e ? reject(e) : resolve(rows))
-        );
-      });
+
+      const uRows = await qConn("SELECT id, email, tipo FROM usuarios WHERE email = ? LIMIT 1", [email]);
       const u = uRows[0];
       if (!u) {
         conn.release();
@@ -411,84 +565,52 @@ app.post("/api/propietario/postulaciones/:id/aceptar", requireUser, (req, res) =
         return res.status(403).json({ success: false, message: "Solo propietario" });
       }
 
-      // perfil propietario
-      const pRows = await new Promise((resolve, reject) => {
-        conn.query(
-          "SELECT id FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1",
-          [u.id],
-          (e, rows) => (e ? reject(e) : resolve(rows))
-        );
-      });
+      let pRows = await qConn("SELECT id FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1", [u.id]);
       let propietarioId = pRows[0]?.id;
       if (!propietarioId) {
-        // crear perfil si no existe
-        await new Promise((resolve, reject) => {
-          conn.query("INSERT INTO perfiles_propietarios (usuario_id) VALUES (?)", [u.id], (e) => (e ? reject(e) : resolve()));
-        });
-        const pRows2 = await new Promise((resolve, reject) => {
-          conn.query(
-            "SELECT id FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1",
-            [u.id],
-            (e, rows) => (e ? reject(e) : resolve(rows))
-          );
-        });
-        propietarioId = pRows2[0]?.id;
+        await qConn("INSERT INTO perfiles_propietarios (usuario_id) VALUES (?)", [u.id]);
+        pRows = await qConn("SELECT id FROM perfiles_propietarios WHERE usuario_id = ? LIMIT 1", [u.id]);
+        propietarioId = pRows[0]?.id;
       }
 
       await new Promise((resolve, reject) => conn.beginTransaction((e) => (e ? reject(e) : resolve())));
 
-      // traer postulación + oferta del propietario (y que oferta esté activa)
-      const row = await new Promise((resolve, reject) => {
-        conn.query(
-          `SELECT p.id AS postulacion_id, p.oferta_id, p.conductor_id, o.vehiculo_id
-           FROM postulaciones p
-           JOIN ofertas_trabajo o ON o.id = p.oferta_id
-           WHERE p.id = ? AND o.propietario_id = ? AND o.estado = 'activa'
-           LIMIT 1`,
-          [postId, propietarioId],
-          (e, rows) => (e ? reject(e) : resolve(rows[0] || null))
-        );
-      });
-
-      if (!row) {
+      const row = await qConn(
+        `SELECT p.id AS postulacion_id, p.oferta_id, p.conductor_id, o.vehiculo_id
+         FROM postulaciones p
+         JOIN ofertas_trabajo o ON o.id = p.oferta_id
+         WHERE p.id = ? AND o.propietario_id = ? AND o.estado = 'activa' AND o.deleted_at IS NULL
+         LIMIT 1`,
+        [postId, propietarioId]
+      );
+      const picked = row[0];
+      if (!picked) {
         await new Promise((resolve) => conn.rollback(() => resolve()));
         conn.release();
         return res.status(404).json({ success: false, message: "Postulación/oferta inválida o no activa" });
       }
 
-      // 1) crear asignación
-      const asignacionId = await new Promise((resolve, reject) => {
-        conn.query(
-          `INSERT INTO asignaciones
-           (oferta_id, propietario_id, conductor_id, vehiculo_id, fecha_inicio, estado, notas)
-           VALUES (?, ?, ?, ?, NOW(), 'activa', NULL)`,
-          [row.oferta_id, propietarioId, row.conductor_id, row.vehiculo_id],
-          (e, r) => (e ? reject(e) : resolve(r.insertId))
-        );
-      });
+      const ins = await qConn(
+        `INSERT INTO asignaciones
+         (oferta_id, propietario_id, conductor_id, vehiculo_id, fecha_inicio, estado, notas)
+         VALUES (?, ?, ?, ?, NOW(), 'activa', NULL)`,
+        [picked.oferta_id, propietarioId, picked.conductor_id, picked.vehiculo_id]
+      );
+      const asignacionId = ins.insertId;
 
-      // 2) marcar postulación aceptada y otras no seleccionadas
-      await new Promise((resolve, reject) => {
-        conn.query("UPDATE postulaciones SET estado='aceptado' WHERE id = ?", [postId], (e) => (e ? reject(e) : resolve()));
-      });
-      await new Promise((resolve, reject) => {
-        conn.query(
-          `UPDATE postulaciones
-           SET estado='no_seleccionado'
-           WHERE oferta_id = ? AND id <> ? AND estado IN ('pendiente','preseleccionado')`,
-          [row.oferta_id, postId],
-          (e) => (e ? reject(e) : resolve())
-        );
-      });
+      await qConn("UPDATE postulaciones SET estado='aceptado' WHERE id = ?", [postId]);
+      await qConn(
+        `UPDATE postulaciones
+         SET estado='no_seleccionado'
+         WHERE oferta_id = ? AND id <> ? AND estado IN ('pendiente','preseleccionado')`,
+        [picked.oferta_id, postId]
+      );
 
-      // 3) cerrar oferta
-      await new Promise((resolve, reject) => {
-        conn.query("UPDATE ofertas_trabajo SET estado='cerrada' WHERE id = ?", [row.oferta_id], (e) => (e ? reject(e) : resolve()));
-      });
+      await qConn("UPDATE ofertas_trabajo SET estado='cerrada' WHERE id = ?", [picked.oferta_id]);
 
       await new Promise((resolve, reject) => conn.commit((e) => (e ? reject(e) : resolve())));
-
       conn.release();
+
       res.json({ success: true, asignacion_id: asignacionId });
     } catch (e) {
       console.error(e);
@@ -501,10 +623,7 @@ app.post("/api/propietario/postulaciones/:id/aceptar", requireUser, (req, res) =
   });
 });
 
-// ----------------------------------
-// API PROPIETARIO: finalizar asignación
-// PATCH /api/propietario/asignaciones/:id/finalizar
-// ----------------------------------
+// Finalizar asignación
 app.patch("/api/propietario/asignaciones/:id/finalizar", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
@@ -525,7 +644,6 @@ app.patch("/api/propietario/asignaciones/:id/finalizar", requireUser, async (req
       [asignacionId, perfil.id]
     );
 
-    // mysql2 devuelve OkPacket, no rows
     if (!r || r.affectedRows === 0) {
       return res.status(404).json({ success: false, message: "No se pudo finalizar (no existe o no está activa)" });
     }
@@ -537,11 +655,9 @@ app.patch("/api/propietario/asignaciones/:id/finalizar", requireUser, async (req
   }
 });
 
-// ----------------------------------
-// API Dashboard CONDUCTOR
-// GET /api/dashboard/conductor
-// Devuelve stats para llenar tu dashboard actual
-// ----------------------------------
+// =====================================================
+// DASHBOARD CONDUCTOR + OFERTAS
+// =====================================================
 app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
@@ -557,12 +673,12 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
 
     await ensurePerfilConductor(u.id);
 
-    // Notificaciones no leídas (si tu tabla tiene "leida")
     let notifCount = 0;
     try {
-      const n = await q("SELECT COUNT(*) AS n FROM notificaciones WHERE usuario_id = ? AND (leida = 0 OR leida IS NULL)", [
-        u.id,
-      ]);
+      const n = await q(
+        "SELECT COUNT(*) AS n FROM notificaciones WHERE usuario_id = ? AND (leida = 0 OR leida IS NULL)",
+        [u.id]
+      );
       notifCount = n[0]?.n || 0;
     } catch {
       notifCount = 0;
@@ -573,10 +689,10 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
       stats: {
         nivel: u.nivel_actual || "Plata",
         score: u.score_reputacion ?? 0,
-        avg: u.score_reputacion ?? 0, // si luego calculas promedio real, lo cambias aquí
+        avg: u.score_reputacion ?? 0,
         reviews: u.total_reviews ?? 0,
         rating90: u.rating_90d ?? 0,
-        jobs: 0, // si luego quieres, se saca de asignaciones finalizadas
+        jobs: 0,
         points: u.puntos_carrera ?? 0,
         notifCount,
       },
@@ -586,11 +702,8 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
     res.status(500).json({ success: false, message: err.message || "Error dashboard conductor" });
   }
 });
-// ==============================
-// API CONDUCTOR: Ofertas (con detalle + estado de mi postulación)
-// ==============================
 
-// GET /api/conductor/ofertas?ciudad=Bogotá&turno=noche&q=...
+// GET /api/conductor/ofertas?ciudad=&turno=&q=
 app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
@@ -602,7 +715,6 @@ app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
       return res.status(403).json({ success: false, message: "Solo conductor" });
     }
 
-    // Perfil conductor
     const perfil = await ensurePerfilConductor(u.id);
     const conductorId = perfil?.id;
     if (!conductorId) return res.status(400).json({ success: false, message: "Perfil conductor no existe" });
@@ -618,8 +730,14 @@ app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
         AND (o.deleted_at IS NULL)
     `;
 
-    if (ciudad) { where += ` AND o.ciudad = ?`; params.push(ciudad); }
-    if (turno) { where += ` AND o.turno = ?`; params.push(turno); }
+    if (ciudad) {
+      where += ` AND o.ciudad = ?`;
+      params.push(ciudad);
+    }
+    if (turno) {
+      where += ` AND o.turno = ?`;
+      params.push(turno);
+    }
 
     if (qtxt) {
       where += ` AND (o.titulo LIKE ? OR o.descripcion LIKE ? OR o.requisitos LIKE ?)`;
@@ -663,7 +781,7 @@ app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
   }
 });
 
-// POST /api/conductor/ofertas/:id/postular  body: {mensaje, cv_url}
+// POST /api/conductor/ofertas/:id/postular
 app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) => {
   try {
     const { email, tipo } = req.tcAuth;
@@ -685,18 +803,16 @@ app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) =>
     const mensaje = (req.body?.mensaje || "").toString().trim() || null;
     const cv_url = (req.body?.cv_url || "").toString().trim() || null;
 
-    // validar oferta activa (si no tienes bloqueada/deleted_at, te lo ajusto)
     const oferta = await q(
-      "SELECT id FROM ofertas_trabajo WHERE id = ? AND estado = 'activa' LIMIT 1",
+      "SELECT id FROM ofertas_trabajo WHERE id = ? AND estado = 'activa' AND deleted_at IS NULL AND (bloqueada IS NULL OR bloqueada = 0) LIMIT 1",
       [ofertaId]
     );
     if (!oferta[0]) return res.status(404).json({ success: false, message: "Oferta no existe o no está activa" });
 
-    // evitar doble postulación
-    const ya = await q(
-      "SELECT id FROM postulaciones WHERE oferta_id = ? AND conductor_id = ? LIMIT 1",
-      [ofertaId, conductorId]
-    );
+    const ya = await q("SELECT id FROM postulaciones WHERE oferta_id = ? AND conductor_id = ? LIMIT 1", [
+      ofertaId,
+      conductorId,
+    ]);
     if (ya[0]) return res.json({ success: true, message: "Ya estabas postulado a esta oferta." });
 
     await q(
@@ -710,156 +826,11 @@ app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) =>
     res.status(500).json({ success: false, message: err.message || "Error postulando" });
   }
 });
-// ===============================
-// POSTULAR A OFERTA (100% tu BD)
-// ofertas_trabajo / postulaciones
-// ===============================
 
-function requireAuth(req, res, next) {
-  if (!req.user || !req.user.id) return res.status(401).json({ ok: false, error: "No autenticado" });
-  next();
-}
-
-// Ajusta si tu tabla se llama diferente:
-async function getConductorIdByUserId(pool, userId) {
-  const [rows] = await pool.query(
-    `SELECT id FROM perfiles_conductores WHERE usuario_id = ? LIMIT 1`,
-    [userId]
-  );
-  return rows?.[0]?.id || null;
-}
-
-
-// 1) Detalle de oferta
-app.get("/api/ofertas-trabajo/:id", requireAuth, async (req, res) => {
-  try {
-    const ofertaId = Number(req.params.id);
-    if (!ofertaId) return res.status(400).json({ ok: false, error: "ID inválido" });
-
-    const [rows] = await pool.query(
-      `SELECT
-        id, propietario_id, vehiculo_id, titulo, descripcion, ciudad, turno,
-        cuota_diaria, porcentaje_propietario, requisitos,
-        estado, fecha_creacion, deleted_at, bloqueada, motivo_bloqueo
-       FROM ofertas_trabajo
-       WHERE id = ? LIMIT 1`,
-      [ofertaId]
-    );
-
-    if (rows.length === 0) return res.status(404).json({ ok: false, error: "Oferta no existe" });
-
-    return res.json({ ok: true, oferta: rows[0] });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: "Error obteniendo oferta" });
-  }
-});
-
-// 2) Postular a oferta (tu enum: pendiente/preseleccionado/no_seleccionado)
-app.post("/api/ofertas-trabajo/:id/postular", requireAuth, async (req, res) => {
-  const conn = await pool.getConnection();
-  try {
-    const ofertaId = Number(req.params.id);
-    const mensaje = (req.body?.mensaje || "").trim();
-    const cvUrl = (req.body?.cv_url || "").trim();
-
-    if (!ofertaId) return res.status(400).json({ ok: false, error: "ID inválido" });
-    if (mensaje.length === 0) return res.status(400).json({ ok: false, error: "Escribe un mensaje" });
-
-    // tu BD: mensaje TEXT (puede ser largo), pero limitamos por UX
-    if (mensaje.length > 1500) return res.status(400).json({ ok: false, error: "Mensaje muy largo (máx 1500)" });
-    if (cvUrl.length > 255) return res.status(400).json({ ok: false, error: "cv_url muy largo (máx 255)" });
-
-    const conductorId = await getConductorIdByUserId(pool, req.user.id);
-    if (!conductorId) return res.status(403).json({ ok: false, error: "Este usuario no está registrado como conductor" });
-
-    await conn.beginTransaction();
-
-    // Bloqueo de la oferta para evitar condiciones de carrera
-    const [ofertaRows] = await conn.query(
-      `SELECT id, estado, deleted_at, bloqueada, motivo_bloqueo
-       FROM ofertas_trabajo
-       WHERE id = ?
-       FOR UPDATE`,
-      [ofertaId]
-    );
-
-    if (ofertaRows.length === 0) {
-      await conn.rollback();
-      return res.status(404).json({ ok: false, error: "Oferta no existe" });
-    }
-
-    const o = ofertaRows[0];
-
-    if (o.deleted_at) {
-      await conn.rollback();
-      return res.status(409).json({ ok: false, error: "Oferta eliminada" });
-    }
-
-    if (Number(o.bloqueada) === 1) {
-      await conn.rollback();
-      return res.status(409).json({ ok: false, error: `Oferta bloqueada: ${o.motivo_bloqueo || "—"}` });
-    }
-
-    if (String(o.estado || "").toUpperCase() !== "ABIERTA") {
-      await conn.rollback();
-      return res.status(409).json({ ok: false, error: "La oferta ya no está ABIERTA" });
-    }
-
-    // Insert con tu enum: estado='pendiente'
-    // y tu campo fecha_postulacion tiene default current_timestamp(),
-    // así que podemos omitirlo (o setear NOW()).
-    await conn.query(
-      `INSERT INTO postulaciones (oferta_id, conductor_id, mensaje, cv_url, estado)
-       VALUES (?, ?, ?, ?, 'pendiente')`,
-      [ofertaId, conductorId, mensaje, cvUrl || null]
-    );
-
-    await conn.commit();
-    return res.json({ ok: true, message: "Postulación enviada (pendiente)" });
-
-  } catch (err) {
-    await conn.rollback();
-
-    // Como ya tienes uq_oferta_conductor, el duplicado caería aquí
-    if (String(err?.code) === "ER_DUP_ENTRY") {
-      return res.status(409).json({ ok: false, error: "Ya te postulaste a esta oferta" });
-    }
-
-    console.error(err);
-    return res.status(500).json({ ok: false, error: "Error al postular" });
-  } finally {
-    conn.release();
-  }
-});
-
-// 3) Mis postulaciones
-app.get("/api/postulaciones/mias", requireAuth, async (req, res) => {
-  try {
-    const conductorId = await getConductorIdByUserId(pool, req.user.id);
-    if (!conductorId) return res.status(403).json({ ok: false, error: "No eres conductor" });
-
-    const [rows] = await pool.query(
-      `SELECT
-        p.id, p.oferta_id, p.mensaje, p.cv_url, p.estado, p.fecha_postulacion,
-        o.titulo, o.ciudad, o.turno, o.cuota_diaria, o.estado AS oferta_estado
-       FROM postulaciones p
-       JOIN ofertas_trabajo o ON o.id = p.oferta_id
-       WHERE p.conductor_id = ?
-       ORDER BY p.fecha_postulacion DESC`,
-      [conductorId]
-    );
-
-    return res.json({ ok: true, postulaciones: rows });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: "Error obteniendo postulaciones" });
-  }
-});
-
-
-// 6. Configuración del Servidor
+// ==============================
+// Server listen
+// ==============================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor TaxiConfianza corriendo en puerto ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Servidor TaxiConfianza corriendo en puerto ${PORT}`);
 });
