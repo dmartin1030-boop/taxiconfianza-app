@@ -3,21 +3,73 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Publicar oferta | Taxi Confianza</title>
+  <title>Publicar oferta | TaxiConfianza</title>
 
-  <!-- Usa tu css actual -->
-  <link rel="stylesheet" href="/css/dashboard.css" />
+  <!-- MISMO THEME que conductor-ofertas.html -->
+  <link rel="stylesheet" href="css/dashboard-theme.css" />
+
+  <style>
+    /* Estilos SOLO de formulario + tabla + modal (mantienen el mismo tema) */
+    .table{width:100%; border-collapse:collapse; min-width:900px;}
+    .table th,.table td{padding:12px; border-bottom:1px solid var(--border); text-align:left; font-size:13px; vertical-align:top}
+    .table th{color:var(--muted); font-weight:700}
+    .right{text-align:right}
+
+    .filters{display:grid; grid-template-columns:1fr; gap:10px}
+    .field label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    .input, select, textarea{
+      width:100%;
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding:10px 12px;
+      color: var(--text);
+      outline:none;
+      font-size:13px;
+      box-sizing:border-box;
+    }
+    textarea{min-height:92px; resize:vertical}
+
+    .actions-row{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap}
+    .kpi{display:flex; gap:10px; flex-wrap:wrap}
+    .kpi .pill{background: rgba(255,255,255,.03)}
+
+    .two{display:grid; grid-template-columns: 1fr; gap:12px}
+    @media(min-width: 980px){ .two{grid-template-columns: 1.1fr .9fr} }
+
+    dialog{
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(15,23,42,.98);
+      color: var(--text);
+      max-width: 820px;
+      width: min(92vw, 820px);
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop{background: rgba(0,0,0,.60)}
+    .dlg-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px}
+    .dlg-title{margin:0; font-size:16px}
+    .hr{height:1px; background: var(--border); margin: 12px 0}
+    .small{font-size:12px; color:var(--muted)}
+    .disabled{opacity:.55; pointer-events:none}
+    .danger{background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25)}
+  </style>
 </head>
 
 <body>
-  <!-- ✅ 1) Contenedor principal: sidebar + main -->
-  <div class="layout">
+  <div class="wrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">TC</div>
+        <div>
+          <h1>TaxiConfianza</h1>
+          <p>Panel Propietario</p>
+        </div>
+      </div>
 
-    <!-- ✅ 2) SIDEBAR -->
-    <aside class="sidebar">
       <nav class="nav" aria-label="Navegación del propietario">
-
-        <a class="active" href="/dashboard-propietario.html" aria-current="page">
+        <a href="dashboard-propietario.html">
           <svg class="ico" viewBox="0 0 24 24" fill="none">
             <path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z"
               stroke="currentColor" stroke-width="1.6"/>
@@ -25,360 +77,253 @@
           Dashboard
         </a>
 
-        <!-- ✅ Botón con icono -->
-        <a href="/publicar-oferta.html" class="nav-cta">
+        <a class="active" href="publicar-oferta.html" aria-current="page">
           <svg class="ico" viewBox="0 0 24 24" fill="none">
             <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
           </svg>
           Publicar oferta
         </a>
 
-        <a href="/mis-ofertas.html">
+        <a href="mis-ofertas.html" class="disabled" title="Si quieres, lo conectamos después">
           <svg class="ico" viewBox="0 0 24 24" fill="none">
             <path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
           </svg>
           Mis ofertas
         </a>
 
-        <a href="/postulaciones-propietario.html">
+        <a href="postulaciones-propietario.html" class="disabled" title="Si quieres, lo conectamos después">
           <svg class="ico" viewBox="0 0 24 24" fill="none">
-            <path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M7 8h10M7 12h6M7 16h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M5 4h14a2 2 0 0 1 2 2v14l-4-2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+              stroke="currentColor" stroke-width="1.6"/>
           </svg>
           Postulaciones
         </a>
 
-        <a href="/trabajo-actual.html">
+        <a href="trabajo-actual.html" class="disabled" title="Si quieres, lo conectamos después">
           <svg class="ico" viewBox="0 0 24 24" fill="none">
             <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" stroke="currentColor" stroke-width="1.6"/>
           </svg>
           Trabajo actual
         </a>
 
-        <a href="/historial-trabajos.html">
+        <a href="historial-trabajos.html" class="disabled" title="Si quieres, lo conectamos después">
           <svg class="ico" viewBox="0 0 24 24" fill="none">
-            <path d="M7 4h10v4H7z" stroke="currentColor" stroke-width="1.6"/>
-            <path d="M6 8h12v12H6z" stroke="currentColor" stroke-width="1.6"/>
-            <path d="M8 12h8M8 16h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M7 4h10v4H7V4Z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M6 8h12v12H6V8Z" stroke="currentColor" stroke-width="1.6"/>
           </svg>
           Historial de trabajos
         </a>
-
       </nav>
+
+      <div class="sep"></div>
+
+      <div class="mini">
+        <div class="row">
+          <div>
+            <small>Sesión</small>
+            <div class="pill"><span class="dot"></span><span id="user-pill">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <button class="btn danger" id="btnLogout" style="width:100%; justify-content:center">Salir</button>
     </aside>
 
-    <!-- ✅ 3) MAIN (todo tu contenido va aquí adentro) -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- MAIN -->
     <main class="main">
+      <header class="topbar">
+        <div class="left">
+          <h2 class="title">Publicar oferta</h2>
+          <p class="subtitle">Crea ofertas en <code>ofertas_trabajo</code> y adminístralas aquí mismo.</p>
+        </div>
 
-      <!-- ✅ 4) Contenedor interno para que no se “pegue” al borde -->
-      <div class="container">
+        <div class="top-actions">
+          <button class="btn mobile-toggle" id="btnOpenMenu" type="button" aria-label="Abrir menú">☰ Menú</button>
 
-        <header class="page-header">
-          <h1>Publicar oferta</h1>
-          <p class="muted">Crea una oferta para que los conductores se postulen.</p>
-        </header>
-
-        <!-- CARD: FORM -->
-        <section class="card">
-          <div class="card-head">
-            <h2>Nueva oferta</h2>
-            <p class="muted">Se guarda en <b>ofertas_trabajo</b>.</p>
+          <div class="search" role="search" aria-label="Buscar mis ofertas">
+            <svg class="ico" viewBox="0 0 24 24" fill="none">
+              <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <input id="q" placeholder="Buscar por título, ciudad, requisitos…" />
           </div>
 
-          <form id="formOferta" class="form-grid">
+          <button class="btn primary" id="btnRefresh" type="button">Actualizar</button>
+        </div>
+      </header>
 
-            <div class="field">
-              <label for="vehiculo_id">Vehículo</label>
-              <select id="vehiculo_id" name="vehiculo_id" required>
-                <option value="">Cargando…</option>
-              </select>
+      <section class="grid">
+        <!-- LISTA / MIS OFERTAS -->
+        <article class="card">
+          <div class="row" style="margin-bottom:10px;">
+            <div class="kpi">
+              <span class="pill">Mis ofertas: <strong id="count">0</strong></span>
+              <span class="pill">Tu usuario: <strong id="who">—</strong></span>
             </div>
-
-            <div class="field">
-              <label for="ciudad">Ciudad</label>
-              <input id="ciudad" name="ciudad" type="text" placeholder="Ej: Bogotá" required />
-            </div>
-
-            <div class="field">
-              <label for="turno">Turno</label>
-              <select id="turno" name="turno">
-                <option value="dia">Día</option>
-                <option value="noche">Noche</option>
-                <option value="mixto">Mixto</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="estado">Estado</label>
-              <select id="estado" name="estado">
-                <option value="activa" selected>Activa</option>
-                <option value="pausada">Pausada</option>
-                <option value="cerrada">Cerrada</option>
-              </select>
-            </div>
-
-            <div class="field field-full">
-              <label for="titulo">Título</label>
-              <input id="titulo" name="titulo" type="text" placeholder="Ej: Taxi turno noche con pago diario" required />
-            </div>
-
-            <div class="field field-full">
-              <label for="descripcion">Descripción</label>
-              <textarea id="descripcion" name="descripcion" rows="4" placeholder="Describe condiciones, horarios, zonas, etc."></textarea>
-            </div>
-
-            <div class="field">
-              <label for="cuota_diaria">Cuota diaria ($)</label>
-              <input id="cuota_diaria" name="cuota_diaria" type="number" min="0" step="1" placeholder="Ej: 70000" />
-            </div>
-
-            <div class="field">
-              <label for="porcentaje_propietario">% para propietario</label>
-              <input id="porcentaje_propietario" name="porcentaje_propietario" type="number" min="0" step="0.01" placeholder="Ej: 30.00" />
-            </div>
-
-            <div class="field field-full">
-              <small class="muted">Debes llenar <b>cuota diaria</b> o <b>% propietario</b> (al menos uno).</small>
-            </div>
-
-            <div class="field field-full">
-              <label for="requisitos">Requisitos</label>
-              <textarea id="requisitos" name="requisitos" rows="3" placeholder="Ej: licencia vigente, sin comparendos, experiencia 1 año."></textarea>
-            </div>
-
-            <div class="actions">
-              <button type="submit" class="btn-primary" id="btnPublicar">Publicar oferta</button>
-              <button type="button" class="btn-ghost" id="btnLimpiar">Limpiar</button>
-            </div>
-
-          </form>
-        </section>
-
-        <!-- CARD: MIS OFERTAS -->
-        <section class="card">
-          <div class="card-head row-between">
-            <div>
-              <h2>Mis ofertas</h2>
-              <p class="muted">Gestiona estado o elimina (soft delete).</p>
-            </div>
-            <button class="btn-ghost" id="btnRefrescar" type="button">Refrescar</button>
+            <div class="muted" id="msg"></div>
           </div>
 
-          <div class="table-wrap">
-            <table class="table" id="tablaOfertas">
+          <div style="overflow:auto; border-radius: 12px;">
+            <table class="table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Título</th>
-                  <th>Ciudad</th>
-                  <th>Turno</th>
-                  <th>Pago</th>
+                  <th>Oferta</th>
+                  <th>Acuerdo</th>
+                  <th>Vehículo</th>
+                  <th>Ciudad / Turno</th>
                   <th>Estado</th>
-                  <th>Bloqueada</th>
-                  <th>Acciones</th>
+                  <th class="right">Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr><td colspan="8" class="muted">Cargando…</td></tr>
+              <tbody id="offersTable">
+                <tr><td colspan="6" class="muted">Cargando…</td></tr>
               </tbody>
             </table>
           </div>
-        </section>
+        </article>
 
-      </div><!-- /container -->
+        <!-- FORM / NUEVA OFERTA -->
+        <article class="card">
+          <h3>Nueva oferta</h3>
+          <p class="muted">Campos reales de tu tabla <code>ofertas_trabajo</code>.</p>
+
+          <div class="filters">
+            <div class="field">
+              <label>Vehículo</label>
+              <select id="vehiculo_id">
+                <option value="">Cargando vehículos…</option>
+              </select>
+              <div class="small">Se guarda como <b>vehiculo_id</b> y pertenece a tu perfil.</div>
+            </div>
+
+            <div class="field">
+              <label>Título</label>
+              <input class="input" id="titulo" placeholder="Ej: Taxi turno noche con pago diario" />
+            </div>
+
+            <div class="field">
+              <label>Ciudad</label>
+              <input class="input" id="ciudad" placeholder="Ej: Bogotá" />
+            </div>
+
+            <div class="two">
+              <div class="field">
+                <label>Turno</label>
+                <select id="turno">
+                  <option value="dia">Día</option>
+                  <option value="noche">Noche</option>
+                  <option value="mixto">Mixto</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Estado</label>
+                <select id="estado">
+                  <option value="activa" selected>Activa</option>
+                  <option value="pausada">Pausada</option>
+                  <option value="cerrada">Cerrada</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Descripción</label>
+              <textarea id="descripcion" placeholder="Describe condiciones, horarios, zonas, etc."></textarea>
+            </div>
+
+            <div class="two">
+              <div class="field">
+                <label>Cuota diaria ($)</label>
+                <input class="input" id="cuota_diaria" type="number" min="0" placeholder="Ej: 70000" />
+              </div>
+              <div class="field">
+                <label>% Propietario</label>
+                <input class="input" id="porcentaje_propietario" type="number" step="0.01" min="0" placeholder="Ej: 30.00" />
+              </div>
+            </div>
+
+            <div class="small">
+              Debes llenar <b>cuota_diaria</b> o <b>porcentaje_propietario</b> (al menos uno).
+            </div>
+
+            <div class="field">
+              <label>Requisitos</label>
+              <textarea id="requisitos" placeholder="Ej: licencia vigente, sin comparendos, experiencia 1 año…"></textarea>
+            </div>
+
+            <div class="actions-row">
+              <button class="btn" type="button" id="btnClear">Limpiar</button>
+              <button class="btn primary" type="button" id="btnCreate">Publicar</button>
+            </div>
+
+            <p class="small">
+              Tip: si una oferta está <b>bloqueada</b>, el sistema no permitirá cambiar su estado.
+            </p>
+          </div>
+        </article>
+      </section>
     </main>
-  </div><!-- /layout -->
+  </div>
 
-  <script>
-    const API = {
-      vehiculos: "/api/propietario/vehiculos",
-      crearOferta: "/api/ofertas",
-      misOfertas: "/api/propietario/ofertas",
-      actualizarOferta: (id) => `/api/ofertas/${id}`,
-      eliminarOferta: (id) => `/api/ofertas/${id}`,
-    };
+  <!-- MODAL: Ver/Editar rápido (solo estado + ver detalle) -->
+  <dialog id="offerDialog">
+    <form method="dialog" id="offerForm">
+      <div class="dlg-head">
+        <div>
+          <h3 class="dlg-title" id="dlgTitle">Oferta</h3>
+          <div class="small" id="dlgMeta"></div>
+        </div>
+        <button class="btn" value="cancel" type="submit">✕</button>
+      </div>
 
-    const $ = (s) => document.querySelector(s);
+      <div class="two">
+        <div>
+          <div class="muted" style="margin-bottom:6px;">Descripción</div>
+          <div id="dlgDesc" class="small"></div>
 
-    function money(n){
-      const num = Number(n || 0);
-      return num.toLocaleString("es-CO");
-    }
+          <div class="hr"></div>
 
-    function turnoLabel(t){
-      if (t === "dia") return "Día";
-      if (t === "noche") return "Noche";
-      if (t === "mixto") return "Mixto";
-      return t || "";
-    }
+          <div class="muted" style="margin-bottom:6px;">Requisitos</div>
+          <div id="dlgReq" class="small"></div>
+        </div>
 
-    async function cargarVehiculos() {
-      const sel = $("#vehiculo_id");
-      sel.innerHTML = `<option value="">Cargando…</option>`;
-      const res = await fetch(API.vehiculos);
-      const json = await res.json();
+        <div>
+          <div class="muted" style="margin-bottom:6px;">Acciones</div>
 
-      if (!json.ok) {
-        sel.innerHTML = `<option value="">No se pudieron cargar</option>`;
-        return;
-      }
-
-      const data = json.data || [];
-      if (!data.length) {
-        sel.innerHTML = `<option value="">No tienes vehículos registrados</option>`;
-        return;
-      }
-
-      sel.innerHTML = `<option value="">Selecciona un vehículo…</option>`;
-      data.forEach(v => {
-        const id = v.id ?? v.vehiculo_id;
-        const placa = v.placa ?? "SIN_PLACA";
-        const modelo = v.modelo ?? "";
-        const opt = document.createElement("option");
-        opt.value = id;
-        opt.textContent = `${placa} ${modelo}`.trim();
-        sel.appendChild(opt);
-      });
-    }
-
-    function validarPago() {
-      const cuota = Number($("#cuota_diaria").value || 0);
-      const pct = Number($("#porcentaje_propietario").value || 0);
-      return cuota > 0 || pct > 0;
-    }
-
-    async function publicarOferta(e){
-      e.preventDefault();
-
-      if (!validarPago()) {
-        alert("Debes ingresar Cuota diaria o % propietario (al menos uno).");
-        return;
-      }
-
-      const data = {
-        vehiculo_id: $("#vehiculo_id").value,
-        ciudad: $("#ciudad").value.trim(),
-        turno: $("#turno").value,
-        estado: $("#estado").value,
-        titulo: $("#titulo").value.trim(),
-        descripcion: $("#descripcion").value.trim(),
-        cuota_diaria: $("#cuota_diaria").value ? Number($("#cuota_diaria").value) : 0,
-        porcentaje_propietario: $("#porcentaje_propietario").value ? Number($("#porcentaje_propietario").value) : 0,
-        requisitos: $("#requisitos").value.trim(),
-      };
-
-      const btn = $("#btnPublicar");
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(API.crearOferta, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        const json = await res.json();
-        if (!json.ok) return alert(json.error || "Error al publicar");
-
-        alert("Oferta publicada ✅");
-        $("#formOferta").reset();
-        await cargarMisOfertas();
-      } catch (err) {
-        console.error(err);
-        alert("Error de red");
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    async function cargarMisOfertas(){
-      const tbody = $("#tablaOfertas tbody");
-      tbody.innerHTML = `<tr><td colspan="8" class="muted">Cargando…</td></tr>`;
-
-      const res = await fetch(API.misOfertas);
-      const json = await res.json();
-      if (!json.ok) {
-        tbody.innerHTML = `<tr><td colspan="8" class="muted">No se pudo cargar</td></tr>`;
-        return;
-      }
-
-      const rows = json.data || [];
-      if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="8" class="muted">Aún no tienes ofertas</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = "";
-      rows.forEach(o => {
-        const pagoTxt = (Number(o.cuota_diaria || 0) > 0)
-          ? `$ ${money(o.cuota_diaria)} / día`
-          : (Number(o.porcentaje_propietario || 0) > 0)
-            ? `${o.porcentaje_propietario}% propietario`
-            : "-";
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${o.id}</td>
-          <td>${(o.titulo || "").replaceAll("<","&lt;")}</td>
-          <td>${o.ciudad || ""}</td>
-          <td>${turnoLabel(o.turno)}</td>
-          <td>${pagoTxt}</td>
-          <td>
-            <select data-action="estado" data-id="${o.idsizda}">
-              <option value="activa" ${o.estado==="activa"?"selected":""}>activa</option>
-              <option value="pausada" ${o.estado==="pausada"?"selected":""}>pausada</option>
-              <option value="cerrada" ${o.estado==="cerrada"?"selected":""}>cerrada</option>
+          <div class="field">
+            <label>Estado</label>
+            <select id="dlgEstado">
+              <option value="activa">activa</option>
+              <option value="pausada">pausada</option>
+              <option value="cerrada">cerrada</option>
             </select>
-          </td>
-          <td>${Number(o.bloqueada||0) ? "Sí" : "No"}</td>
-          <td>
-            <button class="btn-ghost" data-action="eliminar" data-id="${o.id}" type="button">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+            <div class="small" id="dlgLockMsg"></div>
+          </div>
 
-    async function actualizarEstado(id, estado){
-      const res = await fetch(API.actualizarOferta(id), {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado })
-      });
-      const json = await res.json();
-      if (!json.ok) alert(json.error || "No se pudo actualizar");
-    }
+          <div class="actions-row" style="margin-top:10px;">
+            <button class="btn" value="cancel" type="submit">Cancelar</button>
+            <button class="btn primary" id="btnSaveEstado" type="button">Guardar</button>
+            <button class="btn danger" id="btnDeleteOffer" type="button">Eliminar</button>
+          </div>
 
-    async function eliminarOferta(id){
-      if (!confirm("¿Eliminar oferta? (soft delete)")) return;
-      const res = await fetch(API.eliminarOferta(id), { method: "DELETE" });
-      const json = await res.json();
-      if (!json.ok) return alert(json.error || "No se pudo eliminar");
-      await cargarMisOfertas();
-    }
+          <div class="muted" id="dlgStatus" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </form>
+  </dialog>
 
-    function bindTabla(){
-      $("#tablaOfertas").addEventListener("change", async (e) => {
-        const el = e.target;
-        if (el?.dataset?.action === "estado") {
-          await actualizarEstado(el.dataset.id, el.value);
-        }
-      });
+  <!-- mismos JS base que tu plantilla -->
+  <script src="js/tc-session.js"></script>
+  <script src="js/tc-api.js"></script>
 
-      $("#tablaOfertas").addEventListener("click", async (e) => {
-        const btn = e.target.closest("button");
-        if (!btn) return;
-        if (btn.dataset.action === "eliminar") await eliminarOferta(btn.dataset.id);
-      });
-    }
-
-    $("#formOferta").addEventListener("submit", publicarOferta);
-    $("#btnLimpiar").addEventListener("click", () => $("#formOferta").reset());
-    $("#btnRefrescar").addEventListener("click", cargarMisOfertas);
-
-    bindTabla();
-    cargarVehiculos();
-    cargarMisOfertas();
-  </script>
+  <!-- crea este archivo (te lo hago en el siguiente paso si quieres) -->
+  <script src="js/tc-propietario-publicar-oferta.js"></script>
 </body>
 </html>
+
