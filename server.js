@@ -711,7 +711,7 @@ app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) =>
   }
 });
 // ===============================
-// POSTULAR A OFERTA (MVP) - TABLAS REALES
+// POSTULAR A OFERTA (100% tu BD)
 // ofertas_trabajo / postulaciones
 // ===============================
 
@@ -720,7 +720,7 @@ function requireAuth(req, res, next) {
   next();
 }
 
-// Si tu tabla conductores tiene otro nombre, cámbialo aquí.
+// Ajusta si tu tabla se llama diferente:
 async function getConductorIdByUserId(pool, userId) {
   const [rows] = await pool.query(
     `SELECT id FROM conductores WHERE usuario_id = ? LIMIT 1`,
@@ -729,7 +729,7 @@ async function getConductorIdByUserId(pool, userId) {
   return rows?.[0]?.id || null;
 }
 
-// 1) Detalle de oferta (para pantalla de postulación)
+// 1) Detalle de oferta
 app.get("/api/ofertas-trabajo/:id", requireAuth, async (req, res) => {
   try {
     const ofertaId = Number(req.params.id);
@@ -754,25 +754,27 @@ app.get("/api/ofertas-trabajo/:id", requireAuth, async (req, res) => {
   }
 });
 
-// 2) Postular a oferta
+// 2) Postular a oferta (tu enum: pendiente/preseleccionado/no_seleccionado)
 app.post("/api/ofertas-trabajo/:id/postular", requireAuth, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     const ofertaId = Number(req.params.id);
     const mensaje = (req.body?.mensaje || "").trim();
-    const cvUrl = (req.body?.cv_url || "").trim(); // opcional
+    const cvUrl = (req.body?.cv_url || "").trim();
 
     if (!ofertaId) return res.status(400).json({ ok: false, error: "ID inválido" });
     if (mensaje.length === 0) return res.status(400).json({ ok: false, error: "Escribe un mensaje" });
-    if (mensaje.length > 1000) return res.status(400).json({ ok: false, error: "Mensaje muy largo (máx 1000)" });
-    if (cvUrl.length > 500) return res.status(400).json({ ok: false, error: "cv_url muy largo" });
+
+    // tu BD: mensaje TEXT (puede ser largo), pero limitamos por UX
+    if (mensaje.length > 1500) return res.status(400).json({ ok: false, error: "Mensaje muy largo (máx 1500)" });
+    if (cvUrl.length > 255) return res.status(400).json({ ok: false, error: "cv_url muy largo (máx 255)" });
 
     const conductorId = await getConductorIdByUserId(pool, req.user.id);
     if (!conductorId) return res.status(403).json({ ok: false, error: "Este usuario no está registrado como conductor" });
 
     await conn.beginTransaction();
 
-    // Bloqueo lógico de la oferta (evita carreras)
+    // Bloqueo de la oferta para evitar condiciones de carrera
     const [ofertaRows] = await conn.query(
       `SELECT id, estado, deleted_at, bloqueada, motivo_bloqueo
        FROM ofertas_trabajo
@@ -803,33 +805,26 @@ app.post("/api/ofertas-trabajo/:id/postular", requireAuth, async (req, res) => {
       return res.status(409).json({ ok: false, error: "La oferta ya no está ABIERTA" });
     }
 
-    // Evitar doble postulación
-    const [ya] = await conn.query(
-      `SELECT id
-       FROM postulaciones
-       WHERE oferta_id = ? AND conductor_id = ?
-       LIMIT 1`,
-      [ofertaId, conductorId]
-    );
-
-    if (ya.length > 0) {
-      await conn.rollback();
-      return res.status(409).json({ ok: false, error: "Ya te postulaste a esta oferta" });
-    }
-
-    // Insertar postulación según tus columnas reales
+    // Insert con tu enum: estado='pendiente'
+    // y tu campo fecha_postulacion tiene default current_timestamp(),
+    // así que podemos omitirlo (o setear NOW()).
     await conn.query(
-      `INSERT INTO postulaciones
-        (oferta_id, conductor_id, mensaje, cv_url, estado, fecha_postulacion)
-       VALUES (?, ?, ?, ?, 'ENVIADA', NOW())`,
+      `INSERT INTO postulaciones (oferta_id, conductor_id, mensaje, cv_url, estado)
+       VALUES (?, ?, ?, ?, 'pendiente')`,
       [ofertaId, conductorId, mensaje, cvUrl || null]
     );
 
     await conn.commit();
-    return res.json({ ok: true, message: "Postulación enviada" });
+    return res.json({ ok: true, message: "Postulación enviada (pendiente)" });
 
   } catch (err) {
     await conn.rollback();
+
+    // Como ya tienes uq_oferta_conductor, el duplicado caería aquí
+    if (String(err?.code) === "ER_DUP_ENTRY") {
+      return res.status(409).json({ ok: false, error: "Ya te postulaste a esta oferta" });
+    }
+
     console.error(err);
     return res.status(500).json({ ok: false, error: "Error al postular" });
   } finally {
@@ -837,7 +832,7 @@ app.post("/api/ofertas-trabajo/:id/postular", requireAuth, async (req, res) => {
   }
 });
 
-// 3) Mis postulaciones (para paso 3 del MVP)
+// 3) Mis postulaciones
 app.get("/api/postulaciones/mias", requireAuth, async (req, res) => {
   try {
     const conductorId = await getConductorIdByUserId(pool, req.user.id);
@@ -845,7 +840,7 @@ app.get("/api/postulaciones/mias", requireAuth, async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT
-        p.id, p.oferta_id, p.conductor_id, p.mensaje, p.cv_url, p.estado, p.fecha_postulacion,
+        p.id, p.oferta_id, p.mensaje, p.cv_url, p.estado, p.fecha_postulacion,
         o.titulo, o.ciudad, o.turno, o.cuota_diaria, o.estado AS oferta_estado
        FROM postulaciones p
        JOIN ofertas_trabajo o ON o.id = p.oferta_id
@@ -860,6 +855,7 @@ app.get("/api/postulaciones/mias", requireAuth, async (req, res) => {
     return res.status(500).json({ ok: false, error: "Error obteniendo postulaciones" });
   }
 });
+
 
 // 6. Configuración del Servidor
 const PORT = process.env.PORT || 3000;
