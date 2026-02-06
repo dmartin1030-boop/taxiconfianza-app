@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mis vehículos | TaxiConfianza</title>
+
+  <link rel="stylesheet" href="css/dashboard-theme.css" />
+
+  <style>
+    .table{width:100%; border-collapse:collapse; min-width:760px;}
+    .table th,.table td{padding:12px; border-bottom:1px solid var(--border); text-align:left; font-size:13px; vertical-align:top}
+    .table th{color:var(--muted); font-weight:700}
+
+    .field label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    .input, select, textarea{
+      width:100%;
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding:10px 12px;
+      color: var(--text);
+      outline:none;
+      font-size:13px;
+      box-sizing:border-box;
+    }
+    .actions-row{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap}
+    .danger{background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25)}
+    .muted{color: var(--muted);}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- Sidebar (igual a tu theme) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">TC</div>
+        <div>
+          <h1>TaxiConfianza</h1>
+          <p>Panel Propietario</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Navegación del propietario">
+        <a href="dashboard-propietario.html">
+          <svg class="ico" viewBox="0 0 24 24" fill="none">
+            <path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z"
+              stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          Dashboard
+        </a>
+
+        <a href="publicar-oferta.html">
+          <svg class="ico" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Publicar oferta
+        </a>
+
+        <a class="active" href="mis-vehiculos.html" aria-current="page">
+          <svg class="ico" viewBox="0 0 24 24" fill="none">
+            <path d="M7 16l-2 2m2-2 2 2m-2-2V8m10 8 2 2m-2-2-2 2m2-2V8"
+              stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M6 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Mis vehículos
+        </a>
+      </nav>
+
+      <div class="sep"></div>
+      <button class="btn danger" id="btnLogout" style="width:100%; justify-content:center">Salir</button>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="left">
+          <h2 class="title">Mis vehículos</h2>
+          <p class="subtitle">Crea vehículos para pruebas y selección en “Publicar oferta”.</p>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn primary" id="btnRefresh" type="button">Actualizar</button>
+        </div>
+      </header>
+
+      <section class="grid">
+        <!-- Lista -->
+        <article class="card">
+          <div class="row" style="margin-bottom:10px;">
+            <div class="muted">Total: <strong id="count">0</strong></div>
+            <div class="muted" id="msg"></div>
+          </div>
+
+          <div style="overflow:auto; border-radius: 12px;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Placa</th>
+                  <th>Modelo</th>
+                  <th style="text-align:right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbl">
+                <tr><td colspan="4" class="muted">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Form crear -->
+        <article class="card">
+          <h3>Crear vehículo</h3>
+          <p class="muted">Mínimo requerido: <code>placa</code> y <code>modelo</code>.</p>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Placa</label>
+            <input class="input" id="placa" placeholder="Ej: ABC123" />
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Modelo (texto libre)</label>
+            <input class="input" id="modelo" placeholder="Ej: Chevrolet Spark GT 2020" />
+          </div>
+
+          <div class="actions-row" style="margin-top:12px;">
+            <button class="btn" id="btnClear" type="button">Limpiar</button>
+            <button class="btn primary" id="btnCreate" type="button">Guardar</button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <!-- Si ya los usas en tu proyecto (como en conductor-ofertas), déjalos -->
+  <script src="js/tc-session.js"></script>
+
+  <script>
+    const API = {
+      list: "/api/propietario/vehiculos",
+      create: "/api/propietario/vehiculos",
+      del: (id) => `/api/propietario/vehiculos/${id}`
+    };
+
+    const $ = (s) => document.querySelector(s);
+
+    async function loadVehiculos(){
+      $("#msg").textContent = "Cargando…";
+      const res = await fetch(API.list);
+      const json = await res.json();
+
+      if(!json.ok){
+        $("#tbl").innerHTML = `<tr><td colspan="4" class="muted">No se pudo cargar</td></tr>`;
+        $("#msg").textContent = json.error || "Error";
+        return;
+      }
+
+      const data = json.data || [];
+      $("#count").textContent = data.length;
+
+      if(!data.length){
+        $("#tbl").innerHTML = `<tr><td colspan="4" class="muted">No tienes vehículos aún</td></tr>`;
+        $("#msg").textContent = "";
+        return;
+      }
+
+      $("#tbl").innerHTML = data.map(v => `
+        <tr>
+          <td>${v.id ?? v.vehiculo_id}</td>
+          <td>${(v.placa || "").toString().toUpperCase()}</td>
+          <td>${v.modelo || ""}</td>
+          <td style="text-align:right">
+            <button class="btn danger" data-del="${v.id ?? v.vehiculo_id}" type="button">Eliminar</button>
+          </td>
+        </tr>
+      `).join("");
+
+      $("#msg").textContent = "";
+    }
+
+    async function createVehiculo(){
+      const placa = $("#placa").value.trim().toUpperCase();
+      const modelo = $("#modelo").value.trim();
+
+      if(!placa || !modelo){
+        alert("Debes ingresar placa y modelo");
+        return;
+      }
+
+      const res = await fetch(API.create, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ placa, modelo })
+      });
+
+      const json = await res.json();
+      if(!json.ok){
+        alert(json.error || "Error creando vehículo");
+        return;
+      }
+
+      alert("Vehículo creado ✅");
+      $("#placa").value = "";
+      $("#modelo").value = "";
+      await loadVehiculos();
+    }
+
+    async function deleteVehiculo(id){
+      if(!confirm("¿Eliminar vehículo?")) return;
+
+      const res = await fetch(API.del(id), { method: "DELETE" });
+      const json = await res.json();
+      if(!json.ok){
+        alert(json.error || "No se pudo eliminar");
+        return;
+      }
+      await loadVehiculos();
+    }
+
+    $("#btnRefresh").addEventListener("click", loadVehiculos);
+    $("#btnCreate").addEventListener("click", createVehiculo);
+    $("#btnClear").addEventListener("click", () => { $("#placa").value=""; $("#modelo").value=""; });
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-del]");
+      if(btn) deleteVehiculo(btn.getAttribute("data-del"));
+    });
+
+    loadVehiculos();
+  </script>
+</body>
+</html>
