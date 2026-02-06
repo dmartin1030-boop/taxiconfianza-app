@@ -1,196 +1,211 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
   <title>Postular a oferta | Taxi Confianza</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- TU TEMA -->
-  <link rel="stylesheet" href="/css/dashboard-theme.css" />
+  <!-- Tus estilos -->
+  <link rel="stylesheet" href="css/dashboard-theme.css" />
+  <link rel="stylesheet" href="styles.css" />
 
   <style>
-    /* Ajustes mínimos sin romper tu theme */
-    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
-    .grid { display: grid; gap: 14px; grid-template-columns: 1.2fr .8fr; }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-    .card { padding: 16px; border-radius: 16px; }
-    .muted { opacity: .82; }
-    .field { display: grid; gap: 6px; margin-top: 10px; }
-    textarea { width: 100%; min-height: 110px; resize: vertical; }
-    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .badge { padding: 6px 10px; border-radius: 999px; font-size: 12px; }
-    .ok { display:none; margin-top: 12px; }
-    .err { display:none; margin-top: 12px; }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card-bg, #111);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .alert {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+    }
+    .alert.success { background: #103d1a; color: #7dff9a; }
+    .alert.error { background: #3d1010; color: #ff8a8a; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="row" style="justify-content:space-between; margin-bottom: 14px;">
-      <div>
-        <h1 class="h1">Postular a oferta</h1>
-        <div class="muted">Envía tu postulación con un mensaje breve.</div>
-      </div>
-      <div class="row">
-        <a class="btn btn-ghost" href="/conductor/ofertas.html">Volver</a>
-        <a class="btn btn-ghost" href="/conductor/postulaciones.html">Mis postulaciones</a>
-      </div>
+
+  <div class="container">
+
+    <h1>Postular a oferta</h1>
+    <p class="muted">Completa el formulario para enviar tu postulación.</p>
+
+    <!-- ========================= -->
+    <!-- DETALLE DE LA OFERTA -->
+    <!-- ========================= -->
+    <div class="card" id="ofertaCard">
+      <h2 id="ofertaTitulo">Cargando oferta...</h2>
+      <p id="ofertaDescripcion"></p>
+
+      <p class="muted" id="ofertaMeta"></p>
     </div>
 
-    <div class="grid">
-      <!-- Detalle -->
-      <section class="card panel">
-        <div class="row" style="justify-content:space-between;">
-          <h2 class="h2" id="ofertaTitulo">Cargando oferta...</h2>
-          <span class="badge" id="ofertaEstado">—</span>
-        </div>
+    <!-- ========================= -->
+    <!-- FORMULARIO POSTULACIÓN -->
+    <!-- ========================= -->
+    <div class="card">
 
-        <div class="muted" id="ofertaMeta" style="margin-top:6px;">—</div>
+      <div class="field">
+        <label class="label" for="mensaje">Mensaje para el propietario *</label>
+        <textarea
+          id="mensaje"
+          class="input"
+          maxlength="1500"
+          placeholder="Ej: Tengo experiencia, disponibilidad inmediata, conozco la ciudad..."
+        ></textarea>
+      </div>
 
-        <hr class="sep" style="margin: 14px 0;" />
+      <!-- ✅ INPUT CV -->
+      <div class="field">
+        <label class="label" for="cv_url">Link CV (opcional)</label>
+        <input
+          id="cv_url"
+          class="input"
+          maxlength="255"
+          placeholder="https://drive.google.com/..."
+        />
+      </div>
 
-        <div id="ofertaDetalle" class="muted">
-          Cargando información...
-        </div>
-      </section>
+      <div class="actions">
+        <button id="btnPostular" class="btn btn-primary">
+          Postular
+        </button>
+        <a href="conductor-ofertas.html" class="btn btn-ghost">
+          Volver
+        </a>
+      </div>
 
-      <!-- Form postulación -->
-      <aside class="card panel">
-        <h3 class="h3">Tu postulación</h3>
-
-        <div class="field">
-          <label for="mensaje" class="label">Mensaje al propietario</label>
-          <textarea id="mensaje" class="input" maxlength="500" placeholder="Ej: Estoy disponible hoy, tengo experiencia, puedo iniciar de inmediato..."></textarea>
-          <div class="muted"><span id="contador">0</span>/500</div>
-        </div>
-
-        <div class="row" style="margin-top: 12px;">
-          <button id="btnPostular" class="btn btn-primary">Postular</button>
-          <button id="btnLimpiar" class="btn btn-ghost" type="button">Limpiar</button>
-        </div>
-
-        <div id="okBox" class="ok alert alert-success">✅ Postulación enviada.</div>
-        <div id="errBox" class="err alert alert-danger">❌ Error.</div>
-
-        <div class="muted" style="margin-top: 12px;">
-          Nota: Solo puedes postular una vez por oferta.
-        </div>
-      </aside>
+      <div id="successBox" class="alert success"></div>
+      <div id="errorBox" class="alert error"></div>
     </div>
+
   </div>
 
+  <!-- ========================= -->
+  <!-- JS -->
+  <!-- ========================= -->
   <script>
-    const qs = new URLSearchParams(location.search);
-    const ofertaId = qs.get("id");
+    const params = new URLSearchParams(window.location.search);
+    const ofertaId = params.get("id");
 
     const ofertaTitulo = document.getElementById("ofertaTitulo");
-    const ofertaEstado = document.getElementById("ofertaEstado");
+    const ofertaDescripcion = document.getElementById("ofertaDescripcion");
     const ofertaMeta = document.getElementById("ofertaMeta");
-    const ofertaDetalle = document.getElementById("ofertaDetalle");
 
-    const mensaje = document.getElementById("mensaje");
-    const contador = document.getElementById("contador");
+    const mensajeInput = document.getElementById("mensaje");
+    const cvUrlInput = document.getElementById("cv_url");
+
     const btnPostular = document.getElementById("btnPostular");
-    const btnLimpiar = document.getElementById("btnLimpiar");
-
-    const okBox = document.getElementById("okBox");
-    const errBox = document.getElementById("errBox");
-
-    function showOk(text) {
-      okBox.style.display = "block";
-      okBox.textContent = text || "✅ Listo";
-      errBox.style.display = "none";
-    }
-    function showErr(text) {
-      errBox.style.display = "block";
-      errBox.textContent = text || "❌ Error";
-      okBox.style.display = "none";
-    }
-
-    mensaje.addEventListener("input", () => contador.textContent = String(mensaje.value.length));
-    btnLimpiar.addEventListener("click", () => { mensaje.value = ""; contador.textContent = "0"; });
+    const successBox = document.getElementById("successBox");
+    const errorBox = document.getElementById("errorBox");
 
     if (!ofertaId) {
-      ofertaTitulo.textContent = "Falta el id de la oferta";
-      ofertaDetalle.textContent = "Vuelve a explorar ofertas y entra desde un botón de 'Postular'.";
+      ofertaTitulo.textContent = "Error";
+      ofertaDescripcion.textContent = "No se indicó la oferta.";
       btnPostular.disabled = true;
     } else {
       cargarOferta();
     }
 
+    // =========================
+    // CARGAR OFERTA
+    // =========================
     async function cargarOferta() {
       try {
-        const r = await fetch(`/api/ofertas/${ofertaId}`, { credentials: "include" });
+        const r = await fetch(`/api/ofertas-trabajo/${ofertaId}`, {
+          credentials: "include"
+        });
         const data = await r.json();
-        if (!data.ok) throw new Error(data.error || "No se pudo cargar");
+
+        if (!data.ok) throw new Error(data.error || "No se pudo cargar la oferta");
 
         const o = data.oferta;
 
-        ofertaTitulo.textContent = o.titulo || `Oferta #${o.id}`;
-        ofertaEstado.textContent = (o.estado || "—");
-        ofertaMeta.textContent = [
-          o.ciudad ? `📍 ${o.ciudad}` : null,
-          o.created_at ? `🕒 ${new Date(o.created_at).toLocaleString()}` : null
-        ].filter(Boolean).join(" • ") || "—";
+        ofertaTitulo.textContent = o.titulo;
+        ofertaDescripcion.textContent = o.descripcion || "";
 
-        // Render flexible (si tienes campos distintos, igual no se rompe)
-        ofertaDetalle.innerHTML = `
-          <div><strong>Descripción:</strong> ${escapeHtml(o.descripcion || "—")}</div>
-          <div style="margin-top:8px;"><strong>Pago:</strong> ${escapeHtml(o.pago || o.tarifa || "—")}</div>
-          <div style="margin-top:8px;"><strong>Duración:</strong> ${escapeHtml(o.duracion || "—")}</div>
+        ofertaMeta.textContent = `
+          Ciudad: ${o.ciudad || "-"} ·
+          Turno: ${o.turno || "-"} ·
+          Cuota diaria: ${o.cuota_diaria || "-"}
         `;
-
-        // si no está abierta, bloquea
-        if (String(o.estado || "").toUpperCase() !== "ABIERTA") {
-          btnPostular.disabled = true;
-          showErr("Esta oferta ya no está disponible para postular.");
-        }
-      } catch (e) {
-        console.error(e);
-        ofertaTitulo.textContent = "Error cargando oferta";
-        ofertaDetalle.textContent = "No se pudo obtener la información. Revisa sesión o API.";
+      } catch (err) {
+        ofertaTitulo.textContent = "Error";
+        ofertaDescripcion.textContent = err.message;
         btnPostular.disabled = true;
       }
     }
 
+    // =========================
+    // POSTULAR
+    // =========================
     btnPostular.addEventListener("click", async () => {
-      okBox.style.display = "none";
-      errBox.style.display = "none";
+      successBox.style.display = "none";
+      errorBox.style.display = "none";
+
+      const mensaje = mensajeInput.value.trim();
+      const cv_url = cvUrlInput.value.trim();
+
+      if (!mensaje) {
+        errorBox.textContent = "Debes escribir un mensaje.";
+        errorBox.style.display = "block";
+        return;
+      }
 
       btnPostular.disabled = true;
       btnPostular.textContent = "Enviando...";
 
       try {
-        const r = await fetch(`/api/ofertas/${ofertaId}/postular`, {
+        const r2 = await fetch(`/api/ofertas-trabajo/${ofertaId}/postular`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ mensaje: mensaje.value.trim() })
+          body: JSON.stringify({
+            mensaje,
+            cv_url
+          })
         });
 
-        const data = await r.json();
-        if (!data.ok) throw new Error(data.error || "No se pudo postular");
+        const data2 = await r2.json();
+        if (!data2.ok) throw new Error(data2.error || "Error al postular");
 
-        showOk(data.message || "✅ Postulación enviada");
-        // opcional: redirigir luego de 1s
-        // setTimeout(() => location.href = "/conductor/postulaciones.html", 900);
+        successBox.textContent = "✅ Postulación enviada correctamente (pendiente)";
+        successBox.style.display = "block";
 
-      } catch (e) {
-        console.error(e);
-        showErr(e.message);
+        btnPostular.textContent = "Postulado";
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = "block";
         btnPostular.disabled = false;
-      } finally {
         btnPostular.textContent = "Postular";
-        // Si fue ok, lo dejamos deshabilitado para evitar spam:
-        if (okBox.style.display === "block") btnPostular.disabled = true;
       }
     });
-
-    function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, s => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[s]));
-    }
   </script>
+
 </body>
 </html>
+
