@@ -1,3 +1,5 @@
+console.log("[tc-session] cargando...");
+
 (function () {
   const KEY = "userTaxiConfianza";
 
