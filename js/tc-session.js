@@ -1,41 +1,46 @@
+// js/tc-session.js
 (function () {
   const KEY = "userTaxiConfianza";
-
-  function normalizeRole(role) {
-    return String(role || "").trim().toLowerCase();
-  }
 
   function getUser() {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) return null;
-      const u = JSON.parse(raw);
-      if (!u || !u.email || !u.tipo) return null;
-      return { ...u, tipo: normalizeRole(u.tipo) };
+      return JSON.parse(raw);
     } catch {
       return null;
     }
   }
 
-  function requireRole(role, redirect = "login.html") {
+  function setUser(user) {
+    if (!user) return;
+    localStorage.setItem(KEY, JSON.stringify(user));
+    if (user.email) localStorage.setItem("user_email", user.email);
+    if (user.tipo)  localStorage.setItem("user_tipo", user.tipo);
+  }
+
+  function logout(redirect) {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("user_tipo");
+    if (redirect) window.location.href = redirect;
+  }
+
+  function requireRole(role) {
     const u = getUser();
-    if (!u) {
-      window.location.href = redirect;
-      return null;
-    }
-    const expected = normalizeRole(role);
-    if (normalizeRole(u.tipo) !== expected) {
-      window.location.href = redirect;
+    if (!u || (role && u.tipo !== role)) {
+      alert("Sesión inválida. Inicia sesión nuevamente.");
+      logout("index.html");
       return null;
     }
     return u;
   }
 
-  function logout(redirect = "index.html") {
-    localStorage.removeItem(KEY);
-    window.location.href = redirect;
-  }
-
   window.TC = window.TC || {};
-  window.TC.session = { getUser, requireRole, logout, normalizeRole };
+  window.TC.session = {
+    getUser,
+    setUser,
+    logout,
+    requireRole
+  };
 })();
