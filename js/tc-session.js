@@ -1,3 +1,10 @@
+(function () {
+  const KEY = "userTaxiConfianza";
+
+  function normalizeRole(role) {
+    return String(role || "").trim().toLowerCase();
+  }
+    
 function getUser() {
     try {
       const raw = localStorage.getItem(KEY);
