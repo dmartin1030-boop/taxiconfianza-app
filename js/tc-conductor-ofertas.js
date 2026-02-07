@@ -276,15 +276,25 @@
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    const u = window.TC.session.requireRole("conductor");
-    if (!u) return;
+  const u = window.TC.session.requireRole("conductor");
+  if (!u) return;
 
-    attachUI();
-    try {
-      await loadOffers();
-    } catch (err) {
-      console.error(err);
-      setMsg("❌ Error cargando ofertas: " + err.message);
-    }
-  });
-})();
+  attachUI();
+
+  // ✅ Al entrar: dejar filtros vacíos para mostrar TODO
+  if ($("f-ciudad")) $("f-ciudad").value = "";
+  if ($("f-turno")) $("f-turno").value = "";
+  if ($("f-acuerdo")) $("f-acuerdo").value = "";
+  if ($("f-min")) $("f-min").value = "";
+  if ($("f-max")) $("f-max").value = "999999";
+  if ($("f-order")) $("f-order").value = "recent";
+  if ($("q")) $("q").value = "";
+
+  try {
+    await loadOffers();
+  } catch (err) {
+    console.error(err);
+    setMsg("❌ Error cargando ofertas: " + err.message);
+  }
+});
+
