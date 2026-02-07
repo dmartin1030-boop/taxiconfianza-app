@@ -1,3 +1,4 @@
+console.log("[tc-session] cargando...");
 (function () {
   async function request(path, opts = {}) {
     const user = window.TC?.session?.getUser?.();
