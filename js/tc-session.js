@@ -55,7 +55,7 @@ function getUser() {
 
 
   function logout(redirect = "index.html") {
-    localStorage.removeItem(KEY);
+    localStorage.removeItem("userTaxiConfianza");
     window.location.href = redirect;
   }
 
