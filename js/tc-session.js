@@ -1,30 +1,42 @@
 console.log("[tc-session] cargando...");
 (function () {
-  async function request(path, opts = {}) {
-    const user = window.TC?.session?.getUser?.();
-    const headers = Object.assign(
-      { "Content-Type": "application/json" },
-      opts.headers || {},
-      user ? { "X-User-Email": user.email, "X-User-Tipo": user.tipo } : {}
-    );
-    
-    const fetchOpts = Object.assign({}, opts, { headers });
-    if (
-      fetchOpts.body &&
-      typeof fetchOpts.body === "object" &&
-      !(fetchOpts.body instanceof FormData)
-    ) {
-      fetchOpts.body = JSON.stringify(fetchOpts.body);
-    }
-    const res = await fetch(path, fetchOpts);
-    const data = await res.json().catch(() => ({}));
-    
-    if (!res.ok || data.success === false) {
-      const msg = data.message || data.error || Error HTTP 
-        ${res.status}; throw new Error(msg);
-    }
-    return data;
+  const KEY = "userTaxiConfianza";
+
+  function normalizeRole(role) {
+    return String(role || "").trim().toLowerCase();
   }
+
+  function getUser() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      const u = JSON.parse(raw);
+      if (!u || !u.email || !u.tipo) return null;
+      return { ...u, tipo: normalizeRole(u.tipo) };
+    } catch {
+      return null;
+    }
+  }
+
+  function requireRole(role, redirect = "login.html") {
+    const u = getUser();
+    if (!u) {
+      window.location.href = redirect;
+      return null;
+    }
+    const expected = normalizeRole(role);
+    if (normalizeRole(u.tipo) !== expected) {
+      window.location.href = redirect;
+      return null;
+    }
+    return u;
+  }
+
+  function logout(redirect = "index.html") {
+    localStorage.removeItem(KEY);
+    window.location.href = redirect;
+  }
+
   window.TC = window.TC || {};
-  window.TC.api = { request }; 
+  window.TC.session = { getUser, requireRole, logout, normalizeRole };
 })();
