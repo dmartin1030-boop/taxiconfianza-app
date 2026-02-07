@@ -139,97 +139,124 @@
   <script src="js/tc-session.js"></script>
 
   <script>
-    const API = {
-      list: "/api/propietario/vehiculos",
-      create: "/api/propietario/vehiculos",
-      del: (id) => `/api/propietario/vehiculos/${id}`
+  const API = {
+    list: "/api/propietario/vehiculos",
+    create: "/api/propietario/vehiculos",
+    del: (id) => `/api/propietario/vehiculos/${id}`
+  };
+
+  function authHeaders(){
+    const email = localStorage.getItem("user_email") || localStorage.getItem("email") || "";
+    const tipo  = localStorage.getItem("user_tipo")  || localStorage.getItem("tipo")  || "";
+
+    return {
+      "Content-Type": "application/json",
+      "X-User-Email": email,
+      "X-User-Tipo": tipo
     };
+  }
 
-    const $ = (s) => document.querySelector(s);
+  function requireAuthOrStop(){
+    const email = localStorage.getItem("user_email") || localStorage.getItem("email") || "";
+    const tipo  = localStorage.getItem("user_tipo")  || localStorage.getItem("tipo")  || "";
+    if(!email || !tipo){
+      alert("No hay sesión guardada. Inicia sesión primero.");
+      return false;
+    }
+    return true;
+  }
 
-    async function loadVehiculos(){
-      $("#msg").textContent = "Cargando…";
-      const res = await fetch(API.list);
-      const json = await res.json();
+  const $ = (s) => document.querySelector(s);
 
-      if(!json.ok){
-        $("#tbl").innerHTML = `<tr><td colspan="4" class="muted">No se pudo cargar</td></tr>`;
-        $("#msg").textContent = json.error || "Error";
-        return;
-      }
+  async function loadVehiculos(){
+    if(!requireAuthOrStop()) return;
 
-      const data = json.data || [];
-      $("#count").textContent = data.length;
+    $("#msg").textContent = "Cargando…";
+    const res = await fetch(API.list, { headers: authHeaders() });
+    const json = await res.json();
 
-      if(!data.length){
-        $("#tbl").innerHTML = `<tr><td colspan="4" class="muted">No tienes vehículos aún</td></tr>`;
-        $("#msg").textContent = "";
-        return;
-      }
+    if(!json.ok){
+      $("#tbl").innerHTML = `<tr><td colspan="4" class="muted">No se pudo cargar</td></tr>`;
+      $("#msg").textContent = json.error || "Error";
+      return;
+    }
 
-      $("#tbl").innerHTML = data.map(v => `
-        <tr>
-          <td>${v.id ?? v.vehiculo_id}</td>
-          <td>${(v.placa || "").toString().toUpperCase()}</td>
-          <td>${v.modelo || ""}</td>
-          <td style="text-align:right">
-            <button class="btn danger" data-del="${v.id ?? v.vehiculo_id}" type="button">Eliminar</button>
-          </td>
-        </tr>
-      `).join("");
+    const data = json.data || [];
+    $("#count").textContent = data.length;
 
+    if(!data.length){
+      $("#tbl").innerHTML = `<tr><td colspan="4" class="muted">No tienes vehículos aún</td></tr>`;
       $("#msg").textContent = "";
+      return;
     }
 
-    async function createVehiculo(){
-      const placa = $("#placa").value.trim().toUpperCase();
-      const modelo = $("#modelo").value.trim();
+    $("#tbl").innerHTML = data.map(v => `
+      <tr>
+        <td>${v.id ?? v.vehiculo_id}</td>
+        <td>${(v.placa || "").toString().toUpperCase()}</td>
+        <td>${v.modelo || ""}</td>
+        <td style="text-align:right">
+          <button class="btn danger" data-del="${v.id ?? v.vehiculo_id}" type="button">Eliminar</button>
+        </td>
+      </tr>
+    `).join("");
 
-      if(!placa || !modelo){
-        alert("Debes ingresar placa y modelo");
-        return;
-      }
+    $("#msg").textContent = "";
+  }
 
-      const res = await fetch(API.create, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ placa, modelo })
-      });
+  async function createVehiculo(){
+    if(!requireAuthOrStop()) return;
 
-      const json = await res.json();
-      if(!json.ok){
-        alert(json.error || "Error creando vehículo");
-        return;
-      }
+    const placa = $("#placa").value.trim().toUpperCase();
+    const modelo = $("#modelo").value.trim();
 
-      alert("Vehículo creado ✅");
-      $("#placa").value = "";
-      $("#modelo").value = "";
-      await loadVehiculos();
+    if(!placa || !modelo){
+      alert("Debes ingresar placa y modelo");
+      return;
     }
 
-    async function deleteVehiculo(id){
-      if(!confirm("¿Eliminar vehículo?")) return;
-
-      const res = await fetch(API.del(id), { method: "DELETE" });
-      const json = await res.json();
-      if(!json.ok){
-        alert(json.error || "No se pudo eliminar");
-        return;
-      }
-      await loadVehiculos();
-    }
-
-    $("#btnRefresh").addEventListener("click", loadVehiculos);
-    $("#btnCreate").addEventListener("click", createVehiculo);
-    $("#btnClear").addEventListener("click", () => { $("#placa").value=""; $("#modelo").value=""; });
-
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-del]");
-      if(btn) deleteVehiculo(btn.getAttribute("data-del"));
+    const res = await fetch(API.create, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ placa, modelo })
     });
 
-    loadVehiculos();
-  </script>
+    const json = await res.json();
+    if(!json.ok){
+      alert(json.error || "Error creando vehículo");
+      return;
+    }
+
+    alert("Vehículo creado ✅");
+    $("#placa").value = "";
+    $("#modelo").value = "";
+    await loadVehiculos();
+  }
+
+  async function deleteVehiculo(id){
+    if(!requireAuthOrStop()) return;
+
+    if(!confirm("¿Eliminar vehículo?")) return;
+
+    const res = await fetch(API.del(id), { method: "DELETE", headers: authHeaders() });
+    const json = await res.json();
+    if(!json.ok){
+      alert(json.error || "No se pudo eliminar");
+      return;
+    }
+    await loadVehiculos();
+  }
+
+  $("#btnRefresh").addEventListener("click", loadVehiculos);
+  $("#btnCreate").addEventListener("click", createVehiculo);
+  $("#btnClear").addEventListener("click", () => { $("#placa").value=""; $("#modelo").value=""; });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-del]");
+    if(btn) deleteVehiculo(btn.getAttribute("data-del"));
+  });
+
+  loadVehiculos();
+</script>
 </body>
 </html>
