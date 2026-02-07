@@ -36,19 +36,23 @@ function getUser() {
 }
 
 
-  function requireRole(role, redirect = "login.html") {
-    const u = getUser();
-    if (!u) {
-      window.location.href = redirect;
-      return null;
-    }
-    const expected = normalizeRole(role);
-    if (normalizeRole(u.tipo) !== expected) {
-      window.location.href = redirect;
-      return null;
-    }
-    return u;
+  function requireRole(role) {
+  const u = getUser();
+
+  if (!u) {
+    alert("Sesión inválida. Inicia sesión nuevamente.");
+    // No hacemos redirect inmediato acá (evita loops raros)
+    return null;
   }
+
+  if (role && String(u.tipo || "").toLowerCase() !== String(role).toLowerCase()) {
+    alert("No tienes permisos para entrar aquí.");
+    return null;
+  }
+
+  return u;
+}
+
 
   function logout(redirect = "index.html") {
     localStorage.removeItem(KEY);
