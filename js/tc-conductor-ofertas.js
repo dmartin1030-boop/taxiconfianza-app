@@ -278,6 +278,7 @@
   document.addEventListener("DOMContentLoaded", async () => {
   const u = window.TC.session.requireRole("conductor");
   if (!u) return;
+  };
 
   attachUI();
 
@@ -294,4 +295,5 @@
     await loadOffers();
   } catch (err) {
     console.error(err);
-    setMsg("❌ Error cargando ofertas: " + err.message);}
+    setMsg("❌ Error cargando ofertas: " + err.message);
+  };
