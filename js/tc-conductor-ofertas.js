@@ -294,5 +294,4 @@
     await loadOffers();
   } catch (err) {
     console.error(err);
-    setMsg("❌ Error cargando ofertas: " + err.message);
- }
+    setMsg("❌ Error cargando ofertas: " + err.message);}
