@@ -278,7 +278,8 @@
   document.addEventListener("DOMContentLoaded", async () => {
   const u = window.TC.session.requireRole("conductor");
   if (!u) return;
-  };
+});
+
 
   attachUI();
 
