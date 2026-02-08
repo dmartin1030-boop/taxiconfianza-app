@@ -734,47 +734,6 @@ app.patch("/api/propietario/asignaciones/:id/finalizar", requireUser, async (req
   }
 });
 // =====================================================
-// CONDUCTOR: OFERTAS ACTIVAS (para tc-conductor-ofertas.js)
-// Respuesta: { ok:true, data:[...] }
-// NOTA: lo dejo SIN requireUser para que no falle por headers.
-// =====================================================
-app.get("/api/ofertas/activas", async (req, res) => {
-  try {
-    const rows = await q(
-      `
-      SELECT
-        o.id,
-        o.titulo,
-        o.descripcion,
-        o.ciudad,
-        o.turno,
-        o.cuota_diaria,
-        o.porcentaje_propietario,
-        o.requisitos,
-        o.estado,
-        v.placa AS vehiculo,
-        up.nombres AS propietario_nombres,
-        up.apellidos AS propietario_apellidos
-      FROM ofertas_trabajo o
-      LEFT JOIN vehiculos v ON v.id = o.vehiculo_id
-      LEFT JOIN perfiles_propietarios pp ON pp.id = o.propietario_id
-      LEFT JOIN usuarios up ON up.id = pp.usuario_id
-      WHERE o.estado = 'activa'
-        AND (o.bloqueada IS NULL OR o.bloqueada = 0)
-        AND o.deleted_at IS NULL
-      ORDER BY o.fecha_creacion DESC
-      LIMIT 200
-      `
-    );
-
-    res.json({ ok: true, data: rows || [] });
-  } catch (err) {
-    console.error("GET /api/ofertas/activas", err);
-    res.status(500).json({ ok: false, message: err.message || "Error listando ofertas" });
-  }
-});
-
-// =====================================================
 // DASHBOARD CONDUCTOR + OFERTAS
 // =====================================================
 app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
@@ -821,7 +780,46 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
     res.status(500).json({ success: false, message: err.message || "Error dashboard conductor" });
   }
 });
+// =====================================================
+// CONDUCTOR: OFERTAS ACTIVAS (para tc-conductor-ofertas.js)
+// Respuesta: { ok:true, data:[...] }
+// NOTA: lo dejo SIN requireUser para que no falle por headers.
+// =====================================================
+app.get("/api/ofertas/activas", async (req, res) => {
+  try {
+    const rows = await q(
+      `
+      SELECT
+        o.id,
+        o.titulo,
+        o.descripcion,
+        o.ciudad,
+        o.turno,
+        o.cuota_diaria,
+        o.porcentaje_propietario,
+        o.requisitos,
+        o.estado,
+        v.placa AS vehiculo,
+        up.nombres AS propietario_nombres,
+        up.apellidos AS propietario_apellidos
+      FROM ofertas_trabajo o
+      LEFT JOIN vehiculos v ON v.id = o.vehiculo_id
+      LEFT JOIN perfiles_propietarios pp ON pp.id = o.propietario_id
+      LEFT JOIN usuarios up ON up.id = pp.usuario_id
+      WHERE o.estado = 'activa'
+        AND (o.bloqueada IS NULL OR o.bloqueada = 0)
+        AND o.deleted_at IS NULL
+      ORDER BY o.fecha_creacion DESC
+      LIMIT 200
+      `
+    );
 
+    res.json({ ok: true, data: rows || [] });
+  } catch (err) {
+    console.error("GET /api/ofertas/activas", err);
+    res.status(500).json({ ok: false, message: err.message || "Error listando ofertas" });
+  }
+});
 // GET /api/conductor/ofertas?ciudad=&turno=&q=
 app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
   try {
