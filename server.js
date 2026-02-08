@@ -5,6 +5,12 @@ const path = require("path");
 const app = express();
 
 // ==============================
+// Logs de errores fatales (Railway)
+// ==============================
+process.on("unhandledRejection", (err) => console.error("unhandledRejection:", err));
+process.on("uncaughtException", (err) => console.error("uncaughtException:", err));
+
+// ==============================
 // Middleware
 // ==============================
 app.use(express.json());
