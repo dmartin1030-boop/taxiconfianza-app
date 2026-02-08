@@ -15,6 +15,10 @@ process.on("uncaughtException", (err) => console.error("uncaughtException:", err
 // ==============================
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "/")));
+// ==============================
+// Healthcheck (Railway)
+// ==============================
+app.get("/health", (req, res) => res.status(200).send("ok"));
 
 // ==============================
 // DB Pool (Hostinger/Railway)
