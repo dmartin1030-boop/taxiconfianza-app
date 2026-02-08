@@ -275,13 +275,12 @@
     });
   }
 
+  // Mover attachUI dentro del DOMContentLoaded para asegurar que el DOM esté listo
   document.addEventListener("DOMContentLoaded", async () => {
-  const u = window.TC.session.requireRole("conductor");
-  if (!u) return;
-});
-
-
-  attachUI();
+    const u = window.TC.session.requireRole("conductor");
+    if (!u) return;
+    attachUI();  // Llamar aquí para que los elementos existan
+  });
 
   // ✅ Al entrar: dejar filtros vacíos para mostrar TODO
   if ($("f-ciudad")) $("f-ciudad").value = "";
@@ -297,4 +296,5 @@
   } catch (err) {
     console.error(err);
     setMsg("❌ Error cargando ofertas: " + err.message);
-  };
+  }  // Corregido: sin punto y coma extra
+})();
