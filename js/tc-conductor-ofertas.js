@@ -296,6 +296,3 @@
     console.error(err);
     setMsg("❌ Error cargando ofertas: " + err.message);
  }
-
-
-
