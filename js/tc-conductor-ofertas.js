@@ -30,7 +30,7 @@ console.log("[tc-conductor-ofertas] cargando...");
   let ofertasView = [];     // lo que se muestra tras filtros
 
   // --------- DOM refs (si no existen, no rompe) ----------
-  const tbody = () => $("#tblOfertas tbody");
+  const tbody = () => $("#offersTable");
 
   const inpBuscar   = () => $("#inpBuscar");
   const fCiudad     = () => $("#fCiudad");
