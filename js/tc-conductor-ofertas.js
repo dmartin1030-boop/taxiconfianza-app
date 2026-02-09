@@ -32,11 +32,12 @@ console.log("[tc-conductor-ofertas] cargando...");
   // --------- DOM refs (si no existen, no rompe) ----------
   const tbody = () => $("#offersTable");
 
-  const inpBuscar   = () => $("#inpBuscar");
-  const fCiudad     = () => $("#fCiudad");
-  const fTurno      = () => $("#fTurno");
-  const fCuotaMin   = () => $("#fCuotaMin");
-  const btnActualizar = () => $("#btnActualizar");
+const inpBuscar     = () => $("#inpBuscar") || $("#q");
+const fCiudad       = () => $("#fCiudad") || $("#f-ciudad");
+const fTurno        = () => $("#fTurno") || $("#f-turno");
+const fCuotaMin     = () => $("#fCuotaMin") || $("#f-min");
+const btnActualizar = () => $("#btnActualizar") || $("#btnRefresh");
+
 
   // --------- Init ----------
   document.addEventListener("DOMContentLoaded", async () => {
