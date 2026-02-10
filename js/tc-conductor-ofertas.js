@@ -38,6 +38,43 @@ const fTurno        = () => $("#fTurno") || $("#f-turno");
 const fCuotaMin     = () => $("#fCuotaMin") || $("#f-min");
 const btnActualizar = () => $("#btnActualizar") || $("#btnRefresh");
 
+  let ofertaSeleccionadaId = null;
+
+function openModalPostular(ofertaId) {
+  ofertaSeleccionadaId = ofertaId;
+
+  const modal = document.querySelector("#modalPostular");
+  const cv = document.querySelector("#mpCvUrl");
+  const msg = document.querySelector("#mpMensaje");
+  const alert = document.querySelector("#mpAlert");
+
+  if (alert) { alert.style.display = "none"; alert.textContent = ""; }
+  if (cv) cv.value = "";
+  if (msg) msg.value = "";
+
+  if (modal) {
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    setTimeout(() => cv && cv.focus(), 50);
+  }
+}
+
+function closeModalPostular() {
+  const modal = document.querySelector("#modalPostular");
+  if (modal) {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+  }
+  ofertaSeleccionadaId = null;
+}
+
+function showMpAlert(msg) {
+  const alert = document.querySelector("#mpAlert");
+  if (!alert) return;
+  alert.textContent = msg;
+  alert.style.display = "block";
+}
+
 
   // --------- Init ----------
   document.addEventListener("DOMContentLoaded", async () => {
