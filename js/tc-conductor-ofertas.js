@@ -198,8 +198,9 @@ const btnActualizar = () => $("#btnActualizar") || $("#btnRefresh");
             <td>${estado}</td>
             <td>
               <button class="btn btn-sm" data-action="postular" data-id="${safeText(o.id)}">
-                Postular
-              </button>
+  Postular
+</button>
+
             </td>
           </tr>
         `;
