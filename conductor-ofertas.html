@@ -274,5 +274,35 @@
   <script src="js/tc-session.js"></script>
   <script src="js/tc-api.js"></script>
   <script src="js/tc-conductor-ofertas.js"></script>
+  <!-- Modal Postular -->
+<div class="tc-modal" id="modalPostular" aria-hidden="true">
+  <div class="tc-modal__backdrop" data-close="1"></div>
+
+  <div class="tc-modal__card" role="dialog" aria-modal="true" aria-labelledby="mp-title">
+    <div class="tc-modal__head">
+      <h3 id="mp-title">Postular a oferta</h3>
+      <button class="btn btn-sm" id="mpClose" type="button">✕</button>
+    </div>
+
+    <div class="tc-modal__body">
+      <p style="opacity:.85; margin:0 0 10px 0;">
+        Pega el enlace de tu CV (Drive/OneDrive/Dropbox) con permisos de lectura.
+      </p>
+
+      <label style="display:block; font-size:.9em; margin:8px 0 6px;">Link del CV</label>
+      <input class="tc-input" id="mpCvUrl" type="url" placeholder="https://..." autocomplete="off" />
+
+      <label style="display:block; font-size:.9em; margin:12px 0 6px;">Mensaje (opcional)</label>
+      <textarea class="tc-input" id="mpMensaje" rows="3" placeholder="Escribe un mensaje breve..."></textarea>
+
+      <div class="tc-alert" id="mpAlert" style="display:none;"></div>
+    </div>
+
+    <div class="tc-modal__foot">
+      <button class="btn btn-sm" id="mpCancel" type="button">Cancelar</button>
+      <button class="btn btn-sm" id="mpSubmit" type="button">Confirmar postulación</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
