@@ -943,7 +943,28 @@ app.post("/api/conductor/ofertas/:id/postular", requireUser, async (req, res) =>
     res.status(500).json({ success: false, message: err.message || "Error postulando" });
   }
 });
+// =====================================
+// SESION: devolver usuario actual con ID
+// GET /api/session/me?email=...
+// =====================================
+app.get("/api/session/me", (req, res) => {
+  const email = (req.query.email || "").toString().trim().toLowerCase();
+  if (!email) return res.status(400).json({ ok: false, error: "Falta email" });
 
+  const q = `
+    SELECT id, email, tipo, nombres, apellidos
+    FROM usuarios
+    WHERE LOWER(email) = ?
+    LIMIT 1
+  `;
+
+  db.query(q, [email], (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, error: "DB", detail: err.message });
+    if (!rows || rows.length === 0) return res.status(404).json({ ok: false, error: "Usuario no encontrado" });
+
+    return res.json({ ok: true, user: rows[0] });
+  });
+});
 // ==============================
 // Server listen
 // ==============================
