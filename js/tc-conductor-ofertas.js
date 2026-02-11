@@ -264,5 +264,66 @@ function showMpAlert(msg) {
     return;
   }
 });
-  
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+
+  if (t?.id === "mpClose" || t?.id === "mpCancel" || t?.dataset?.close === "1") {
+    closeModalPostular();
+    return;
+  }
+
+  if (t?.id === "mpSubmit") {
+    try {
+      if (!ofertaSeleccionadaId) return showMpAlert("No hay oferta seleccionada.");
+
+      // conductor_id: debe existir del login
+      const conductorId = Number(localStorage.getItem("tc_usuario_id"));
+      if (!Number.isFinite(conductorId) || conductorId <= 0) {
+        return showMpAlert("No se detectó el usuario. Inicia sesión nuevamente.");
+      }
+
+      const cv_url = (document.querySelector("#mpCvUrl")?.value || "").trim();
+      const mensaje = (document.querySelector("#mpMensaje")?.value || "").trim();
+
+      // cv_url en tu tabla puede ser NULL, pero como el modal lo pide, lo validamos:
+      if (cv_url.length < 5) return showMpAlert("Pega el link de tu CV.");
+      if (!/^https?:\/\//i.test(cv_url)) return showMpAlert("El link debe iniciar por http:// o https://");
+
+      t.disabled = true;
+      t.textContent = "Enviando...";
+
+      const resp = await fetch(`/api/conductor/ofertas/${ofertaSeleccionadaId}/postular`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conductor_id: conductorId, cv_url, mensaje })
+      });
+
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok) {
+        showMpAlert(data?.error || "No se pudo postular.");
+        return;
+      }
+
+      closeModalPostular();
+
+      // ✅ refrescar lista
+      if (typeof cargarOfertas === "function") {
+        await cargarOfertas();
+      } else {
+        location.reload();
+      }
+
+    } catch (err) {
+      console.error(err);
+      showMpAlert("Error inesperado al postular.");
+    } finally {
+      const btn = document.querySelector("#mpSubmit");
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Confirmar postulación";
+      }
+    }
+  }
+});  
 })();
