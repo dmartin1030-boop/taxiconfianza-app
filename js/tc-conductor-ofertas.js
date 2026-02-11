@@ -244,4 +244,25 @@ function showMpAlert(msg) {
       })
       .join("");
   }
+  document.addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+
+  const action = el.getAttribute("data-action");
+
+  // 1) Click en Postular (desde la tabla)
+  if (action === "postular") {
+    const ofertaId = Number(el.getAttribute("data-id"));
+    if (!Number.isFinite(ofertaId) || ofertaId <= 0) return;
+    openModalPostular(ofertaId);
+    return;
+  }
+
+  // Cerrar modal
+  if (el.id === "mpClose" || el.id === "mpCancel" || el.dataset.close === "1") {
+    closeModalPostular();
+    return;
+  }
+});
+  
 })();
