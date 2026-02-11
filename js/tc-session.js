@@ -31,6 +31,42 @@ console.log("[tc-session] cargando...");
     console.log("[tc-session] getUser: NO hay sesión");
     return null;
   }
+// =====================================
+// Asegurar tc_usuario_id (traerlo del backend)
+// =====================================
+async function ensureUserId() {
+  // 1) intenta leer usuario de userTaxiConfianza
+  let u = null;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) u = JSON.parse(raw);
+  } catch (_) {}
+
+  // 2) o desde user_email
+  const email = (u?.email || localStorage.getItem("user_email") || "").toString().trim().toLowerCase();
+  if (!email) return;
+
+  // Si ya existe, no hace nada
+  const existing = Number(localStorage.getItem("tc_usuario_id"));
+  if (Number.isFinite(existing) && existing > 0) return;
+
+  try {
+    const resp = await fetch(`/api/session/me?email=${encodeURIComponent(email)}`);
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data?.ok) return;
+
+    const id = Number(data.user?.id);
+    if (Number.isFinite(id) && id > 0) {
+      localStorage.setItem("tc_usuario_id", String(id));
+      console.log("[tc-session] tc_usuario_id seteado:", id);
+    }
+  } catch (e) {
+    console.warn("[tc-session] ensureUserId error:", e);
+  }
+}
+
+// Ejecutar al cargar cualquier página
+ensureUserId();
 
   function requireRole(role) {
     const u = getUser();
