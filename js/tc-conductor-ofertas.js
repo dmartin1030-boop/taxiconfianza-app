@@ -129,8 +129,9 @@ function showMpAlert(msg) {
 
   const modal = document.getElementById("modalPostular");
   if (modal) modal.classList.add("show");
-}
-
+     }
+    });
+  }
   // --------- API ----------
   async function cargarOfertas() {
     const tb = tbody();
