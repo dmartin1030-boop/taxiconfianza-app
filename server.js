@@ -199,7 +199,7 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  const query = "SELECT nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password = ?";
+const query = "SELECT id, nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password = ?";
 
   db.query(query, [email, password], (err, results) => {
     if (err) {
