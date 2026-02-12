@@ -36,6 +36,15 @@ app.use(session({
 }));
 
 
+app.get("/api/debug/session", (req, res) => {
+  res.json({
+    ok: true,
+    hasSession: !!req.session,
+    sessionId: req.sessionID || null,
+    user: req.session?.user || null,
+  });
+});
+
 // ==============================
 // Healthcheck (Railway)
 // ==============================
