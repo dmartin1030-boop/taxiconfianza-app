@@ -73,8 +73,9 @@ function showMpAlert(msg) {
   if (!alert) return;
   alert.textContent = msg;
   alert.style.display = "block";
+  }
+ });
 }
-
 
   // --------- Init ----------
   document.addEventListener("DOMContentLoaded", async () => {
