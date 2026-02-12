@@ -146,7 +146,7 @@ async function ensurePerfilConductor(usuarioId) {
 // Rutas HTML
 // ==============================
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
-app.get("/.html", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+app.get("/login.html", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
 app.get("/register.html", (req, res) => res.sendFile(path.join(__dirname, "register.html")));
 
 app.get("/dashboard-propietario.html", (req, res) =>
