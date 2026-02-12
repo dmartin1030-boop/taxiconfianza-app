@@ -209,6 +209,13 @@ const query = "SELECT id, nombres, apellidos, email, tipo FROM usuarios WHERE em
 
     if (results.length > 0) {
       const user = results[0];
+      // ✅ Guardar sesión (para rutas protegidas)
+req.session.user = {
+  id: user.id,
+  email: user.email,
+  tipo: String(user.tipo || "").toLowerCase(),
+};
+
       res.json({
         success: true,
         user: {
