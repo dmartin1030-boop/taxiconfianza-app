@@ -277,7 +277,8 @@ document.addEventListener("click", async (e) => {
       if (!ofertaSeleccionadaId) return showMpAlert("No hay oferta seleccionada.");
 
       // conductor_id: debe existir del login
-      const conductorId = Number(localStorage.getItem("tc_usuario_id"));
+      const u = (window.getUser && window.getUser()) || null;
+      const conductorId = Number(localStorage.getItem("tc_usuario_id") || u?.id);
       if (!Number.isFinite(conductorId) || conductorId <= 0) {
         return showMpAlert("No se detectó el usuario. Inicia sesión nuevamente.");
       }
