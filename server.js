@@ -26,12 +26,15 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "tc_secret_dev",
   resave: false,
   saveUninitialized: false,
+  name: "tc_sid",
   cookie: {
     httpOnly: true,
     sameSite: "lax",
-    secure: true, // Railway es HTTPS
+    secure: "auto",   // ✅ detecta https con trust proxy
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 días
   }
 }));
+
 
 // ==============================
 // Healthcheck (Railway)
