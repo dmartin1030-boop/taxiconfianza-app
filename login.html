@@ -41,11 +41,12 @@
     const password = document.getElementById('loginPassword').value;
 
     try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const response = await fetch("/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include", // ✅ AQUÍ VA
+  body: JSON.stringify({ email, password })
+});
 
       const result = await response.json();
 
@@ -77,4 +78,5 @@
 
 </body>
 </html>
+
 
