@@ -5,6 +5,8 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
 const app = express();
+// ✅ Railway / proxies: permitir cookies secure detrás de proxy
+app.set("trust proxy", 1);
 
 // ==============================
 // Logs de errores fatales (Railway)
@@ -141,7 +143,7 @@ async function ensurePerfilConductor(usuarioId) {
 // Rutas HTML
 // ==============================
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
-app.get("/login.html", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+app.get("/.html", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
 app.get("/register.html", (req, res) => res.sendFile(path.join(__dirname, "register.html")));
 
 app.get("/dashboard-propietario.html", (req, res) =>
