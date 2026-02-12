@@ -17,6 +17,20 @@ process.on("uncaughtException", (err) => console.error("uncaughtException:", err
 // ==============================
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "/")));
+// Cookies + Sesión
+app.use(cookieParser());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || "tc_secret_dev",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true, // Railway es HTTPS
+  }
+}));
+
 // ==============================
 // Healthcheck (Railway)
 // ==============================
