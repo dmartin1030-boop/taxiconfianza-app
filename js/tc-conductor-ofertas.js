@@ -124,12 +124,13 @@ function showMpAlert(msg) {
       const id = btn.getAttribute("data-id");
 
       if (action === "postular") {
-        // Placeholder: luego conectamos a /api/postulaciones
-        console.log("[tc-conductor-ofertas] postular a oferta", id);
-        alert("Función Postular: pendiente de conectar (ya está el botón listo).");
-      }
-    });
-  }
+  console.log("[tc-conductor-ofertas] postular a oferta", id);
+
+  ofertaSeleccionadaId = Number(id);
+
+  const modal = document.getElementById("modalPostular");
+  if (modal) modal.classList.add("show");
+}
 
   // --------- API ----------
   async function cargarOfertas() {
