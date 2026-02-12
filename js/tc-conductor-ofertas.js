@@ -294,10 +294,11 @@ document.addEventListener("click", async (e) => {
       t.textContent = "Enviando...";
 
       const resp = await fetch(`/api/conductor/ofertas/${ofertaSeleccionadaId}/postular`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conductor_id: conductorId, cv_url, mensaje })
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include", // ✅ ESTO ENVÍA LA COOKIE DE SESIÓN
+  body: JSON.stringify({ conductor_id: conductorId, cv_url, mensaje })
+});
 
       const data = await resp.json().catch(() => ({}));
 
