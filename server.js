@@ -104,6 +104,16 @@ function tipoLower(t) {
 //   X-User-Tipo: propietario | conductor
 // ==============================
 function requireUser(req, res, next) {
+  // ✅ 1) Primero: aceptar sesión (express-session)
+  if (req.session?.user?.email && req.session?.user?.tipo) {
+    req.tcAuth = {
+      email: String(req.session.user.email).trim().toLowerCase(),
+      tipo: String(req.session.user.tipo).trim().toLowerCase(),
+    };
+    return next();
+  }
+
+  // ✅ 2) Si no hay sesión, usar headers (modo antiguo)
   const email = (req.headers["x-user-email"] || "").toString().trim().toLowerCase();
   const tipo = (req.headers["x-user-tipo"] || "").toString().trim().toLowerCase();
 
