@@ -162,16 +162,19 @@ const r = await fetch("/api/conductor/ofertas", {
       console.log("[tc-conductor-ofertas] status", r.status);
       const j = await r.json().catch(() => null);
 
-      if (!r.ok) {
-        throw new Error((j && j.message) ? j.message : `HTTP ${r.status}`);
-      }
+if (!r.ok) {
+  throw new Error((j && (j.message || j.error)) ? (j.message || j.error) : `HTTP ${r.status}`);
+}
 
-      if (!j || j.ok !== true) {
-        throw new Error((j && j.message) ? j.message : "Respuesta inválida del servidor");
-      }
+// ✅ aceptar ambos formatos: {success:true} o {ok:true}
+const okFlag = (j?.ok === true) || (j?.success === true);
+if (!okFlag) {
+  throw new Error(j?.message || j?.error || "Respuesta inválida del servidor");
+}
 
-      ofertasAll = Array.isArray(j.ofertas) ? j.ofertas : [];
-      aplicarFiltrosYRender();
+// ✅ aceptar ambos formatos de data: {ofertas:[...]} o {data:[...]}
+ofertasAll = Array.isArray(j?.ofertas) ? j.ofertas : (Array.isArray(j?.data) ? j.data : []);
+aplicarFiltrosYRender();
     } catch (err) {
       console.error("[tc-conductor-ofertas] Error cargando ofertas:", err);
       tb.innerHTML = `<tr><td colspan="6">Error cargando ofertas</td></tr>`;
