@@ -163,7 +163,7 @@ const r = await fetch("/api/conductor/ofertas", {
         throw new Error((j && j.message) ? j.message : "Respuesta inválida del servidor");
       }
 
-      ofertasAll = Array.isArray(j.data) ? j.data : [];
+      ofertasAll = Array.isArray(j.ofertas) ? j.ofertas : [];
       aplicarFiltrosYRender();
     } catch (err) {
       console.error("[tc-conductor-ofertas] Error cargando ofertas:", err);
