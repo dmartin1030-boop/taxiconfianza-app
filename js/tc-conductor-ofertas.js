@@ -144,10 +144,13 @@ function showMpAlert(msg) {
     setChipText("#chipEncontradas", "0");
 
     try {
-      console.log("[tc-conductor-ofertas] GET /api/ofertas/activas");
-      const r = await fetch("/api/ofertas/activas", {
-        headers: { "Accept": "application/json" },
-      });
+      console.log("[tc-conductor-ofertas] GET /api/conductor/ofertas");
+
+const r = await fetch("/api/conductor/ofertas", {
+  headers: { "Accept": "application/json" },
+  credentials: "include"  // 🔥 importante para sesión
+});
+
 
       console.log("[tc-conductor-ofertas] status", r.status);
       const j = await r.json().catch(() => null);
