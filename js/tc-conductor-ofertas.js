@@ -149,8 +149,13 @@ function showMpAlert(msg) {
       console.log("[tc-conductor-ofertas] GET /api/conductor/ofertas");
 
 const r = await fetch("/api/conductor/ofertas", {
-  headers: { "Accept": "application/json" },
-  credentials: "include"  // 🔥 importante para sesión
+  headers: {
+    "Accept": "application/json",
+    // ✅ fallback para tu requireUser si sigue pidiendo headers
+    "X-User-Email": (currentUser?.email || "").toString(),
+    "X-User-Tipo": (currentUser?.tipo || "conductor").toString(),
+  },
+  credentials: "include",
 });
 
 
