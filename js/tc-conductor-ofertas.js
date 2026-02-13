@@ -219,34 +219,42 @@ const r = await fetch("/api/conductor/ofertas", {
     }
 
     tb.innerHTML = ofertasView
-      .map((o) => {
-        const propietario = `${safeText(o.propietario_nombres) || "—"} ${safeText(o.propietario_apellidos)}`.trim();
-        const vehiculo = safeText(o.vehiculo) || "—";
-        const estado = safeText(o.estado) || "—";
+  .map((o) => {
+    const propietario = `${safeText(o.propietario_nombres) || ""} ${safeText(o.propietario_apellidos)}`.trim() || "—";
+    const vehiculo = safeText(o.vehiculo) || safeText(o.placa) || "—";
+    const estado = safeText(o.estado) || "—";
 
-        return `
-          <tr>
-            <td>
-              <div style="font-weight:600">${safeText(o.titulo) || "—"}</div>
-              <div style="opacity:.85; font-size:.9em">${safeText(o.ciudad) ? safeText(o.ciudad) : ""}</div>
-            </td>
-            <td>
-              <div>${safeText(o.turno) || "—"}</div>
-              <div style="opacity:.85; font-size:.9em">Cuota: ${money(o.cuota_diaria)}</div>
-            </td>
-            <td>${vehiculo}</td>
-            <td>${propietario}</td>
-            <td>${estado}</td>
-            <td>
-              <button class="btn btn-sm" data-action="postular" data-id="${safeText(o.id)}">
-  Postular
-</button>
+    // ✅ nuevo: estado de mi postulación (viene de /api/conductor/ofertas)
+    const miEstado = safeText(o.mi_postulacion_estado); // ej: "pendiente" | "preseleccionado" | ...
+    const yaPostulado = !!miEstado;
 
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
+    const btnHtml = yaPostulado
+      ? `<button class="btn btn-sm" disabled style="opacity:.7; cursor:not-allowed">
+           ${miEstado === "pendiente" ? "Pendiente" : miEstado}
+         </button>`
+      : `<button class="btn btn-sm" data-action="postular" data-id="${safeText(o.id)}">
+           Postular
+         </button>`;
+
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:600">${safeText(o.titulo) || "—"}</div>
+          <div style="opacity:.85; font-size:.9em">${safeText(o.ciudad) ? safeText(o.ciudad) : ""}</div>
+        </td>
+        <td>
+          <div>${safeText(o.turno) || "—"}</div>
+          <div style="opacity:.85; font-size:.9em">Cuota: ${money(o.cuota_diaria)}</div>
+        </td>
+        <td>${vehiculo}</td>
+        <td>${propietario}</td>
+        <td>${estado}</td>
+        <td>${btnHtml}</td>
+      </tr>
+    `;
+  })
+  .join("");
+
   }
   document.addEventListener("click", async (e) => {
   const el = e.target.closest("[data-action]");
