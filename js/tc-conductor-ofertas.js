@@ -25,10 +25,11 @@ console.log("[tc-conductor-ofertas] cargando...");
     if (el) el.textContent = text;
   }
 
+  
   // --------- State ----------
   let ofertasAll = [];      // lo que viene del backend
   let ofertasView = [];     // lo que se muestra tras filtros
-
+  let currentUser = null;
   // --------- DOM refs (si no existen, no rompe) ----------
   const tbody = () => $("#offersTable");
 
@@ -80,7 +81,8 @@ function showMpAlert(msg) {
     // 1) validar sesión y rol
     const u = window.TC?.session?.requireRole("conductor");
     if (!u) return;
-
+    currentUser = u;
+    
     setChipText("#chipUsuario", u.email ? u.email : "—");
 
     // 2) eventos UI
