@@ -351,7 +351,7 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
           u2.nombres AS conductor_nombre
        FROM asignaciones a
        JOIN ofertas_trabajo o ON o.id = a.oferta_id
-       JOIN vehiculos v ON v.id = a.vehiculo_id
+       JOIN vehiculos v ON v.id = o.vehiculo_id
        JOIN perfiles_conductores pc ON pc.id = a.conductor_id
        JOIN usuarios u2 ON u2.id = pc.usuario_id
        WHERE a.propietario_id = ? AND a.estado = 'activa'
@@ -769,9 +769,9 @@ app.post("/api/propietario/postulaciones/:id/aceptar", requireUser, (req, res) =
 
       const ins = await qConn(
         `INSERT INTO asignaciones
-         (oferta_id, propietario_id, conductor_id, vehiculo_id, fecha_inicio, estado, notas)
-         VALUES (?, ?, ?, ?, NOW(), 'activa', NULL)`,
-        [picked.oferta_id, propietarioId, picked.conductor_id, picked.vehiculo_id]
+         (oferta_id, propietario_id, conductor_id, fecha_inicio, estado, notas)
+         VALUES (?, ?, ?, NOW(), 'activa', NULL)`,
+        [picked.oferta_id, propietarioId, picked.conductor_id]
       );
       const asignacionId = ins.insertId;
 
