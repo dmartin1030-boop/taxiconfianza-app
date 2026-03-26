@@ -145,6 +145,8 @@
   <!-- ========================= -->
   <!-- JS -->
   <!-- ========================= -->
+  <script src="js/tc-session.js"></script>
+  <script src="js/tc-api.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
     const ofertaId = params.get("id");
@@ -173,14 +175,10 @@
     // =========================
     async function cargarOferta() {
       try {
-        const r = await fetch(`/api/ofertas-trabajo/${ofertaId}`, {
-          credentials: "include"
-        });
-        const data = await r.json();
+        const data = await TC.api.request(`/api/conductor/ofertas`);
 
-        if (!data.ok) throw new Error(data.error || "No se pudo cargar la oferta");
-
-        const o = data.oferta;
+        const o = (data.ofertas || []).find(x => String(x.id) === String(ofertaId));
+        if (!o) throw new Error("Oferta no encontrada o no disponible");
 
         ofertaTitulo.textContent = o.titulo;
         ofertaDescripcion.textContent = o.descripcion || "";
@@ -217,20 +215,12 @@
       btnPostular.textContent = "Enviando...";
 
       try {
-        const r2 = await fetch(`/api/ofertas-trabajo/${ofertaId}/postular`, {
+        const data2 = await TC.api.request(`/api/conductor/ofertas/${ofertaId}/postular`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            mensaje,
-            cv_url
-          })
+          body: { mensaje, cv_url }
         });
 
-        const data2 = await r2.json();
-        if (!data2.ok) throw new Error(data2.error || "Error al postular");
-
-        successBox.textContent = "✅ Postulación enviada correctamente (pendiente)";
+        successBox.textContent = data2.message || "✅ Postulación enviada correctamente (pendiente)";
         successBox.style.display = "block";
 
         btnPostular.textContent = "Postulado";

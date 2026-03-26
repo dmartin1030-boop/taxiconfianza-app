@@ -1,8 +1,10 @@
+require('dotenv').config();
 const express = require("express");
 const mysql = require("mysql2");
 const path = require("path");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
 
 const app = express();
 // ✅ Railway / proxies: permitir cookies secure detrás de proxy
@@ -190,7 +192,7 @@ app.get("/api/conductores", (req, res) => {
 // ==============================
 // API - Registro
 // ==============================
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const { nombre, apellido, celular, email, password, rol } = req.body;
 
   if (!nombre || !apellido || !celular || !email || !password || !rol) {
@@ -202,10 +204,19 @@ app.post("/register", (req, res) => {
     return res.status(400).json({ success: false, error: "Rol inválido." });
   }
 
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+    console.log(`[REGISTER] Hash generado para ${email}: starts_with=${hashedPassword.slice(0,7)} length=${hashedPassword.length}`);
+  } catch (err) {
+    console.error("Error al hashear contraseña:", err);
+    return res.status(500).json({ success: false, error: "Error interno del servidor." });
+  }
+
   const query =
     "INSERT INTO usuarios (nombres, apellidos, celular, email, password, tipo) VALUES (?, ?, ?, ?, ?, ?)";
 
-  db.query(query, [nombre, apellido, celular, email, password, rolValido], (err) => {
+  db.query(query, [nombre, apellido, celular, email, hashedPassword, rolValido], (err, result) => {
     if (err) {
       console.error("Error al registrar usuario:", err);
       return res.status(500).json({
@@ -213,6 +224,21 @@ app.post("/register", (req, res) => {
         error: "Este correo ya está registrado o hay un error en los datos.",
       });
     }
+    console.log(`[REGISTER] Usuario insertado id=${result.insertId} email=${email}`);
+
+    // Verificar qué quedó guardado realmente en la DB
+    db.query("SELECT id, email, LENGTH(password) as pwd_len, LEFT(password, 7) as pwd_prefix FROM usuarios WHERE id = ?", [result.insertId], (err2, rows) => {
+      if (err2) {
+        console.error("[REGISTER] No se pudo verificar el hash guardado:", err2.message);
+      } else if (rows.length) {
+        const r = rows[0];
+        console.log(`[REGISTER] Verificación DB → id=${r.id} email=${r.email} pwd_len=${r.pwd_len} pwd_prefix=${r.pwd_prefix}`);
+        if (r.pwd_len !== 60) {
+          console.error(`[REGISTER] ⚠️  Hash truncado en DB: se guardaron ${r.pwd_len} chars en lugar de 60. Amplía la columna password a VARCHAR(60) o más.`);
+        }
+      }
+    });
+
     res.json({ success: true, message: "Registro exitoso" });
   });
 });
@@ -220,38 +246,63 @@ app.post("/register", (req, res) => {
 // ==============================
 // API - Login
 // ==============================
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-const query = "SELECT id, nombres, apellidos, email, tipo FROM usuarios WHERE email = ? AND password = ?";
+  const query = "SELECT id, nombres, apellidos, email, tipo, password FROM usuarios WHERE email = ?";
 
-  db.query(query, [email, password], (err, results) => {
+  db.query(query, [email], async (err, results) => {
     if (err) {
       console.error("Error en DB:", err.message);
       return res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 
-    if (results.length > 0) {
-      const user = results[0];
-      // ✅ Guardar sesión (para rutas protegidas)
-req.session.user = {
-  id: user.id,
-  email: user.email,
-  tipo: String(user.tipo || "").toLowerCase(),
-};
-
-      res.json({
-        success: true,
-        user: {
-          nombres: user.nombres,
-          apellidos: user.apellidos,
-          email: user.email,
-          tipo: String(user.tipo || "").toLowerCase(),
-        },
-      });
-    } else {
-      res.json({ success: false, message: "Correo o contraseña incorrectos" });
+    if (results.length === 0) {
+      return res.json({ success: false, message: "Correo o contraseña incorrectos" });
     }
+
+    const user = results[0];
+
+    // Diagnóstico: tipo y valor del hash recuperado de la DB
+    const rawPwd = user.password;
+    const pwdType = Buffer.isBuffer(rawPwd) ? "Buffer" : typeof rawPwd;
+    const pwdString = Buffer.isBuffer(rawPwd) ? rawPwd.toString("utf8") : String(rawPwd ?? "");
+    console.log(`[LOGIN] email=${email} pwd_type=${pwdType} pwd_len=${pwdString.length} pwd_prefix=${pwdString.slice(0,7)}`);
+
+    if (!pwdString.startsWith("$2b$") && !pwdString.startsWith("$2a$")) {
+      console.error(`[LOGIN] ⚠️  El hash en DB no parece bcrypt (prefix="${pwdString.slice(0,7)}"). Posiblemente la contraseña está en texto plano o truncada.`);
+    }
+
+    let passwordMatch = false;
+    try {
+      passwordMatch = await bcrypt.compare(password, pwdString);
+    } catch (err) {
+      console.error("[LOGIN] Error al verificar contraseña:", err);
+      return res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+
+    console.log(`[LOGIN] bcrypt.compare resultado=${passwordMatch} para ${email}`);
+
+    if (!passwordMatch) {
+      return res.json({ success: false, message: "Correo o contraseña incorrectos" });
+    }
+
+    // ✅ Guardar sesión (para rutas protegidas)
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      tipo: String(user.tipo || "").toLowerCase(),
+    };
+
+    res.json({
+      success: true,
+      user: {
+        nombres: user.nombres,
+        apellidos: user.apellidos,
+        email: user.email,
+        tipo: String(user.tipo || "").toLowerCase(),
+      },
+    });
   });
 });
 
