@@ -79,6 +79,15 @@
   </main>
 
   <script>
+    // Pre-seleccionar rol desde ?tipo=conductor o ?tipo=propietario
+    (function () {
+      const tipo = new URLSearchParams(window.location.search).get("tipo");
+      if (tipo === "conductor" || tipo === "propietario") {
+        const radio = document.querySelector(`input[name="rol"][value="${tipo}"]`);
+        if (radio) radio.checked = true;
+      }
+    })();
+
     const form = document.getElementById('registrationForm');
     
     form.addEventListener('submit', async (e) => {
