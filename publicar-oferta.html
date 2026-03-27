@@ -37,6 +37,37 @@
     .two{display:grid; grid-template-columns: 1fr; gap:12px}
     @media(min-width: 980px){ .two{grid-template-columns: 1.1fr .9fr} }
 
+    .three{display:grid; grid-template-columns:1fr; gap:12px}
+    @media(min-width:600px){ .three{grid-template-columns:1fr 1fr} }
+    @media(min-width:900px){ .three{grid-template-columns:1fr 1fr 1fr} }
+
+    .form-section{
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      margin-top: 6px;
+    }
+    .form-section-title{
+      font-size:11px; font-weight:700; letter-spacing:.07em;
+      text-transform:uppercase; color:var(--muted);
+      margin: 0 0 14px;
+    }
+    .check-group{display:flex; flex-wrap:wrap; gap:10px; margin-top:4px}
+    .check-label{
+      display:flex; align-items:center; gap:7px;
+      font-size:13px; cursor:pointer;
+      background:rgba(0,0,0,.14);
+      border:1px solid var(--border);
+      border-radius:10px; padding:7px 12px;
+      user-select:none; transition:border-color .15s, background .15s;
+    }
+    .check-label:has(input:checked){
+      border-color: rgba(251,191,36,.45);
+      background: rgba(251,191,36,.1);
+      color:#fbbf24;
+    }
+    .check-label input{accent-color:#fbbf24}
+    #turnoHorasRow{display:none}
+
     dialog{
       border:1px solid var(--border);
       border-radius: var(--radius);
@@ -173,10 +204,10 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>Oferta</th>
-                  <th>Acuerdo</th>
+                  <th>Oferta / Modalidad</th>
+                  <th>Pago</th>
                   <th>Vehículo</th>
-                  <th>Ciudad / Turno</th>
+                  <th>Zona</th>
                   <th>Estado</th>
                   <th class="right">Acciones</th>
                 </tr>
@@ -191,39 +222,23 @@
         <!-- FORM / NUEVA OFERTA -->
         <article class="card">
           <h3>Nueva oferta</h3>
-          <p class="muted">Campos reales de tu tabla <code>ofertas_trabajo</code>.</p>
+          <p class="muted">Completa los datos de la oferta para conductores.</p>
 
           <div class="filters">
-            <div class="field">
-              <label>Vehículo</label>
-              <select id="vehiculo_id">
-                <option value="">Cargando vehículos…</option>
-              </select>
-              <div class="small">Se guarda como <b>vehiculo_id</b> y pertenece a tu perfil.</div>
-            </div>
 
+            <!-- ── INFORMACIÓN BÁSICA ── -->
             <div class="field">
-              <label>Título</label>
-              <input class="input" id="titulo" placeholder="Ej: Taxi turno noche con pago diario" />
-            </div>
-
-            <div class="field">
-              <label>Ciudad</label>
-              <input class="input" id="ciudad" placeholder="Ej: Bogotá" />
+              <label>Título de la oferta *</label>
+              <input class="input" id="titulo" placeholder="Ej: Conductor turno noche, pago diario garantizado" />
             </div>
 
             <div class="two">
               <div class="field">
-                <label>Turno</label>
-                <select id="turno">
-                  <option value="dia">Día</option>
-                  <option value="noche">Noche</option>
-                  <option value="mixto">Mixto</option>
-                </select>
+                <label>Ciudad *</label>
+                <input class="input" id="ciudad" placeholder="Ej: Bogotá" />
               </div>
-
               <div class="field">
-                <label>Estado</label>
+                <label>Estado de la oferta</label>
                 <select id="estado">
                   <option value="activa" selected>Activa</option>
                   <option value="pausada">Pausada</option>
@@ -232,39 +247,192 @@
               </div>
             </div>
 
-            <div class="field">
-              <label>Descripción</label>
-              <textarea id="descripcion" placeholder="Describe condiciones, horarios, zonas, etc."></textarea>
-            </div>
+            <!-- ── MODALIDAD DE TRABAJO ── -->
+            <div class="form-section">
+              <p class="form-section-title">Modalidad de trabajo</p>
 
-            <div class="two">
               <div class="field">
-                <label>Cuota diaria ($)</label>
-                <input class="input" id="cuota_diaria" type="number" min="0" placeholder="Ej: 70000" />
+                <label>Turno general</label>
+                <select id="turno">
+                  <option value="dia">Día</option>
+                  <option value="noche">Noche</option>
+                  <option value="mixto">Mixto</option>
+                </select>
               </div>
+
+              <div class="field" style="margin-top:10px">
+                <label>Modalidad</label>
+                <select id="modalidad">
+                  <option value="">Sin especificar</option>
+                  <option value="taxi_completo">Taxi completo — conductor lo tiene siempre</option>
+                  <option value="turno_fijo">Turno fijo — horario definido</option>
+                  <option value="turno_partido">Turno partido — compartido con otro conductor</option>
+                  <option value="fin_de_semana">Solo fines de semana</option>
+                  <option value="turno_libre">Turno libre — el conductor elige</option>
+                </select>
+              </div>
+
+              <div class="two" id="turnoHorasRow" style="margin-top:10px">
+                <div class="field">
+                  <label>Hora inicio turno</label>
+                  <input class="input" type="time" id="turno_inicio" />
+                </div>
+                <div class="field">
+                  <label>Hora fin turno</label>
+                  <input class="input" type="time" id="turno_fin" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ── ZONA DE OPERACIÓN ── -->
+            <div class="form-section">
+              <p class="form-section-title">Zona de operación</p>
               <div class="field">
-                <label>% Propietario</label>
-                <input class="input" id="porcentaje_propietario" type="number" step="0.01" min="0" placeholder="Ej: 30.00" />
+                <label>¿Dónde opera el vehículo?</label>
+                <select id="zona_tipo" onchange="toggleZonaTexto(this.value)">
+                  <option value="toda_ciudad">Toda la ciudad</option>
+                  <option value="especifica">Zona específica</option>
+                </select>
+              </div>
+              <div class="field" id="zonaTextoRow" style="display:none; margin-top:10px">
+                <label>Describe la zona</label>
+                <input class="input" id="zona_operacion" placeholder="Ej: Norte de Bogotá, Usaquén y Chapinero" />
               </div>
             </div>
 
-            <div class="small">
-              Debes llenar <b>cuota_diaria</b> o <b>porcentaje_propietario</b> (al menos uno).
+            <!-- ── VEHÍCULO ── -->
+            <div class="form-section">
+              <p class="form-section-title">Vehículo</p>
+
+              <div class="field">
+                <label>Vehículo registrado *</label>
+                <select id="vehiculo_id">
+                  <option value="">Cargando vehículos…</option>
+                </select>
+                <div class="small" style="margin-top:4px">Vehículos registrados en tu perfil. <a href="mis-vehiculos.html" style="color:var(--brand)">Agregar vehículo →</a></div>
+              </div>
+
+              <div class="three" style="margin-top:10px">
+                <div class="field">
+                  <label>Marca</label>
+                  <input class="input" id="veh_marca" placeholder="Ej: Chevrolet" />
+                </div>
+                <div class="field">
+                  <label>Modelo / Referencia</label>
+                  <input class="input" id="veh_modelo" placeholder="Ej: Sail, Spark, Aveo" />
+                </div>
+                <div class="field">
+                  <label>Año</label>
+                  <input class="input" type="number" id="veh_anio" min="2000" max="2030" placeholder="Ej: 2020" />
+                </div>
+              </div>
+
+              <div class="field" style="margin-top:10px">
+                <label>Tipo de combustible</label>
+                <select id="veh_combustible">
+                  <option value="">Sin especificar</option>
+                  <option value="gasolina">Gasolina</option>
+                  <option value="gas">Gas natural (GNV)</option>
+                  <option value="hibrido">Híbrido</option>
+                </select>
+              </div>
             </div>
 
-            <div class="field">
-              <label>Requisitos</label>
-              <textarea id="requisitos" placeholder="Ej: licencia vigente, sin comparendos, experiencia 1 año…"></textarea>
+            <!-- ── CONDICIONES ECONÓMICAS ── -->
+            <div class="form-section">
+              <p class="form-section-title">Condiciones económicas</p>
+
+              <div class="two">
+                <div class="field">
+                  <label>Cuota diaria ($)</label>
+                  <input class="input" id="cuota_diaria" type="number" min="0" placeholder="Ej: 75000" />
+                </div>
+                <div class="field">
+                  <label>% para el propietario</label>
+                  <input class="input" id="porcentaje_propietario" type="number" step="0.01" min="0" max="100" placeholder="Ej: 30.00" />
+                </div>
+              </div>
+              <div class="small">Llena cuota diaria o % propietario (al menos uno).</div>
             </div>
 
-            <div class="actions-row">
-            <button class="btn" type="button" id="btnClear">Limpiar</button>
-<button class="btn primary" type="button" id="btnCreate">Publicar</button>
-
+            <!-- ── QUÉ INCLUYE EL PROPIETARIO ── -->
+            <div class="form-section">
+              <p class="form-section-title">¿Qué incluye el propietario?</p>
+              <div class="check-group">
+                <label class="check-label">
+                  <input type="checkbox" name="incluye" value="soat" />
+                  🛡️ SOAT
+                </label>
+                <label class="check-label">
+                  <input type="checkbox" name="incluye" value="mantenimiento" />
+                  🔧 Mantenimiento preventivo
+                </label>
+                <label class="check-label">
+                  <input type="checkbox" name="incluye" value="todo_riesgo" />
+                  🔒 Seguro todo riesgo
+                </label>
+                <label class="check-label" id="checkNada">
+                  <input type="checkbox" name="incluye" value="nada" id="incluyeNada" />
+                  ❌ Nada (conductor corre con todo)
+                </label>
+              </div>
             </div>
 
-            <p class="small">
-              Tip: si una oferta está <b>bloqueada</b>, el sistema no permitirá cambiar su estado.
+            <!-- ── REQUISITOS MÍNIMOS ── -->
+            <div class="form-section">
+              <p class="form-section-title">Requisitos mínimos del conductor</p>
+
+              <div class="two">
+                <div class="field">
+                  <label>Años de experiencia mínima</label>
+                  <input class="input" type="number" id="exp_minima" min="0" max="30" placeholder="Ej: 2" />
+                </div>
+                <div class="field">
+                  <label>Categoría de licencia</label>
+                  <select id="categoria_licencia">
+                    <option value="">Sin requisito</option>
+                    <option value="B1">B1 — vehículos hasta 3.5 t</option>
+                    <option value="B2">B2 — vehículos de servicio público</option>
+                    <option value="B3">B3 — vehículos articulados</option>
+                    <option value="C1">C1 — motocicletas</option>
+                    <option value="C2">C2 — motocicletas pesadas</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── DESCRIPCIÓN Y REQUISITOS ── -->
+            <div class="form-section">
+              <p class="form-section-title">Descripción y requisitos adicionales</p>
+
+              <div class="field">
+                <label>Descripción de la oferta</label>
+                <textarea id="descripcion" placeholder="Describe condiciones, horarios, beneficios adicionales, etc."></textarea>
+              </div>
+
+              <div class="field" style="margin-top:10px">
+                <label>Requisitos adicionales</label>
+                <textarea id="requisitos" placeholder="Ej: Sin comparendos en los últimos 2 años, hoja de vida limpia…"></textarea>
+              </div>
+            </div>
+
+            <!-- ── CONTACTO ── -->
+            <div class="form-section">
+              <p class="form-section-title">Contacto</p>
+              <div class="field">
+                <label>WhatsApp de contacto (opcional)</label>
+                <input class="input" id="whatsapp" type="tel" placeholder="Ej: 3001234567" maxlength="15" />
+                <div class="small" style="margin-top:4px">Solo visible para conductores con sesión activa.</div>
+              </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:8px">
+              <button class="btn" type="button" id="btnClear">Limpiar</button>
+              <button class="btn primary" type="button" id="btnCreate">Publicar oferta →</button>
+            </div>
+
+            <p class="small" style="margin-top:8px">
+              Tip: las ofertas bloqueadas por el sistema no pueden cambiar de estado.
             </p>
           </div>
         </article>
@@ -319,12 +487,38 @@
     </form>
   </dialog>
 
-  <!-- mismos JS base que tu plantilla -->
   <script src="js/tc-session.js"></script>
   <script src="js/tc-api.js"></script>
-
-  <!-- crea este archivo (te lo hago en el siguiente paso si quieres) -->
   <script src="js/tc-propietario-publicar-oferta.js"></script>
+  <script>
+    // Mostrar/ocultar horario cuando modalidad = turno_fijo
+    document.getElementById("modalidad").addEventListener("change", function () {
+      document.getElementById("turnoHorasRow").style.display =
+        this.value === "turno_fijo" ? "grid" : "none";
+    });
+
+    // Mostrar/ocultar campo zona específica
+    function toggleZonaTexto(val) {
+      document.getElementById("zonaTextoRow").style.display =
+        val === "especifica" ? "block" : "none";
+      if (val !== "especifica") {
+        document.getElementById("zona_operacion").value = "";
+      }
+    }
+
+    // "Nada" es excluyente del resto
+    document.getElementById("incluyeNada").addEventListener("change", function () {
+      if (this.checked) {
+        document.querySelectorAll('input[name="incluye"]:not(#incluyeNada)')
+          .forEach(cb => { cb.checked = false; });
+      }
+    });
+    document.querySelectorAll('input[name="incluye"]:not(#incluyeNada)').forEach(cb => {
+      cb.addEventListener("change", function () {
+        if (this.checked) document.getElementById("incluyeNada").checked = false;
+      });
+    });
+  </script>
 </body>
 </html>
 

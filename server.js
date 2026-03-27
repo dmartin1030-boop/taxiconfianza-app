@@ -79,6 +79,41 @@ db.getConnection((err, connection) => {
 });
 
 // ==============================
+// Migraciones automáticas
+// Agrega columnas nuevas a ofertas_trabajo sin romper datos existentes
+// ==============================
+async function runMigrations() {
+  const cols = [
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS modalidad VARCHAR(30) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS turno_inicio VARCHAR(5) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS turno_fin VARCHAR(5) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS zona_operacion VARCHAR(200) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS veh_marca VARCHAR(80) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS veh_modelo VARCHAR(80) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS veh_anio SMALLINT DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS veh_combustible VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS incluye VARCHAR(200) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS exp_minima TINYINT UNSIGNED DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS categoria_licencia VARCHAR(10) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(20) DEFAULT NULL",
+  ];
+  for (const sql of cols) {
+    try {
+      await new Promise((res, rej) =>
+        db.query(sql, (err) => (err ? rej(err) : res()))
+      );
+    } catch (e) {
+      // Ignorar si la columna ya existe (MySQL < 8 no soporta IF NOT EXISTS)
+      if (!String(e.message).includes("Duplicate column")) {
+        console.warn("[migration] warn:", e.message);
+      }
+    }
+  }
+  console.log("✅ Migraciones ofertas_trabajo aplicadas.");
+}
+runMigrations();
+
+// ==============================
 // Helpers DB (promisify mysql2 pool)
 // ==============================
 function q(sql, params = []) {
@@ -522,6 +557,19 @@ app.post("/api/ofertas", requireUser, async (req, res) => {
       porcentaje_propietario,
       requisitos,
       estado,
+      // nuevos campos
+      modalidad,
+      turno_inicio,
+      turno_fin,
+      zona_operacion,
+      veh_marca,
+      veh_modelo,
+      veh_anio,
+      veh_combustible,
+      incluye,        // array o string CSV
+      exp_minima,
+      categoria_licencia,
+      whatsapp,
     } = req.body || {};
 
     if (!vehiculo_id || !titulo || !ciudad) {
@@ -541,17 +589,38 @@ app.post("/api/ofertas", requireUser, async (req, res) => {
     const allowedEstado = new Set(["activa", "pausada", "cerrada"]);
     const e = allowedEstado.has(String(estado || "")) ? String(estado) : "activa";
 
+    const allowedModalidad = new Set(["taxi_completo","turno_fijo","turno_partido","fin_de_semana","turno_libre"]);
+    const mod = allowedModalidad.has(String(modalidad || "")) ? String(modalidad) : null;
+
+    const allowedCombustible = new Set(["gasolina","gas","hibrido"]);
+    const combustible = allowedCombustible.has(String(veh_combustible || "")) ? String(veh_combustible) : null;
+
     const cuota = Number(cuota_diaria || 0);
     const pct = Number(porcentaje_propietario || 0);
     if (cuota <= 0 && pct <= 0) {
       return res.status(400).json({ ok: false, error: "Ingresa cuota_diaria o porcentaje_propietario (al menos uno)" });
     }
 
+    // Normalizar incluye a CSV limpio
+    let incluyeStr = null;
+    if (Array.isArray(incluye) && incluye.length) {
+      const allowed = new Set(["soat","mantenimiento","todo_riesgo","nada"]);
+      incluyeStr = incluye.filter(x => allowed.has(String(x))).join(",") || null;
+    } else if (typeof incluye === "string" && incluye.trim()) {
+      incluyeStr = incluye.trim();
+    }
+
     await q(
       `INSERT INTO ofertas_trabajo
        (propietario_id, vehiculo_id, titulo, descripcion, ciudad, turno,
-        cuota_diaria, porcentaje_propietario, requisitos, estado, fecha_creacion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        cuota_diaria, porcentaje_propietario, requisitos, estado, fecha_creacion,
+        modalidad, turno_inicio, turno_fin, zona_operacion,
+        veh_marca, veh_modelo, veh_anio, veh_combustible,
+        incluye, exp_minima, categoria_licencia, whatsapp)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(),
+               ?, ?, ?, ?,
+               ?, ?, ?, ?,
+               ?, ?, ?, ?)`,
       [
         perfil.id,
         vehiculo_id,
@@ -563,6 +632,18 @@ app.post("/api/ofertas", requireUser, async (req, res) => {
         pct > 0 ? pct : 0,
         requisitos ? String(requisitos).trim() : null,
         e,
+        mod,
+        turno_inicio ? String(turno_inicio).trim() : null,
+        turno_fin    ? String(turno_fin).trim()    : null,
+        zona_operacion ? String(zona_operacion).trim() : null,
+        veh_marca  ? String(veh_marca).trim()  : null,
+        veh_modelo ? String(veh_modelo).trim() : null,
+        veh_anio   ? Number(veh_anio)          : null,
+        combustible,
+        incluyeStr,
+        exp_minima   ? Number(exp_minima)          : null,
+        categoria_licencia ? String(categoria_licencia).trim().toUpperCase() : null,
+        whatsapp   ? String(whatsapp).trim()   : null,
       ]
     );
 
@@ -590,7 +671,10 @@ app.get("/api/propietario/ofertas", requireUser, async (req, res) => {
       `SELECT
          id, propietario_id, vehiculo_id, titulo, descripcion, ciudad, turno,
          cuota_diaria, porcentaje_propietario, requisitos,
-         estado, fecha_creacion, bloqueada, motivo_bloqueo
+         estado, fecha_creacion, bloqueada, motivo_bloqueo,
+         modalidad, turno_inicio, turno_fin, zona_operacion,
+         veh_marca, veh_modelo, veh_anio, veh_combustible,
+         incluye, exp_minima, categoria_licencia, whatsapp
        FROM ofertas_trabajo
        WHERE propietario_id = ?
          AND deleted_at IS NULL
