@@ -847,7 +847,7 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
       return res.status(403).json({ success: false, message: "Solo conductor" });
     }
 
-    await ensurePerfilConductor(u.id);
+    const perfil = await ensurePerfilConductor(u.id);
 
     let notifCount = 0;
     try {
@@ -860,6 +860,21 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
       notifCount = 0;
     }
 
+    // Trabajos finalizados desde asignaciones
+    let jobs = 0;
+    try {
+      const jRows = await q(
+        `SELECT COUNT(*) AS total FROM asignaciones
+         WHERE conductor_id = ? AND estado = 'finalizada'`,
+        [perfil.id]
+      );
+      jobs = jRows[0]?.total || 0;
+    } catch {
+      jobs = 0;
+    }
+
+    const points = u.puntos_carrera ?? 0;
+
     res.json({
       success: true,
       stats: {
@@ -868,8 +883,8 @@ app.get("/api/dashboard/conductor", requireUser, async (req, res) => {
         avg: u.score_reputacion ?? 0,
         reviews: u.total_reviews ?? 0,
         rating90: u.rating_90d ?? 0,
-        jobs: 0,
-        points: u.puntos_carrera ?? 0,
+        jobs,
+        points,
         notifCount,
       },
     });
