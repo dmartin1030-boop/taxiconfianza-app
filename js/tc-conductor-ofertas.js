@@ -45,18 +45,18 @@ function openModalPostular(ofertaId) {
   ofertaSeleccionadaId = ofertaId;
 
   const modal = document.querySelector("#modalPostular");
-  const cv = document.querySelector("#mpCvUrl");
   const msg = document.querySelector("#mpMensaje");
   const alert = document.querySelector("#mpAlert");
+  const counter = document.querySelector("#mpCharCount");
 
   if (alert) { alert.style.display = "none"; alert.textContent = ""; }
-  if (cv) cv.value = "";
   if (msg) msg.value = "";
+  if (counter) counter.textContent = "0";
 
   if (modal) {
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
-    setTimeout(() => cv && cv.focus(), 50);
+    setTimeout(() => msg && msg.focus(), 50);
   }
 }
 
@@ -83,7 +83,7 @@ function showMpAlert(msg) {
     if (!u) return;
     currentUser = u;
     
-    setChipText("#chipUsuario", u.email ? u.email : "—");
+    setChipText("#user-pill", u.email ? u.email : "—");
 
     // 2) eventos UI
     wireUI();
@@ -116,23 +116,6 @@ function showMpAlert(msg) {
       await cargarOfertas();
     });
 
-    // Delegación de eventos para botones dentro de la tabla
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-action]");
-      if (!btn) return;
-
-      const action = btn.getAttribute("data-action");
-      const id = btn.getAttribute("data-id");
-
-      if (action === "postular") {
-  console.log("[tc-conductor-ofertas] postular a oferta", id);
-
-  ofertaSeleccionadaId = Number(id);
-
-  const modal = document.getElementById("modalPostular");
-  if (modal) modal.classList.add("show");
-     }
-    });
   }
   // --------- API ----------
   async function cargarOfertas() {
@@ -143,7 +126,7 @@ function showMpAlert(msg) {
     }
 
     tb.innerHTML = `<tr><td colspan="6">Cargando...</td></tr>`;
-    setChipText("#chipEncontradas", "0");
+    setChipText("#count", "0");
 
     try {
       console.log("[tc-conductor-ofertas] GET /api/conductor/ofertas");
@@ -215,9 +198,37 @@ aplicarFiltrosYRender();
       return true;
     });
 
-    setChipText("#chipEncontradas", String(ofertasView.length));
+    setChipText("#count", String(ofertasView.length));
     renderTabla();
   }
+
+  // ── Etiquetas legibles ──
+  const MODALIDAD_LABEL = {
+    taxi_completo: "Taxi completo",
+    turno_fijo:    "Turno fijo",
+    turno_partido: "Turno partido",
+    fin_de_semana: "Solo fines de semana",
+    turno_libre:   "Turno libre",
+  };
+  const COMBUSTIBLE_LABEL = {
+    gasolina:  "Gasolina",
+    gas:       "Gas natural (GNV)",
+    hibrido:   "Híbrido",
+    electrico: "Eléctrico",
+  };
+  const INCLUYE_LABEL = {
+    soat:         "🛡️ SOAT",
+    mantenimiento:"🔧 Mantenimiento preventivo",
+    todo_riesgo:  "🔒 Seguro todo riesgo",
+    nada:         "❌ Nada (conductor corre con todo)",
+  };
+  const LICENCIA_LABEL = {
+    B1: "B1 — hasta 3.5 t",
+    B2: "B2 — servicio público",
+    B3: "B3 — articulados",
+    C1: "C1 — motocicletas",
+    C2: "C2 — motos pesadas",
+  };
 
   function renderTabla() {
     const tb = tbody();
@@ -228,64 +239,177 @@ aplicarFiltrosYRender();
       return;
     }
 
-    tb.innerHTML = ofertasView
-  .map((o) => {
-    const propietario = `${safeText(o.propietario_nombres) || ""} ${safeText(o.propietario_apellidos)}`.trim() || "—";
-    const vehiculo = safeText(o.vehiculo) || safeText(o.placa) || "—";
-    const estado = safeText(o.estado) || "—";
+    tb.innerHTML = ofertasView.map((o) => {
+      const propietario = safeText(o.propietario_nombre).trim() || "—";
+      const placa       = safeText(o.placa) || "—";
+      const marca       = safeText(o.veh_marca);
+      const modelo      = safeText(o.veh_modelo);
+      const vehiculoStr = [marca, modelo, placa].filter(Boolean).join(" · ") || "—";
+      const miEstado    = safeText(o.mi_postulacion_estado);
+      const yaPostulado = !!miEstado;
 
-    // ✅ nuevo: estado de mi postulación (viene de /api/conductor/ofertas)
-    const miEstado = safeText(o.mi_postulacion_estado); // ej: "pendiente" | "preseleccionado" | ...
-    const yaPostulado = !!miEstado;
+      const btnPostular = yaPostulado
+        ? `<button class="btn" disabled style="opacity:.65; cursor:not-allowed; font-size:12px">${miEstado === "pendiente" ? "⏳ Pendiente" : miEstado}</button>`
+        : `<button class="btn btn-sm" data-action="postular" data-id="${safeText(o.id)}" style="font-size:12px">Postular</button>`;
 
-    const btnHtml = yaPostulado
-      ? `<button class="btn btn-sm" disabled style="opacity:.7; cursor:not-allowed">
-           ${miEstado === "pendiente" ? "Pendiente" : miEstado}
-         </button>`
-      : `<button class="btn btn-sm" data-action="postular" data-id="${safeText(o.id)}">
-           Postular
-         </button>`;
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:600">${safeText(o.titulo) || "—"}</div>
+            <div style="opacity:.75; font-size:.88em; margin-top:2px">${safeText(o.ciudad)}${o.turno ? " · " + o.turno : ""}</div>
+          </td>
+          <td>
+            <div>${o.cuota_diaria > 0 ? "$" + money(o.cuota_diaria) + "/día" : "—"}</div>
+            ${o.porcentaje_propietario > 0 ? `<div style="opacity:.75; font-size:.88em">${o.porcentaje_propietario}% prop.</div>` : ""}
+          </td>
+          <td style="font-size:12px">${vehiculoStr}</td>
+          <td style="font-size:12px">${propietario}</td>
+          <td style="font-size:12px">${safeText(o.estado) || "—"}</td>
+          <td style="text-align:right; white-space:nowrap">
+            <button class="btn" data-action="ver" data-id="${safeText(o.id)}" style="font-size:12px; margin-right:6px">Ver</button>
+            ${btnPostular}
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
 
-    return `
-      <tr>
-        <td>
-          <div style="font-weight:600">${safeText(o.titulo) || "—"}</div>
-          <div style="opacity:.85; font-size:.9em">${safeText(o.ciudad) ? safeText(o.ciudad) : ""}</div>
-        </td>
-        <td>
-          <div>${safeText(o.turno) || "—"}</div>
-          <div style="opacity:.85; font-size:.9em">Cuota: ${money(o.cuota_diaria)}</div>
-        </td>
-        <td>${vehiculo}</td>
-        <td>${propietario}</td>
-        <td>${estado}</td>
-        <td>${btnHtml}</td>
-      </tr>
-    `;
-  })
-  .join("");
+  // ── Llenar y abrir el dialog de detalle ──
+  function abrirDetalle(ofertaId) {
+    const o = ofertasView.find(x => String(x.id) === String(ofertaId));
+    if (!o) return;
 
+    // Título y meta
+    document.getElementById("dlgTitle").textContent = o.titulo || "Oferta";
+    document.getElementById("dlgMeta").textContent =
+      [o.ciudad, o.fecha_creacion ? "Publicada " + o.fecha_creacion : ""].filter(Boolean).join(" · ");
+
+    // Pills rápidos
+    const pillsEl = document.getElementById("dlgPills");
+    const pills = [
+      o.ciudad            && { text: "📍 " + o.ciudad },
+      o.turno             && { text: "🕐 Turno " + o.turno, hi: false },
+      o.modalidad         && { text: MODALIDAD_LABEL[o.modalidad] || o.modalidad, hi: true },
+      o.estado            && { text: o.estado, hi: false },
+    ].filter(Boolean);
+    pillsEl.innerHTML = pills.map(p =>
+      `<span class="dlg-pill${p.hi ? " hi" : ""}">${p.text}</span>`
+    ).join("");
+
+    // Vehículo
+    const vehKV = document.getElementById("dlgVehiculoKV");
+    const vehItems = [
+      ["Placa",       o.placa || "—"],
+      ["Marca",       o.veh_marca || "—"],
+      ["Modelo",      o.veh_modelo || "—"],
+      ["Año",         o.veh_anio || "—"],
+      ["Combustible", COMBUSTIBLE_LABEL[o.veh_combustible] || o.veh_combustible || "—"],
+    ];
+    if (o.turno_inicio && o.turno_fin) {
+      vehItems.push(["Horario turno", o.turno_inicio + " – " + o.turno_fin]);
+    }
+    vehKV.innerHTML = vehItems.map(([k, v]) =>
+      `<dt>${k}</dt><dd>${v}</dd>`
+    ).join("");
+
+    // Condiciones económicas
+    const econKV = document.getElementById("dlgEconKV");
+    const econItems = [];
+    if (o.cuota_diaria > 0)           econItems.push(["Cuota diaria", "$" + money(o.cuota_diaria)]);
+    if (o.porcentaje_propietario > 0) econItems.push(["% propietario", o.porcentaje_propietario + "%"]);
+    econKV.innerHTML = econItems.length
+      ? econItems.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")
+      : "<dt>—</dt><dd></dd>";
+
+    // Incluye
+    const incluyeEl = document.getElementById("dlgIncluye");
+    const incluyeArr = safeText(o.incluye)
+      ? safeText(o.incluye).split(",").map(s => s.trim()).filter(Boolean)
+      : [];
+    incluyeEl.innerHTML = incluyeArr.length
+      ? incluyeArr.map(tag =>
+          `<span class="incluye-tag${tag === "nada" ? " nada" : ""}">${INCLUYE_LABEL[tag] || tag}</span>`
+        ).join("")
+      : '<span class="small">No especificado</span>';
+
+    // Descripción
+    document.getElementById("dlgDesc").textContent = o.descripcion || "Sin descripción.";
+
+    // Zona
+    document.getElementById("dlgZona").textContent = o.zona_operacion || "Toda la ciudad";
+
+    // Requisitos mínimos (kv)
+    const reqKV = document.getElementById("dlgReqKV");
+    const reqItems = [];
+    if (o.exp_minima)         reqItems.push(["Experiencia mínima", o.exp_minima + " año(s)"]);
+    if (o.categoria_licencia) reqItems.push(["Licencia", LICENCIA_LABEL[o.categoria_licencia] || o.categoria_licencia]);
+    reqKV.innerHTML = reqItems.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+
+    // Requisitos texto
+    document.getElementById("dlgReq").textContent = o.requisitos || "";
+
+    // WhatsApp
+    const waWrap = document.getElementById("dlgContactoWrap");
+    const waLink = document.getElementById("dlgWaLink");
+    const waNum  = document.getElementById("dlgWaNum");
+    if (o.whatsapp) {
+      const num = safeText(o.whatsapp).replace(/\D/g, "");
+      waLink.href = `https://wa.me/57${num}`;
+      waNum.textContent = o.whatsapp;
+      waWrap.style.display = "block";
+    } else {
+      waWrap.style.display = "none";
+    }
+
+    // Botón postular
+    const miEstado = safeText(o.mi_postulacion_estado);
+    document.getElementById("dlgPostularWrap").style.display = miEstado ? "none" : "block";
+    document.getElementById("dlgYaPostulado").style.display  = miEstado ? "block" : "none";
+    if (miEstado) document.getElementById("dlgEstadoPostulacion").textContent = miEstado;
+
+    // Guardar id para el botón postular dentro del dialog
+    document.getElementById("btnDlgPostular").dataset.id = o.id;
+
+    document.getElementById("offerDialog").showModal();
   }
   document.addEventListener("click", async (e) => {
-  const el = e.target.closest("[data-action]");
-  if (!el) return;
+    const el = e.target.closest("[data-action]");
+    if (!el) return;
 
-  const action = el.getAttribute("data-action");
+    const action = el.getAttribute("data-action");
 
-  // 1) Click en Postular (desde la tabla)
-  if (action === "postular") {
-    const ofertaId = Number(el.getAttribute("data-id"));
-    if (!Number.isFinite(ofertaId) || ofertaId <= 0) return;
-    openModalPostular(ofertaId);
-    return;
-  }
+    if (action === "ver") {
+      abrirDetalle(el.getAttribute("data-id"));
+      return;
+    }
 
-  // Cerrar modal
-  if (el.id === "mpClose" || el.id === "mpCancel" || el.dataset.close === "1") {
-    closeModalPostular();
-    return;
-  }
-});
+    if (action === "postular") {
+      const ofertaId = Number(el.getAttribute("data-id"));
+      if (!Number.isFinite(ofertaId) || ofertaId <= 0) return;
+      openModalPostular(ofertaId);
+      return;
+    }
+
+    if (el.id === "mpClose" || el.id === "mpCancel" || el.dataset.close === "1") {
+      closeModalPostular();
+      return;
+    }
+  });
+
+  // Contador de caracteres del textarea de postulación
+  document.addEventListener("input", (e) => {
+    if (e.target.id !== "mpMensaje") return;
+    const counter = document.querySelector("#mpCharCount");
+    if (counter) counter.textContent = e.target.value.length;
+  });
+
+  // Botón "Postular" dentro del dialog de detalle
+  document.addEventListener("click", (e) => {
+    if (e.target.id !== "btnDlgPostular") return;
+    const id = Number(e.target.dataset.id);
+    document.getElementById("offerDialog").close();
+    openModalPostular(id);
+  });
 document.addEventListener("click", async (e) => {
   const t = e.target;
 
@@ -305,22 +429,19 @@ document.addEventListener("click", async (e) => {
         return showMpAlert("No se detectó el usuario. Inicia sesión nuevamente.");
       }
 
-      const cv_url = (document.querySelector("#mpCvUrl")?.value || "").trim();
       const mensaje = (document.querySelector("#mpMensaje")?.value || "").trim();
 
-      // cv_url en tu tabla puede ser NULL, pero como el modal lo pide, lo validamos:
-      if (cv_url.length < 5) return showMpAlert("Pega el link de tu CV.");
-      if (!/^https?:\/\//i.test(cv_url)) return showMpAlert("El link debe iniciar por http:// o https://");
+      if (!mensaje) return showMpAlert("Escribe por qué quieres este trabajo.");
 
       t.disabled = true;
       t.textContent = "Enviando...";
 
       const resp = await fetch(`/api/conductor/ofertas/${ofertaSeleccionadaId}/postular`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include", // ✅ ESTO ENVÍA LA COOKIE DE SESIÓN
-  body: JSON.stringify({ conductor_id: conductorId, cv_url, mensaje })
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ conductor_id: conductorId, mensaje })
+      });
 
       const data = await resp.json().catch(() => ({}));
 
@@ -331,7 +452,18 @@ document.addEventListener("click", async (e) => {
 
       closeModalPostular();
 
-      // ✅ refrescar lista
+      // Mostrar confirmación simple
+      const confirm = document.createElement("div");
+      confirm.textContent = "✅ ¡Postulación enviada! El propietario te contactará pronto.";
+      Object.assign(confirm.style, {
+        position: "fixed", bottom: "24px", left: "50%", transform: "translateX(-50%)",
+        background: "#1a7a4a", color: "#fff", padding: "14px 24px",
+        borderRadius: "10px", fontWeight: "600", fontSize: "15px",
+        zIndex: "9999", boxShadow: "0 4px 16px rgba(0,0,0,.25)"
+      });
+      document.body.appendChild(confirm);
+      setTimeout(() => confirm.remove(), 4000);
+
       if (typeof cargarOfertas === "function") {
         await cargarOfertas();
       } else {
@@ -345,7 +477,7 @@ document.addEventListener("click", async (e) => {
       const btn = document.querySelector("#mpSubmit");
       if (btn) {
         btn.disabled = false;
-        btn.textContent = "Confirmar postulación";
+        btn.textContent = "Enviar postulación";
       }
     }
   }

@@ -23,7 +23,7 @@
       --chip:#0b1326;
       --radius:16px;
       --radius2:12px;
-      --max:1200px;
+      --max:1600px;
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
     }
     *{box-sizing:border-box}
@@ -270,6 +270,49 @@
       font-size: 12px;
       text-align:center;
     }
+    /* Inputs HV */
+    .tc-input{
+      width:100%;
+      background:rgba(0,0,0,.25);
+      border:1px solid var(--border);
+      border-radius:10px;
+      color:var(--text);
+      padding:10px 12px;
+      font-size:14px;
+      font-family:var(--font);
+      outline:none;
+    }
+    .tc-input:focus{border-color:rgba(251,191,36,.4);}
+    .tc-input[readonly]{opacity:.55;cursor:default;}
+    .tc-input option{background:#0b1220;}
+    textarea.tc-input{resize:vertical;}
+    /* Grid HV */
+    .hv-foto-grid{
+      display:grid;
+      grid-template-columns:130px 1fr;
+      gap:20px;
+      align-items:start;
+      margin-top:12px;
+    }
+    @media(max-width:680px){.hv-foto-grid{grid-template-columns:1fr;}}
+    .hv-foto-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .hv-foto-wrap{
+      width:110px;height:110px;
+      border-radius:50%;
+      border:2px solid var(--border);
+      background:rgba(0,0,0,.25);
+      display:grid;place-items:center;
+      overflow:hidden;
+    }
+    .hv-foto-wrap img{width:100%;height:100%;object-fit:cover;}
+    .hv-fields{display:flex;flex-direction:column;gap:12px;}
+    .hv-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
+    .hv-field{display:flex;flex-direction:column;gap:5px;}
+    .hv-field label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.3px;}
+    .hv-ref-box{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:8px;}
+    .hv-ref-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;margin-bottom:8px;}
+    .alert-ok{padding:10px 14px;border-radius:10px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.10);color:#bbf7d0;font-size:13px;}
+    .alert-err{padding:10px 14px;border-radius:10px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.10);color:#fca5a5;font-size:13px;}
     /* Mobile */
     .mobile-toggle{display:none;}
     @media(max-width: 980px){
@@ -320,7 +363,7 @@
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h6M7 16h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v14l-4-2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
           Mis postulaciones
         </a>
-        <a href="#">
+        <a href="#" id="nav-trabajo-actual">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" stroke="currentColor" stroke-width="1.6"/></svg>
           Trabajo actual
         </a>
@@ -351,7 +394,7 @@
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v12H7l-3 3V4Z" stroke="currentColor" stroke-width="1.6"/></svg>
           Notificaciones
         </a>
-        <a href="#">
+        <a href="#" id="nav-mi-perfil">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c1.5-4 14.5-4 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           Mi perfil
         </a>
@@ -396,11 +439,11 @@
             <span class="bubble" id="notif-count">3</span>
           </a>
 
-          <a class="btn primary" href="#">Explorar ofertas</a>
+          <a class="btn primary" href="conductor-ofertas.html">Explorar ofertas</a>
         </div>
       </header>
 
-      <section class="grid">
+      <section class="grid" id="section-dashboard">
         <!-- Reputación -->
         <article class="card">
           <div class="row-between">
@@ -442,18 +485,18 @@
         </article>
 
         <!-- Trabajo actual -->
-        <article class="card">
+        <article class="card" id="card-trabajo-actual">
           <h3>Trabajo actual</h3>
-          <p class="muted" id="job-status">Tienes una asignación activa.</p>
+          <p class="muted" id="job-status">Cargando...</p>
 
           <div class="list">
             <div class="item">
               <div class="left">
-                <strong id="job-title">Turno noche — Taxi Chevrolet Sail</strong>
-                <span class="muted">Propietario: <span id="job-owner">Carlos R.</span> · Placa: <span id="job-placa">ABC123</span></span>
-                <span class="muted">Inicio: <span id="job-start">2026-01-12</span> · Ciudad: <span id="job-city">Bogotá</span></span>
+                <strong id="job-title">—</strong>
+                <span class="muted">Propietario: <span id="job-owner">—</span> · Placa: <span id="job-placa">—</span></span>
+                <span class="muted">Inicio: <span id="job-start">—</span> · Ciudad: <span id="job-city">—</span></span>
               </div>
-              <span class="chip ok">Activa</span>
+              <span class="chip ok" id="job-estado-chip" style="display:none">Activa</span>
             </div>
 
             <div class="item">
@@ -466,7 +509,7 @@
           </div>
 
           <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
-            <a class="btn" href="#">Ver detalle</a>
+            <button class="btn" type="button" id="btn-ver-detalle-trabajo">Ver detalle</button>
             <a class="btn primary" href="#">Calificar al finalizar</a>
           </div>
 
@@ -485,9 +528,9 @@
               <div class="t">Postular a oferta</div>
               <div class="d">Encuentra nuevas oportunidades</div>
             </a>
-            <a class="qbtn" href="#">
-              <div class="t">Actualizar CV</div>
-              <div class="d">Sube tu hoja de vida</div>
+            <a class="qbtn" href="#" id="quick-mi-perfil">
+              <div class="t">Mi hoja de vida</div>
+              <div class="d">Completa tu perfil conductor</div>
             </a>
             <a class="qbtn" href="#">
               <div class="t">Subir documentos</div>
@@ -598,6 +641,188 @@
         </article>
       </section>
 
+      <!-- ===== SECCIÓN MI PERFIL / HOJA DE VIDA ===== -->
+      <section id="section-perfil" style="display:none; max-width:var(--max); margin:0 auto; padding-bottom:40px;">
+
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+          <div>
+            <h2 class="title">Mi hoja de vida</h2>
+            <p class="subtitle">Los propietarios ven esta información cuando te postulas a una oferta.</p>
+          </div>
+          <button class="btn" id="btn-volver-dashboard" type="button">← Volver al dashboard</button>
+        </div>
+
+        <!-- Datos personales -->
+        <div class="card" style="margin-bottom:14px;">
+          <h3>Datos personales</h3>
+          <div class="hv-foto-grid">
+            <div class="hv-foto-col">
+              <div class="hv-foto-wrap" id="hv-foto-preview">
+                <span style="font-size:36px; opacity:.5;">👤</span>
+              </div>
+              <label class="btn" style="cursor:pointer; font-size:12px; width:110px; justify-content:center;">
+                📷 Subir foto
+                <input type="file" id="hv-foto-input" accept="image/*" style="display:none">
+              </label>
+              <input type="hidden" id="hv-foto-url">
+            </div>
+            <div class="hv-fields">
+              <div class="hv-row">
+                <div class="hv-field">
+                  <label>Nombre completo</label>
+                  <input class="tc-input" id="hv-nombres" type="text">
+                </div>
+                <div class="hv-field">
+                  <label>Email</label>
+                  <input class="tc-input" id="hv-email" type="email" >
+                </div>
+              </div>
+              <div class="hv-row">
+                <div class="hv-field">
+                  <label>Número de cédula</label>
+                  <input class="tc-input" id="hv-cedula" type="text" placeholder="Ej: 1012345678" maxlength="20">
+                </div>
+                <div class="hv-field">
+                  <label>Teléfono celular</label>
+                  <input class="tc-input" id="hv-telefono" type="tel" >
+                </div>
+              </div>
+              <div class="hv-row">
+                <div class="hv-field">
+                  <label>Fecha de nacimiento</label>
+                  <input class="tc-input" id="hv-fecha-nacimiento" type="date">
+                </div>
+                <div class="hv-field">
+                  <label>Dirección de residencia</label>
+                  <input class="tc-input" id="hv-direccion" type="text" placeholder="Ej: Cra 45 # 12-30">
+                </div>
+              </div>
+              <div class="hv-row">
+                <div class="hv-field">
+                  <label>Barrio</label>
+                  <input class="tc-input" id="hv-barrio" type="text" placeholder="Ej: Chapinero">
+                </div>
+                <div class="hv-field">
+                  <label>Ciudad donde vive</label>
+                  <input class="tc-input" id="hv-ciudad-residencia" type="text" placeholder="Ej: Bogotá">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Experiencia -->
+        <div class="card" style="margin-bottom:14px;">
+          <h3>Experiencia como conductor</h3>
+          <div class="hv-fields" style="margin-top:10px;">
+            <div class="hv-row">
+              <div class="hv-field">
+                <label>Años de experiencia manejando taxi</label>
+                <input class="tc-input" id="hv-anios-exp" type="number" min="0" max="60" placeholder="Ej: 5">
+              </div>
+              <div class="hv-field">
+                <label>Ciudades donde ha trabajado</label>
+                <input class="tc-input" id="hv-ciudades-trabajadas" type="text" placeholder="Ej: Bogotá, Medellín">
+              </div>
+            </div>
+            <div class="hv-row">
+              <div class="hv-field">
+                <label>Turno preferido</label>
+                <select class="tc-input" id="hv-turno-preferido">
+                  <option value="">-- Seleccionar --</option>
+                  <option value="dia">Día</option>
+                  <option value="noche">Noche</option>
+                  <option value="mixto">Mixto</option>
+                </select>
+              </div>
+              <div class="hv-field">
+                <label>Categoría de licencia</label>
+                <select class="tc-input" id="hv-categoria-licencia">
+                  <option value="">-- Seleccionar --</option>
+                  <option value="B1">B1</option>
+                  <option value="B2">B2</option>
+                  <option value="C1">C1</option>
+                  <option value="C2">C2</option>
+                </select>
+              </div>
+              <div class="hv-field">
+                <label>Número de licencia de conducción</label>
+                <input class="tc-input" id="hv-numero-licencia" type="text" placeholder="Ej: 80123456">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Referencias -->
+        <div class="card" style="margin-bottom:14px;">
+          <h3>Referencias personales</h3>
+          <p class="muted">Dos personas que puedan dar referencia de usted.</p>
+          <div class="hv-ref-box">
+            <div class="hv-ref-label">REFERENCIA 1</div>
+            <div class="hv-row">
+              <div class="hv-field">
+                <label>Nombre</label>
+                <input class="tc-input" id="hv-ref1-nombre" type="text" placeholder="Nombre completo">
+              </div>
+              <div class="hv-field">
+                <label>Teléfono</label>
+                <input class="tc-input" id="hv-ref1-telefono" type="tel" placeholder="Ej: 3001234567">
+              </div>
+              <div class="hv-field">
+                <label>Relación</label>
+                <select class="tc-input" id="hv-ref1-relacion">
+                  <option value="">-- Tipo --</option>
+                  <option value="familiar">Familiar</option>
+                  <option value="laboral">Laboral</option>
+                  <option value="personal">Personal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="hv-ref-box">
+            <div class="hv-ref-label">REFERENCIA 2</div>
+            <div class="hv-row">
+              <div class="hv-field">
+                <label>Nombre</label>
+                <input class="tc-input" id="hv-ref2-nombre" type="text" placeholder="Nombre completo">
+              </div>
+              <div class="hv-field">
+                <label>Teléfono</label>
+                <input class="tc-input" id="hv-ref2-telefono" type="tel" placeholder="Ej: 3009876543">
+              </div>
+              <div class="hv-field">
+                <label>Relación</label>
+                <select class="tc-input" id="hv-ref2-relacion">
+                  <option value="">-- Tipo --</option>
+                  <option value="familiar">Familiar</option>
+                  <option value="laboral">Laboral</option>
+                  <option value="personal">Personal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción personal -->
+        <div class="card" style="margin-bottom:14px;">
+          <h3>Descripción personal</h3>
+          <p class="muted">Cuéntele al propietario quién es usted y por qué es un buen conductor.</p>
+          <textarea class="tc-input" id="hv-descripcion" rows="4" maxlength="300"
+            placeholder="Ej: Soy conductor con 8 años de experiencia, responsable, puntual y con buen conocimiento de la ciudad..." style="margin-top:10px;"></textarea>
+          <div style="text-align:right; font-size:12px; opacity:.55; margin-top:4px;"><span id="hv-desc-count">0</span>/300</div>
+        </div>
+
+        <!-- Guardar -->
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:40px;">
+          <div id="hv-alert" style="display:none; flex:1;"></div>
+          <button class="btn primary" id="btn-guardar-hv" type="button" style="padding:12px 28px; font-size:15px; font-weight:700; margin-left:auto;">
+            💾 Guardar hoja de vida
+          </button>
+        </div>
+
+      </section>
+      <!-- ===== FIN SECCIÓN PERFIL ===== -->
+
       <footer class="foot">
         © 2026 TaxiConfianza · Panel Conductor · Diseñado para crear confianza real.
       </footer>
@@ -605,72 +830,125 @@
   </div>
 
   <script>
-    // 1. Verificación de Seguridad y Carga de Datos
-    document.addEventListener('DOMContentLoaded', () => {
-      // Intentamos obtener los datos del usuario logueado
-      const userData = JSON.parse(localStorage.getItem('userTaxiConfianza'));
-
-      // SEGURIDAD: Si no hay datos o el tipo no es CONDUCTOR, enviamos al login
-      if (!userData || userData.tipo.toUpperCase() !== 'CONDUCTOR') {
-        console.warn("Acceso denegado: Redirigiendo al login...");
-        window.location.href = 'login.html';
-        return;
-      }
-
-      // CARGA DE NOMBRE: Usamos los IDs que tienes en tu HTML actual
-      // El ID de tu saludo es 'user-name' (Línea 337 de tu código)
-      const welcomeName = document.getElementById('user-name');
-      
-      if (welcomeName) {
-        welcomeName.innerText = userData.nombres + " " + (userData.apellidos || "");
-      }
-
-      console.log("Panel cargado exitosamente para:", userData.nombres);
-    });
-
-    // 2. Configuración del Botón Salir
-    // Buscamos el botón de la línea 320 y le asignamos la función
-    const btnSalir = document.querySelector('.btn.danger');
-    if (btnSalir) {
-      btnSalir.addEventListener('click', cerrarSesion);
-    }
-
-    function cerrarSesion() {
-      if(confirm("¿Estás seguro que deseas cerrar sesión?")) {
-        localStorage.removeItem('userTaxiConfianza');
-        window.location.href = 'index.html';
-      }
-    }
-
-    // 3. Lógica para el Menú Móvil (Para que funcione el botón ☰ Menú)
+    // Menú móvil
     const btnOpenMenu = document.getElementById('btnOpenMenu');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
+    if (btnOpenMenu) btnOpenMenu.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
+    if (overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
-    if (btnOpenMenu) {
-      btnOpenMenu.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        overlay.classList.add('show');
-      });
+    // Toggle secciones dashboard ↔ perfil
+    function showSection(name) {
+      const dash = document.getElementById('section-dashboard');
+      const perf = document.getElementById('section-perfil');
+      const foot = document.querySelector('footer.foot');
+      if (name === 'perfil') {
+        dash.style.display = 'none';
+        perf.style.display = 'block';
+        if (foot) foot.style.display = 'none';
+        document.getElementById('nav-mi-perfil').classList.add('active');
+      } else {
+        perf.style.display = 'none';
+        dash.style.display = '';
+        if (foot) foot.style.display = '';
+        document.getElementById('nav-mi-perfil').classList.remove('active');
+      }
     }
 
-    if (overlay) {
-      overlay.addEventListener('click', () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nav-mi-perfil').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection('perfil');
+        if (typeof window.TC_loadHV === 'function') window.TC_loadHV();
         sidebar.classList.remove('open');
         overlay.classList.remove('show');
       });
-    }
+      document.getElementById('quick-mi-perfil').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection('perfil');
+        if (typeof window.TC_loadHV === 'function') window.TC_loadHV();
+      });
+      document.getElementById('btn-volver-dashboard').addEventListener('click', () => showSection('dashboard'));
+
+      document.getElementById('nav-trabajo-actual').addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection('dashboard');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+        const card = document.getElementById('card-trabajo-actual');
+        if (card) requestAnimationFrame(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      });
+    });
   </script>
+  <!-- Modal: detalle de asignación activa -->
+  <div id="modal-detalle-trabajo" style="display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.6); overflow-y:auto; padding:24px 16px;" role="dialog" aria-modal="true" aria-labelledby="modal-detalle-titulo">
+    <div style="background:var(--card,#1a1f2e); border:1px solid var(--border,rgba(255,255,255,.08)); border-radius:16px; max-width:520px; margin:0 auto; padding:28px 24px; position:relative;">
+      <button type="button" id="btn-cerrar-detalle-trabajo" aria-label="Cerrar" style="position:absolute; top:14px; right:14px; background:none; border:none; color:var(--muted,#8b95a1); font-size:22px; cursor:pointer; line-height:1;">✕</button>
+      <h2 id="modal-detalle-titulo" style="margin:0 0 20px; font-size:17px; font-weight:700;">Detalle de tu asignación activa</h2>
+
+      <div style="display:grid; gap:14px;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Oferta</div>
+          <div style="font-weight:600;" id="det-titulo">—</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Ciudad</div>
+            <div id="det-ciudad">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Turno</div>
+            <div id="det-turno">—</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Fecha inicio</div>
+            <div id="det-fecha">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Zona</div>
+            <div id="det-zona">—</div>
+          </div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border,rgba(255,255,255,.08)); margin:4px 0;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Propietario</div>
+          <div style="font-weight:600;" id="det-propietario">—</div>
+          <div style="font-size:13px; color:var(--muted,#8b95a1);" id="det-propietario-tel">—</div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border,rgba(255,255,255,.08)); margin:4px 0;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Vehículo</div>
+          <div style="font-weight:600;" id="det-vehiculo">—</div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border,rgba(255,255,255,.08)); margin:4px 0;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Tipo de acuerdo</div>
+          <div id="det-modalidad">—</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Cuota diaria</div>
+            <div style="font-weight:700; font-size:18px;" id="det-cuota">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">% propietario</div>
+            <div style="font-weight:700; font-size:18px;" id="det-porcentaje">—</div>
+          </div>
+        </div>
+        <div id="det-incluye-row">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:6px;">Incluye</div>
+          <div id="det-incluye" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/tc-session.js"></script>
 <script src="js/tc-api.js"></script>
 <script src="js/tc-dashboard-conductor.js"></script>
 
 </body>
 </html>
-</body>
-</html>
-
-
-
-
 

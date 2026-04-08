@@ -96,6 +96,31 @@ async function runMigrations() {
     "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS exp_minima TINYINT UNSIGNED DEFAULT NULL",
     "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS categoria_licencia VARCHAR(10) DEFAULT NULL",
     "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS bloqueada TINYINT(1) NOT NULL DEFAULT 0",
+    "ALTER TABLE ofertas_trabajo ADD COLUMN IF NOT EXISTS motivo_bloqueo VARCHAR(500) DEFAULT NULL",
+    // Campos extendidos de vehículo en la tabla vehiculos
+    "ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS marca VARCHAR(80) DEFAULT NULL",
+    "ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS anio SMALLINT DEFAULT NULL",
+    "ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS combustible VARCHAR(20) DEFAULT NULL",
+    // Hoja de vida conductor — perfiles_conductores
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS cedula VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS fecha_nacimiento DATE DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS direccion VARCHAR(200) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS barrio VARCHAR(100) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ciudad_residencia VARCHAR(100) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS foto_url MEDIUMTEXT",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS anios_experiencia TINYINT UNSIGNED DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ciudades_trabajadas VARCHAR(300) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS turno_preferido VARCHAR(10) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS categoria_licencia VARCHAR(10) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS numero_licencia VARCHAR(30) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref1_nombre VARCHAR(100) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref1_telefono VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref1_relacion VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref2_nombre VARCHAR(100) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref2_telefono VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref2_relacion VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS descripcion_personal VARCHAR(300) DEFAULT NULL",
   ];
   for (const sql of cols) {
     try {
@@ -400,10 +425,17 @@ app.get("/api/dashboard/propietario", requireUser, async (req, res) => {
           p.id,
           p.oferta_id,
           p.conductor_id,
+          p.mensaje,
           p.estado,
           o.ciudad,
           o.titulo AS oferta_titulo,
-          u2.nombres AS conductor_nombre
+          u2.nombres AS conductor_nombre,
+          u2.apellidos AS conductor_apellidos,
+          pc.anios_experiencia,
+          pc.ciudad_residencia,
+          pc.categoria_licencia,
+          pc.turno_preferido,
+          pc.descripcion_personal
        FROM postulaciones p
        JOIN ofertas_trabajo o ON o.id = p.oferta_id
        JOIN perfiles_conductores pc ON pc.id = p.conductor_id
@@ -447,9 +479,8 @@ app.get("/api/propietario/vehiculos", requireUser, async (req, res) => {
 
     const perfil = await ensurePerfilPropietario(u.id);
 
-    // Ajusta columnas si tu tabla tiene más (marca, etc.)
     const rows = await q(
-      "SELECT id, placa, modelo FROM vehiculos WHERE propietario_id = ? ORDER BY id DESC",
+      "SELECT id, placa, marca, modelo, anio, combustible FROM vehiculos WHERE propietario_id = ? ORDER BY id DESC",
       [perfil.id]
     );
 
@@ -472,14 +503,14 @@ app.post("/api/propietario/vehiculos", requireUser, async (req, res) => {
 
     const perfil = await ensurePerfilPropietario(u.id);
 
-    const { placa, modelo } = req.body || {};
-    if (!placa || !modelo) {
-      return res.status(400).json({ ok: false, error: "Faltan campos: placa, modelo" });
+    const { placa, modelo, marca, anio, combustible } = req.body || {};
+    if (!placa) {
+      return res.status(400).json({ ok: false, error: "La placa es obligatoria" });
     }
 
-    // Normaliza placa
     const placaNorm = String(placa).trim().toUpperCase();
-    const modeloNorm = String(modelo).trim();
+    const COMBUSTIBLE_OK = new Set(["gasolina", "gas", "hibrido", "electrico"]);
+    const combustNorm = COMBUSTIBLE_OK.has(String(combustible || "")) ? String(combustible) : null;
 
     // Evitar duplicado de placa para el mismo propietario
     const dup = await q(
@@ -489,8 +520,15 @@ app.post("/api/propietario/vehiculos", requireUser, async (req, res) => {
     if (dup[0]) return res.status(409).json({ ok: false, error: "Ya tienes un vehículo con esa placa" });
 
     const r = await q(
-      "INSERT INTO vehiculos (propietario_id, placa, modelo) VALUES (?, ?, ?)",
-      [perfil.id, placaNorm, modeloNorm]
+      "INSERT INTO vehiculos (propietario_id, placa, marca, modelo, anio, combustible) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        perfil.id,
+        placaNorm,
+        marca ? String(marca).trim() : null,
+        modelo ? String(modelo).trim() : null,
+        anio ? Number(anio) : null,
+        combustNorm,
+      ]
     );
 
     res.status(201).json({ ok: true, id: r.insertId });
@@ -582,6 +620,9 @@ app.post("/api/ofertas", requireUser, async (req, res) => {
       perfil.id,
     ]);
     if (!v[0]) return res.status(400).json({ ok: false, error: "Vehículo inválido" });
+
+    // Validación de documentos será automática via API RUNT en Fase 2
+
 
     const allowedTurno = new Set(["dia", "noche", "mixto"]);
     const t = allowedTurno.has(String(turno || "")) ? String(turno) : "dia";
@@ -884,6 +925,54 @@ app.post("/api/propietario/postulaciones/:id/aceptar", requireUser, (req, res) =
   });
 });
 
+// GET /api/conductor/asignacion-activa — asignación activa del conductor autenticado
+app.get("/api/conductor/asignacion-activa", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    if (tipoLower(u.tipo) !== "conductor") return res.status(403).json({ ok: false, error: "Solo conductor" });
+
+    const perfil = await ensurePerfilConductor(u.id);
+
+    const rows = await q(
+      `SELECT
+         a.id,
+         DATE_FORMAT(a.fecha_inicio, '%Y-%m-%d') AS fecha_inicio,
+         a.estado,
+         o.titulo AS oferta_titulo,
+         o.ciudad,
+         o.turno,
+         o.modalidad,
+         o.cuota_diaria,
+         o.porcentaje_propietario,
+         o.incluye,
+         o.zona_operacion,
+         v.placa,
+         v.marca,
+         v.modelo,
+         v.anio,
+         u2.nombres AS propietario_nombre,
+         u2.apellidos AS propietario_apellidos,
+         u2.celular AS propietario_celular
+       FROM asignaciones a
+       JOIN ofertas_trabajo o ON o.id = a.oferta_id
+       LEFT JOIN vehiculos v ON v.id = o.vehiculo_id
+       JOIN perfiles_propietarios pp ON pp.id = a.propietario_id
+       JOIN usuarios u2 ON u2.id = pp.usuario_id
+       WHERE a.conductor_id = ? AND a.estado = 'activa'
+       ORDER BY a.fecha_inicio DESC
+       LIMIT 1`,
+      [perfil.id]
+    );
+
+    res.json({ ok: true, data: rows[0] || null });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // Finalizar asignación
 app.patch("/api/propietario/asignaciones/:id/finalizar", requireUser, async (req, res) => {
   try {
@@ -1067,12 +1156,24 @@ app.get("/api/conductor/ofertas", requireUser, async (req, res) => {
         o.descripcion,
         o.ciudad,
         o.turno,
+        o.modalidad,
+        o.turno_inicio,
+        o.turno_fin,
+        o.zona_operacion,
         o.cuota_diaria,
         o.porcentaje_propietario,
+        o.incluye,
+        o.veh_marca,
+        o.veh_modelo,
+        o.veh_anio,
+        o.veh_combustible,
+        o.exp_minima,
+        o.categoria_licencia,
+        o.whatsapp,
         o.requisitos,
+        o.estado,
         DATE_FORMAT(o.fecha_creacion, '%Y-%m-%d') AS fecha_creacion,
         v.placa,
-        v.modelo,
         CONCAT(up.nombres, ' ', up.apellidos) AS propietario_nombre,
         p.estado AS mi_postulacion_estado,
         DATE_FORMAT(p.fecha_postulacion, '%Y-%m-%d') AS mi_fecha_postulacion
@@ -1162,6 +1263,153 @@ app.get("/api/session/me", (req, res) => {
     return res.json({ ok: true, user: rows[0] });
   });
 });
+// =====================================================
+// CONDUCTOR: Hoja de vida (perfil completo)
+// =====================================================
+
+// GET /api/conductor/perfil
+app.get("/api/conductor/perfil", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    if (tipoLower(u.tipo) !== "conductor") return res.status(403).json({ ok: false, error: "Solo conductor" });
+
+    const perfil = await ensurePerfilConductor(u.id);
+
+    const rows = await q(
+      `SELECT pc.*, u.nombres, u.apellidos, u.email, u.telefono
+       FROM perfiles_conductores pc
+       JOIN usuarios u ON u.id = pc.usuario_id
+       WHERE pc.id = ? LIMIT 1`,
+      [perfil.id]
+    );
+
+    res.json({ ok: true, data: rows[0] || {} });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// PUT /api/conductor/perfil
+app.put("/api/conductor/perfil", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    if (tipoLower(u.tipo) !== "conductor") return res.status(403).json({ ok: false, error: "Solo conductor" });
+
+    const perfil = await ensurePerfilConductor(u.id);
+
+    const {
+      cedula, fecha_nacimiento, direccion, barrio, ciudad_residencia, foto_url,
+      anios_experiencia, ciudades_trabajadas, turno_preferido, categoria_licencia, numero_licencia,
+      ref1_nombre, ref1_telefono, ref1_relacion,
+      ref2_nombre, ref2_telefono, ref2_relacion,
+      descripcion_personal,
+    } = req.body || {};
+
+    const allowedTurno = new Set(["dia", "noche", "mixto"]);
+    const turno = allowedTurno.has(String(turno_preferido || "")) ? String(turno_preferido) : null;
+
+    const allowedLic = new Set(["B1", "B2", "C1", "C2"]);
+    const licCat = allowedLic.has(String(categoria_licencia || "")) ? String(categoria_licencia) : null;
+
+    const allowedRel = new Set(["familiar", "laboral", "personal"]);
+    const str = (v) => (v || "").toString().trim() || null;
+
+    await q(
+      `UPDATE perfiles_conductores SET
+        cedula             = ?,
+        fecha_nacimiento   = ?,
+        direccion          = ?,
+        barrio             = ?,
+        ciudad_residencia  = ?,
+        foto_url           = ?,
+        anios_experiencia  = ?,
+        ciudades_trabajadas= ?,
+        turno_preferido    = ?,
+        categoria_licencia = ?,
+        numero_licencia    = ?,
+        ref1_nombre        = ?,
+        ref1_telefono      = ?,
+        ref1_relacion      = ?,
+        ref2_nombre        = ?,
+        ref2_telefono      = ?,
+        ref2_relacion      = ?,
+        descripcion_personal = ?
+       WHERE id = ?`,
+      [
+        str(cedula),
+        fecha_nacimiento || null,
+        str(direccion),
+        str(barrio),
+        str(ciudad_residencia),
+        foto_url || null,
+        Number(anios_experiencia) > 0 ? Number(anios_experiencia) : null,
+        str(ciudades_trabajadas),
+        turno,
+        licCat,
+        str(numero_licencia),
+        str(ref1_nombre),
+        str(ref1_telefono),
+        allowedRel.has(String(ref1_relacion || "")) ? String(ref1_relacion) : null,
+        str(ref2_nombre),
+        str(ref2_telefono),
+        allowedRel.has(String(ref2_relacion || "")) ? String(ref2_relacion) : null,
+        str(descripcion_personal)?.slice(0, 300) || null,
+        perfil.id,
+      ]
+    );
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /api/propietario/postulaciones/:id/conductor  — HV completa para propietario
+app.get("/api/propietario/postulaciones/:id/conductor", requireUser, async (req, res) => {
+  try {
+    const { email, tipo } = req.tcAuth;
+    const u = await getUsuarioByEmail(email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    if (tipoLower(u.tipo) !== "propietario") return res.status(403).json({ ok: false, error: "Solo propietario" });
+
+    const perfil = await ensurePerfilPropietario(u.id);
+    const postId = Number(req.params.id);
+
+    const rows = await q(
+      `SELECT
+          p.id AS postulacion_id, p.mensaje, p.estado,
+          DATE_FORMAT(p.fecha_postulacion, '%Y-%m-%d') AS fecha_postulacion,
+          u2.nombres, u2.apellidos, u2.email AS conductor_email, u2.telefono,
+          pc.cedula, pc.fecha_nacimiento, pc.direccion, pc.barrio, pc.ciudad_residencia,
+          pc.foto_url, pc.anios_experiencia, pc.ciudades_trabajadas,
+          pc.turno_preferido, pc.categoria_licencia, pc.numero_licencia,
+          pc.ref1_nombre, pc.ref1_telefono, pc.ref1_relacion,
+          pc.ref2_nombre, pc.ref2_telefono, pc.ref2_relacion,
+          pc.descripcion_personal
+       FROM postulaciones p
+       JOIN ofertas_trabajo o ON o.id = p.oferta_id
+       JOIN perfiles_conductores pc ON pc.id = p.conductor_id
+       JOIN usuarios u2 ON u2.id = pc.usuario_id
+       WHERE p.id = ? AND o.propietario_id = ? AND o.deleted_at IS NULL
+       LIMIT 1`,
+      [postId, perfil.id]
+    );
+
+    if (!rows[0]) return res.status(404).json({ ok: false, error: "Postulación no encontrada" });
+
+    res.json({ ok: true, data: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // ==============================
 // Server listen
 // ==============================

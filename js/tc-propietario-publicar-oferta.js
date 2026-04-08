@@ -42,6 +42,41 @@ function clearForm() {
   document.querySelectorAll('input[name="incluye"]').forEach(cb => { cb.checked = false; });
   document.getElementById("turnoHorasRow").style.display = "none";
   document.getElementById("zonaTextoRow").style.display  = "none";
+  actualizarInfoVehiculo(null);
+  if (typeof window._clearVehPhoto === "function") window._clearVehPhoto();
+}
+
+// Mapa de vehículos cargados, para leer datos al seleccionar
+const _vehiculosMap = {};
+
+function actualizarInfoVehiculo(id) {
+  const info   = document.getElementById("vehInfo");
+  const v      = _vehiculosMap[id];
+  const COMBUST = { gasolina:"Gasolina", gas:"Gas natural (GNV)", hibrido:"Híbrido", electrico:"Eléctrico" };
+
+  if (!v || !id) {
+    if (info) info.classList.remove("visible");
+    ["veh_marca","veh_modelo","veh_anio","veh_combustible"].forEach(f => {
+      const el = document.getElementById(f); if (el) el.value = "";
+    });
+    return;
+  }
+
+  // Panel visual
+  const set = (elId, val) => { const el = document.getElementById(elId); if (el) el.textContent = val || "—"; };
+  set("vi_placa",      v.placa);
+  set("vi_marca",      v.marca);
+  set("vi_modelo",     v.modelo);
+  set("vi_anio",       v.anio);
+  set("vi_combustible", COMBUST[v.combustible] || v.combustible || "—");
+  if (info) info.classList.add("visible");
+
+  // Campos ocultos para que publicarOferta() los lea
+  const setHidden = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val || ""; };
+  setHidden("veh_marca",      v.marca);
+  setHidden("veh_modelo",     v.modelo);
+  setHidden("veh_anio",       v.anio);
+  setHidden("veh_combustible", v.combustible);
 }
 
 async function cargarVehiculos() {
@@ -63,11 +98,15 @@ async function cargarVehiculos() {
     }
     select.innerHTML = `<option value="">Selecciona un vehículo</option>`;
     data.forEach(v => {
+      _vehiculosMap[v.id] = v;
       const opt = document.createElement("option");
       opt.value = v.id;
-      opt.textContent = `${v.placa}${v.modelo ? " · " + v.modelo : ""}`;
+      // Etiqueta: placa + marca + modelo + año
+      const partes = [v.placa, v.marca, v.modelo, v.anio].filter(Boolean);
+      opt.textContent = partes.join(" · ");
       select.appendChild(opt);
     });
+    select.addEventListener("change", () => actualizarInfoVehiculo(select.value));
   } catch (e) {
     console.error(e);
     select.innerHTML = `<option value="">Error de conexión</option>`;
