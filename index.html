@@ -725,5 +725,501 @@
 })();
 </script>
 
+<!-- ══════════════════════════════════════════════
+     TAXIBOT — Widget flotante v2
+══════════════════════════════════════════════ -->
+<style>
+  /* ── Contenedor flotante ── */
+  #taxibot-launcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    user-select: none;
+  }
+
+  /* ── Ventana de chat ── */
+  #taxibot-window {
+    width: 340px;
+    max-height: 500px;
+    background: #0d1525;
+    border: 1px solid rgba(245,197,24,.28);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,.6);
+    animation: tbSlideIn .25s ease;
+  }
+  #taxibot-window.hidden { display: none; }
+  @keyframes tbSlideIn {
+    from { opacity: 0; transform: translateY(16px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── Header del chat ── */
+  .tb-header {
+    background: linear-gradient(135deg, #1a2540, #0d1525);
+    border-bottom: 1px solid rgba(245,197,24,.18);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tb-header-info { flex: 1; }
+  .tb-header-name { font-weight: 700; font-size: 14px; color: #f1f5f9; }
+  .tb-beta-badge {
+    display: inline-block;
+    background: #F5C518;
+    color: #0d1525;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tb-header-status { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .tb-close-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color .15s;
+  }
+  .tb-close-btn:hover { color: #f1f5f9; }
+
+  /* ── Mensajes ── */
+  .tb-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(245,197,24,.2) transparent;
+  }
+  .tb-bubble {
+    max-width: 82%;
+    padding: 9px 13px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .tb-bubble.bot {
+    background: rgba(245,197,24,.1);
+    border: 1px solid rgba(245,197,24,.2);
+    color: #e2e8f0;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .tb-bubble.user {
+    background: rgba(59,130,246,.18);
+    border: 1px solid rgba(59,130,246,.22);
+    color: #e2e8f0;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .tb-bubble.typing { color: #64748b; font-style: italic; }
+
+  /* ── Sugerencias ── */
+  .tb-suggestions {
+    padding: 0 12px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tb-chip {
+    background: rgba(245,197,24,.08);
+    border: 1px solid rgba(245,197,24,.22);
+    color: #F5C518;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  .tb-chip:hover { background: rgba(245,197,24,.18); }
+
+  /* ── Input ── */
+  .tb-input-row {
+    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid rgba(245,197,24,.12);
+  }
+  .tb-input {
+    flex: 1;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    color: #f1f5f9;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .tb-input:focus { border-color: rgba(245,197,24,.4); }
+  .tb-input::placeholder { color: #475569; }
+  .tb-send-btn {
+    background: #F5C518;
+    border: none;
+    border-radius: 8px;
+    color: #0d1525;
+    font-size: 16px;
+    width: 36px;
+    cursor: pointer;
+    transition: opacity .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tb-send-btn:hover { opacity: .85; }
+  .tb-send-btn:disabled { opacity: .4; cursor: default; }
+
+  /* ══ ZONA DEL PERSONAJE ══ */
+  #tb-character-zone {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  /* Burbuja permanente "¿Necesitas ayuda?" */
+  #tb-callout {
+    background: #fff;
+    color: #1a2e5a;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 14px 14px 4px 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.35);
+    white-space: nowrap;
+    pointer-events: none;
+    animation: tbCalloutPulse 3s ease-in-out infinite;
+  }
+  @keyframes tbCalloutPulse {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+
+  /* Wrapper del robot + etiqueta inferior */
+  #tb-bot-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+
+  /* Tooltip hover */
+  #tb-bot-wrap::after {
+    content: "Soy TaxiBot, tu asistente virtual";
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    background: #1a2e5a;
+    color: #F5C518;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .2s, transform .2s;
+    box-shadow: 0 3px 12px rgba(0,0,0,.4);
+  }
+  #tb-bot-wrap:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Botón lanzador ── SVG del robot taxi */
+  #taxibot-btn {
+    width: 76px;
+    height: auto;
+    cursor: pointer;
+    filter: drop-shadow(0 4px 18px rgba(245,197,24,.45));
+    animation: tbBounce 2.6s ease-in-out infinite;
+    display: block;
+  }
+  @keyframes tbBounce {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+  }
+
+  /* Brazo que saluda */
+  #tb-arm-right {
+    transform-origin: 3px 4px;
+    animation: tbWave 1.8s ease-in-out infinite;
+  }
+  @keyframes tbWave {
+    0%,100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-28deg); }
+    75%      { transform: rotate(18deg); }
+  }
+
+  /* Etiqueta "Soporte IA · 24/7" */
+  #tb-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: .05em;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  /* Punto verde parpadeante */
+  #tb-online {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #4ade80;
+    vertical-align: middle;
+    margin-right: 4px;
+    animation: tbPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes tbPulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .45; transform: scale(.7); }
+  }
+</style>
+
+<div id="taxibot-launcher">
+  <!-- ── Ventana de chat ── -->
+  <div id="taxibot-window" class="hidden">
+    <div class="tb-header">
+      <!-- Mini avatar en header -->
+      <svg width="34" height="34" viewBox="0 0 60 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Letrero TAXI -->
+        <rect x="14" y="2" width="32" height="10" rx="3" fill="#1a2e5a"/>
+        <text x="30" y="10" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#F5C518" text-anchor="middle">TAXI</text>
+        <!-- Cabina -->
+        <rect x="10" y="12" width="40" height="16" rx="6" fill="#F5C518"/>
+        <!-- Cuerpo principal -->
+        <rect x="4" y="24" width="52" height="28" rx="5" fill="#F5C518"/>
+        <!-- Franja tablero ajedrez -->
+        <rect x="4" y="34" width="52" height="8" fill="#111"/>
+        <rect x="10" y="34" width="6" height="4" fill="#F5C518"/>
+        <rect x="22" y="34" width="6" height="4" fill="#F5C518"/>
+        <rect x="34" y="34" width="6" height="4" fill="#F5C518"/>
+        <rect x="46" y="34" width="6" height="4" fill="#F5C518"/>
+        <rect x="4"  y="38" width="6" height="4" fill="#F5C518"/>
+        <rect x="16" y="38" width="6" height="4" fill="#F5C518"/>
+        <rect x="28" y="38" width="6" height="4" fill="#F5C518"/>
+        <rect x="40" y="38" width="6" height="4" fill="#F5C518"/>
+        <!-- Ojos -->
+        <rect x="14" y="15" width="10" height="9" rx="2" fill="#1a2e5a"/>
+        <rect x="36" y="15" width="10" height="9" rx="2" fill="#1a2e5a"/>
+        <circle cx="19" cy="19.5" r="3" fill="#4ade80"/>
+        <circle cx="41" cy="19.5" r="3" fill="#4ade80"/>
+        <!-- Sonrisa -->
+        <path d="M22 29 Q30 34 38 29" stroke="#111" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Ruedas -->
+        <circle cx="16" cy="56" r="8" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
+        <circle cx="16" cy="56" r="3" fill="#888"/>
+        <circle cx="44" cy="56" r="8" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
+        <circle cx="44" cy="56" r="3" fill="#888"/>
+      </svg>
+      <div class="tb-header-info">
+        <div class="tb-header-name">TaxiBot <span class="tb-beta-badge">BETA</span></div>
+        <div class="tb-header-status"><span id="tb-online"></span>Asistente de TaxiConfianza</div>
+      </div>
+      <button class="tb-close-btn" id="taxibot-close" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="tb-messages" id="tb-messages">
+      <div class="tb-bubble bot">¡Hola! Soy TaxiBot 🚕<br>¿En qué puedo ayudarte hoy?</div>
+    </div>
+
+    <div class="tb-suggestions" id="tb-suggestions">
+      <button class="tb-chip">¿Cómo funciona?</button>
+      <button class="tb-chip">Reportar error</button>
+      <button class="tb-chip">Hablar con soporte</button>
+    </div>
+
+    <div class="tb-input-row">
+      <input class="tb-input" id="tb-input" type="text" placeholder="Escribe tu mensaje…" maxlength="500" autocomplete="off"/>
+      <button class="tb-send-btn" id="tb-send" aria-label="Enviar">➤</button>
+    </div>
+  </div>
+
+  <!-- ── Zona del personaje + burbuja ── -->
+  <div id="tb-character-zone">
+    <!-- Burbuja permanente -->
+    <div id="tb-callout">¿Necesitas ayuda? 🚕</div>
+
+    <!-- Robot + etiqueta -->
+    <div id="tb-bot-wrap">
+      <!-- SVG TaxiBot robot-taxi rediseñado -->
+      <svg id="taxibot-btn" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+           role="button" aria-label="Abrir chat con TaxiBot">
+
+        <!-- Antena -->
+        <rect x="37" y="0" width="6" height="13" rx="3" fill="#F5C518"/>
+        <circle cx="40" cy="0" r="4" fill="#F5C518" stroke="#1a2e5a" stroke-width="2"/>
+
+        <!-- Letrero TAXI -->
+        <rect x="16" y="13" width="48" height="12" rx="4" fill="#1a2e5a"/>
+        <text x="40" y="22" font-family="Arial,sans-serif" font-size="8" font-weight="900"
+              fill="#F5C518" text-anchor="middle" letter-spacing="1">TAXI</text>
+
+        <!-- Cabina (techo redondeado) -->
+        <rect x="12" y="25" width="56" height="20" rx="9" fill="#F5C518"/>
+
+        <!-- Faros laterales cabina -->
+        <rect x="4"  y="30" width="10" height="8" rx="2" fill="#fff" opacity=".9"/>
+        <rect x="66" y="30" width="10" height="8" rx="2" fill="#fff" opacity=".9"/>
+
+        <!-- Ojos rectangulares (sobre cabina) -->
+        <rect x="19" y="28" width="14" height="12" rx="3" fill="#1a2e5a"/>
+        <rect x="47" y="28" width="14" height="12" rx="3" fill="#1a2e5a"/>
+        <!-- Pupilas verdes -->
+        <circle cx="26" cy="34" r="4.5" fill="#4ade80"/>
+        <circle cx="54" cy="34" r="4.5" fill="#4ade80"/>
+        <!-- Brillo pupila -->
+        <circle cx="27.5" cy="32.5" r="1.5" fill="#fff" opacity=".7"/>
+        <circle cx="55.5" cy="32.5" r="1.5" fill="#fff" opacity=".7"/>
+
+        <!-- Sonrisa curva -->
+        <path d="M28 44 Q40 52 52 44" stroke="#1a2e5a" stroke-width="3"
+              stroke-linecap="round" fill="none"/>
+
+        <!-- Cuerpo principal -->
+        <rect x="6" y="44" width="68" height="34" rx="7" fill="#F5C518"/>
+
+        <!-- Franja tablero ajedrez -->
+        <rect x="6" y="55" width="68" height="11" fill="#111" rx="1"/>
+        <!-- Cuadros blancos/amarillos del tablero -->
+        <rect x="9"  y="55" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="25" y="55" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="41" y="55" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="57" y="55" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="17" y="60.5" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="33" y="60.5" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="49" y="60.5" width="8" height="5.5" fill="#F5C518"/>
+        <rect x="65" y="60.5" width="8" height="5.5" fill="#F5C518"/>
+
+        <!-- Brazo izquierdo (quieto) -->
+        <rect x="0" y="46" width="8" height="18" rx="4" fill="#F5C518"/>
+
+        <!-- Brazo derecho (saluda, animado) -->
+        <g id="tb-arm-right" transform="translate(72, 46)">
+          <rect x="0" y="0" width="8" height="18" rx="4" fill="#F5C518"/>
+          <rect x="1" y="16" width="7" height="5" rx="2" fill="#F5C518"/>
+        </g>
+
+        <!-- Ruedas -->
+        <circle cx="22" cy="84" r="11" fill="#1a1a1a" stroke="#555" stroke-width="2.5"/>
+        <circle cx="22" cy="84" r="4.5" fill="#666"/>
+        <circle cx="22" cy="84" r="2" fill="#333"/>
+
+        <circle cx="58" cy="84" r="11" fill="#1a1a1a" stroke="#555" stroke-width="2.5"/>
+        <circle cx="58" cy="84" r="4.5" fill="#666"/>
+        <circle cx="58" cy="84" r="2" fill="#333"/>
+      </svg>
+
+      <!-- Etiqueta inferior -->
+      <div id="tb-label"><span id="tb-online-dot" style="display:inline-block;width:6px;height:6px;background:#4ade80;border-radius:50%;box-shadow:0 0 5px #4ade80;vertical-align:middle;margin-right:3px;animation:tbPulse 1.4s ease-in-out infinite;"></span>Soporte IA · 24/7</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const launcher = document.getElementById('taxibot-launcher');
+  const win      = document.getElementById('taxibot-window');
+  const btn      = document.getElementById('taxibot-btn');
+  const closeBtn = document.getElementById('taxibot-close');
+  const input    = document.getElementById('tb-input');
+  const sendBtn  = document.getElementById('tb-send');
+  const msgs     = document.getElementById('tb-messages');
+  const sugs     = document.getElementById('tb-suggestions');
+
+  let history  = [];
+  let loading  = false;
+
+  function openChat()  { win.classList.remove('hidden'); sugs.style.display = ''; input.focus(); }
+  function closeChat() { win.classList.add('hidden'); }
+
+  btn.addEventListener('click', openChat);
+  closeBtn.addEventListener('click', closeChat);
+
+  // Chips de sugerencias
+  sugs.querySelectorAll('.tb-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      sugs.style.display = 'none';
+      sendMessage(chip.textContent.trim());
+    });
+  });
+
+  function addBubble(text, role) {
+    const div = document.createElement('div');
+    div.className = 'tb-bubble ' + role;
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+  }
+
+  async function sendMessage(text) {
+    if (loading || !text.trim()) return;
+    sugs.style.display = 'none';
+    loading = true;
+    sendBtn.disabled = true;
+    input.value = '';
+
+    addBubble(text, 'user');
+    const typingEl = addBubble('Escribiendo…', 'bot typing');
+
+    try {
+      const res  = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history }),
+      });
+      const data = await res.json();
+
+      typingEl.remove();
+
+      const reply = data.reply || 'Lo siento, hubo un error.';
+      addBubble(reply, 'bot');
+
+      history.push({ role: 'user', content: text });
+      history.push({ role: 'assistant', content: reply });
+      if (history.length > 20) history = history.slice(-20);
+    } catch (e) {
+      typingEl.remove();
+      addBubble('Error de conexión. Intenta de nuevo.', 'bot');
+    } finally {
+      loading = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', () => sendMessage(input.value));
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input.value); }
+  });
+})();
+</script>
+
 </body>
 </html>

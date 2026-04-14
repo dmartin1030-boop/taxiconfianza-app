@@ -1411,6 +1411,74 @@ app.get("/api/propietario/postulaciones/:id/conductor", requireUser, async (req,
 });
 
 // ==============================
+// TaxiBot — Chat con Claude + notificaciones Telegram
+// ==============================
+const Anthropic = require("@anthropic-ai/sdk");
+const https = require("https");
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const TAXIBOT_SYSTEM = `Eres TaxiBot, el asistente de TaxiConfianza, plataforma colombiana que conecta conductores y propietarios de taxi. La plataforma está en fase beta. Responde en español, sé amigable y conciso. Si el usuario reporta errores graves indícale que su reporte fue enviado a soporte.`;
+
+const SUPPORT_KEYWORDS = ["error", "problema", "falla", "soporte"];
+
+function sendTelegram(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  const body = JSON.stringify({ chat_id: chatId, text });
+  const options = {
+    hostname: "api.telegram.org",
+    path: `/bot${token}/sendMessage`,
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
+  };
+  const req = https.request(options);
+  req.on("error", (e) => console.error("Telegram error:", e.message));
+  req.write(body);
+  req.end();
+}
+
+app.post("/api/chat", async (req, res) => {
+  const { message, history = [] } = req.body;
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ ok: false, error: "Mensaje requerido" });
+  }
+
+  // Detectar palabras clave de soporte
+  const lower = message.toLowerCase();
+  const needsSupport = SUPPORT_KEYWORDS.some((kw) => lower.includes(kw));
+  if (needsSupport) {
+    sendTelegram(`🚨 *Reporte TaxiBot*\nUsuario: ${message}`);
+  }
+
+  try {
+    // Construir historial de mensajes (máx 10 turnos)
+    const messages = [];
+    const recentHistory = history.slice(-10);
+    for (const turn of recentHistory) {
+      if (turn.role && turn.content) {
+        messages.push({ role: turn.role, content: turn.content });
+      }
+    }
+    messages.push({ role: "user", content: message });
+
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 512,
+      system: TAXIBOT_SYSTEM,
+      messages,
+    });
+
+    const reply = response.content.find((b) => b.type === "text")?.text || "Lo siento, no pude generar una respuesta.";
+    res.json({ ok: true, reply });
+  } catch (err) {
+    console.error("TaxiBot error:", err.message);
+    res.status(500).json({ ok: false, error: "Error al contactar TaxiBot" });
+  }
+});
+
+// ==============================
 // Server listen
 // ==============================
 const PORT = process.env.PORT || 3000;
