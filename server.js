@@ -5,6 +5,8 @@ const path = require("path");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 const app = express();
 // ✅ Railway / proxies: permitir cookies secure detrás de proxy
@@ -121,6 +123,17 @@ async function runMigrations() {
     "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref2_telefono VARCHAR(20) DEFAULT NULL",
     "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS ref2_relacion VARCHAR(20) DEFAULT NULL",
     "ALTER TABLE perfiles_conductores ADD COLUMN IF NOT EXISTS descripcion_personal VARCHAR(300) DEFAULT NULL",
+    // Tabla para tokens de restablecimiento de contraseña
+    `CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      usuario_id INT NOT NULL,
+      token VARCHAR(64) NOT NULL UNIQUE,
+      expires_at DATETIME NOT NULL,
+      used_at DATETIME DEFAULT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_token (token),
+      INDEX idx_usuario (usuario_id)
+    )`,
   ];
   for (const sql of cols) {
     try {
@@ -1475,6 +1488,211 @@ app.post("/api/chat", async (req, res) => {
   } catch (err) {
     console.error("TaxiBot error:", err.message);
     res.status(500).json({ ok: false, error: "Error al contactar TaxiBot" });
+  }
+});
+
+// ==============================
+// Email transporter (Titan Email / SMTP)
+// ==============================
+const mailer = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // STARTTLS en puerto 587
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// ==============================
+// Auth - Ruta HTML reset-password
+// ==============================
+app.get("/reset-password.html", (req, res) =>
+  res.sendFile(path.join(__dirname, "reset-password.html"))
+);
+
+// ==============================
+// API - Solicitar restablecimiento de contraseña
+// POST /api/auth/forgot-password
+// Body: { email }
+// ==============================
+app.post("/api/auth/forgot-password", async (req, res) => {
+  const email = String(req.body.email || "").trim().toLowerCase();
+  if (!email) {
+    return res.status(400).json({ success: false, message: "El email es requerido." });
+  }
+
+  try {
+    const rows = await q(
+      "SELECT id, nombres FROM usuarios WHERE email = ? LIMIT 1",
+      [email]
+    );
+
+    // Respuesta genérica para no revelar si el email existe
+    if (!rows[0]) {
+      return res.json({ success: true, message: "Si el correo existe, recibirás un email con instrucciones." });
+    }
+
+    const usuario = rows[0];
+
+    // Invalidar tokens previos no usados del mismo usuario
+    await q(
+      "UPDATE password_reset_tokens SET used_at = NOW() WHERE usuario_id = ? AND used_at IS NULL",
+      [usuario.id]
+    );
+
+    // Generar token único
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    await q(
+      "INSERT INTO password_reset_tokens (usuario_id, token, expires_at) VALUES (?, ?, ?)",
+      [usuario.id, token, expiresAt]
+    );
+
+    const resetLink = `https://taxiconfianza.com/reset-password.html?token=${token}`;
+    const nombreUsuario = usuario.nombres || "Usuario";
+
+    const htmlEmail = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restablecer contraseña</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:600px;width:100%;">
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#f5c518;padding:30px 40px;text-align:center;">
+              <h1 style="margin:0;color:#1a1a1a;font-size:28px;font-weight:900;letter-spacing:-0.5px;">
+                🚖 TaxiConfianza
+              </h1>
+              <p style="margin:6px 0 0;color:#1a1a1a;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">
+                La plataforma del gremio taxi colombiano
+              </p>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 40px 30px;">
+              <h2 style="margin:0 0 16px;color:#1a1a1a;font-size:22px;">Restablecer contraseña</h2>
+              <p style="margin:0 0 12px;color:#444;font-size:15px;line-height:1.6;">
+                Hola <strong>${nombreUsuario}</strong>,
+              </p>
+              <p style="margin:0 0 24px;color:#444;font-size:15px;line-height:1.6;">
+                Recibimos una solicitud para restablecer la contraseña de tu cuenta en TaxiConfianza.
+                Haz clic en el botón de abajo para crear una nueva contraseña.
+              </p>
+              <!-- Button -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
+                <tr>
+                  <td style="background-color:#f5c518;border-radius:6px;text-align:center;">
+                    <a href="${resetLink}"
+                       style="display:inline-block;padding:14px 36px;color:#1a1a1a;font-size:16px;font-weight:700;text-decoration:none;border-radius:6px;">
+                      Restablecer mi contraseña
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;color:#666;font-size:13px;line-height:1.6;">
+                Este enlace es válido por <strong>1 hora</strong>. Si no solicitaste este cambio,
+                puedes ignorar este correo — tu contraseña no será modificada.
+              </p>
+              <p style="margin:0 0 24px;color:#666;font-size:12px;line-height:1.6;word-break:break-all;">
+                O copia este enlace en tu navegador:<br/>
+                <a href="${resetLink}" style="color:#b8960a;">${resetLink}</a>
+              </p>
+            </td>
+          </tr>
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px;text-align:center;">
+              <p style="margin:0;color:#999;font-size:12px;line-height:1.6;">
+                TaxiConfianza · Bogotá, Colombia<br/>
+                <a href="https://taxiconfianza.com" style="color:#b8960a;text-decoration:none;">taxiconfianza.com</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    await mailer.sendMail({
+      from: `"TaxiConfianza" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Restablecer contraseña — TaxiConfianza",
+      html: htmlEmail,
+    });
+
+    console.log(`[FORGOT-PWD] Token generado para usuario ${usuario.id}, email=${email}`);
+    res.json({ success: true, message: "Si el correo existe, recibirás un email con instrucciones." });
+  } catch (err) {
+    console.error("[FORGOT-PWD] Error:", err);
+    res.status(500).json({ success: false, message: "Error interno. Intenta de nuevo más tarde." });
+  }
+});
+
+// ==============================
+// API - Restablecer contraseña con token
+// POST /api/auth/reset-password
+// Body: { token, password }
+// ==============================
+app.post("/api/auth/reset-password", async (req, res) => {
+  const token = String(req.body.token || "").trim();
+  const newPassword = String(req.body.password || "");
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ success: false, message: "Token y contraseña son requeridos." });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 6 caracteres." });
+  }
+
+  try {
+    const rows = await q(
+      `SELECT prt.id, prt.usuario_id, prt.expires_at, prt.used_at
+       FROM password_reset_tokens prt
+       WHERE prt.token = ? LIMIT 1`,
+      [token]
+    );
+
+    if (!rows[0]) {
+      return res.status(400).json({ success: false, message: "El enlace no es válido o ya fue usado." });
+    }
+
+    const record = rows[0];
+
+    if (record.used_at) {
+      return res.status(400).json({ success: false, message: "Este enlace ya fue usado. Solicita uno nuevo." });
+    }
+
+    if (new Date(record.expires_at) < new Date()) {
+      return res.status(400).json({ success: false, message: "El enlace ha expirado. Solicita uno nuevo." });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    await q("UPDATE usuarios SET password = ? WHERE id = ?", [hashedPassword, record.usuario_id]);
+    await q("UPDATE password_reset_tokens SET used_at = NOW() WHERE id = ?", [record.id]);
+
+    console.log(`[RESET-PWD] Contraseña actualizada para usuario ${record.usuario_id}`);
+    res.json({ success: true, message: "Contraseña actualizada correctamente. Ya puedes iniciar sesión." });
+  } catch (err) {
+    console.error("[RESET-PWD] Error:", err);
+    res.status(500).json({ success: false, message: "Error interno. Intenta de nuevo más tarde." });
   }
 });
 
