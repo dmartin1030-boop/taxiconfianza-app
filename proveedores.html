@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proveedores | TaxiConfianza</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    body { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { display: flex; min-height: 100vh; background: var(--bg-app); }
+
+    /* Sidebar */
+    .sidebar { width:240px; background:var(--bg-card-solid); border-right:0.5px solid var(--border); padding:16px 12px; position:sticky; top:0; height:100vh; overflow-y:auto; flex-shrink:0; display:flex; flex-direction:column; transition:background 0.25s; }
+    .brand { display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:11px; background:var(--bg-card); border:0.5px solid var(--border); margin-bottom:6px; }
+    .logo  { width:32px; height:32px; border-radius:9px; display:grid; place-items:center; background:rgba(212,160,23,0.15); color:var(--gold); font-weight:900; font-size:12px; }
+    .brand h1 { font-size:13px; margin:0; color:var(--text-primary); line-height:1.1; }
+    .brand p  { margin:0; font-size:10px; color:var(--text-tertiary); }
+    .nav { margin-top:12px; display:flex; flex-direction:column; gap:3px; }
+    .nav a { display:flex; align-items:center; gap:9px; padding:8px 11px; border-radius:9px; color:var(--text-secondary); border:0.5px solid transparent; font-size:12px; transition:all 0.15s; }
+    .nav a:hover { background:var(--bg-card); border-color:var(--border); color:var(--text-primary); }
+    .nav a.active { background:rgba(212,160,23,0.1); border-color:rgba(212,160,23,0.3); color:var(--gold); }
+    .ico { width:16px; height:16px; flex-shrink:0; }
+    .sep { height:0.5px; background:var(--border); margin:10px 5px; }
+    .sidebar-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-tertiary); margin:12px 0 7px; padding:0 2px; }
+    .tc-input-sm { width:100%; background:var(--bg-card-solid); border:0.5px solid var(--border); border-radius:9px; color:var(--text-primary); padding:8px 10px; font-size:12px; font-family:var(--font-sans); outline:none; transition:border-color 0.15s; box-sizing:border-box; }
+    .tc-input-sm:focus { border-color:rgba(212,160,23,0.4); }
+
+    /* Categorías sidebar */
+    .cat-filters { display:flex; flex-direction:column; gap:4px; }
+    .cat-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:7px 10px; border-radius:9px;
+      background:var(--bg-card); border:0.5px solid var(--border);
+      color:var(--text-secondary); font-size:12px;
+      cursor:pointer; font-family:var(--font-sans); transition:all 0.15s;
+    }
+    .cat-btn:hover { background:var(--bg-card-solid); color:var(--text-primary); }
+    .cat-btn.active { background:rgba(212,160,23,0.1); border-color:rgba(212,160,23,0.3); color:var(--gold); }
+
+    /* Main */
+    .main { flex:1; padding:16px 18px 40px; min-width:0; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; border:0.5px solid var(--border); border-radius:14px; background:var(--bg-card); margin-bottom:14px; flex-wrap:wrap; }
+    .title    { font-size:16px; margin:0; font-weight:600; color:var(--text-primary); }
+    .subtitle { margin:0; font-size:11px; color:var(--text-tertiary); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 12px; border-radius:9px; border:0.5px solid var(--border); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-size:12px; font-family:var(--font-sans); transition:all 0.15s; }
+    .btn:hover { background:var(--bg-card-solid); }
+    .btn.primary { border-color:rgba(212,160,23,0.35); background:rgba(212,160,23,0.1); color:var(--gold); }
+    .btn.danger  { border-color:rgba(239,68,68,0.35); background:rgba(239,68,68,0.1); color:#F87171; }
+    .mobile-toggle { display:none; }
+
+    /* Hero proveedor destacado */
+    .hero-destacado {
+      border:0.5px solid rgba(212,160,23,0.3);
+      background:linear-gradient(135deg, rgba(212,160,23,0.08) 0%, rgba(29,158,117,0.05) 100%);
+      border-radius:14px; padding:20px; margin-bottom:16px;
+      display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+    }
+    .hero-destacado-icon { font-size:40px; flex-shrink:0; }
+    .hero-destacado-body { flex:1; min-width:0; }
+    .hero-destacado-badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold); margin-bottom:6px; }
+    .hero-destacado-name { font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+    .hero-destacado-desc { font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:10px; }
+    .hero-destacado-beneficio { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:9px; background:rgba(29,158,117,0.1); border:0.5px solid rgba(29,158,117,0.3); color:#6ee7b7; font-size:12px; font-weight:600; }
+
+    /* Grid de cards */
+    .prov-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; }
+
+    .prov-card {
+      border:0.5px solid var(--border); background:var(--bg-card);
+      border-radius:12px; padding:14px; cursor:pointer;
+      transition:all 0.15s; position:relative;
+    }
+    .prov-card:hover { border-color:rgba(212,160,23,0.35); transform:translateY(-1px); }
+    .prov-card.patrocinado { border-color:rgba(212,160,23,0.25); }
+    .prov-card.destacado   { border-color:rgba(212,160,23,0.4); background:rgba(212,160,23,0.04); }
+
+    .prov-plan-badge {
+      position:absolute; top:10px; right:10px;
+      font-size:9px; font-weight:700; padding:2px 8px;
+      border-radius:999px; text-transform:uppercase; letter-spacing:0.05em;
+    }
+    .prov-plan-badge.patrocinado { background:rgba(212,160,23,0.15); color:var(--gold); border:0.5px solid rgba(212,160,23,0.3); }
+    .prov-plan-badge.destacado   { background:rgba(212,160,23,0.2); color:var(--gold); border:0.5px solid rgba(212,160,23,0.4); }
+
+    .prov-icon { font-size:28px; margin-bottom:10px; }
+    .prov-name { font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:4px; }
+    .prov-cat  { font-size:11px; color:var(--text-tertiary); margin-bottom:8px; }
+    .prov-desc { font-size:12px; color:var(--text-secondary); line-height:1.5; margin-bottom:10px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .prov-ciudad { font-size:11px; color:var(--text-tertiary); margin-bottom:10px; }
+    .prov-beneficio {
+      font-size:11px; color:#6ee7b7; font-weight:600;
+      background:rgba(29,158,117,0.08); border:0.5px solid rgba(29,158,117,0.2);
+      border-radius:7px; padding:5px 9px; margin-bottom:10px;
+    }
+    .prov-footer { display:flex; align-items:center; justify-content:space-between; }
+    .ver-detalle { font-size:11px; color:var(--gold); font-weight:600; }
+
+    /* Estado vacío */
+    .empty { text-align:center; padding:50px 20px; color:var(--text-tertiary); }
+    .empty .icon { font-size:36px; margin-bottom:12px; }
+    .empty p { font-size:13px; }
+
+    /* CTA anunciante */
+    .cta-anunciante {
+      border:0.5px solid rgba(212,160,23,0.2);
+      background:rgba(212,160,23,0.04);
+      border-radius:12px; padding:18px; margin-top:16px;
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    }
+    .cta-anunciante-body { flex:1; }
+    .cta-anunciante h4 { font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:4px; }
+    .cta-anunciante p  { font-size:12px; color:var(--text-secondary); }
+    .planes-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .plan-chip { padding:5px 12px; border-radius:999px; font-size:11px; font-weight:600; border:0.5px solid var(--border); background:var(--bg-card); color:var(--text-secondary); }
+
+    /* Modal detalle */
+    .tc-modal { display:none; position:fixed; inset:0; z-index:1000; }
+    .tc-modal.open { display:flex; align-items:center; justify-content:center; }
+    .tc-modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.65); }
+    .tc-modal-card {
+      position:relative; z-index:1;
+      background:var(--bg-card-solid); border:0.5px solid var(--border);
+      border-radius:14px; max-width:520px; width:95%; max-height:88vh; overflow-y:auto;
+    }
+    .tc-modal-head { padding:16px 18px; border-bottom:0.5px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--bg-card-solid); z-index:2; }
+    .tc-modal-head h3 { margin:0; font-size:15px; font-weight:700; color:var(--text-primary); }
+    .tc-modal-body { padding:18px; }
+    .modal-icon { font-size:36px; margin-bottom:12px; }
+    .modal-nombre { font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+    .modal-cat { font-size:12px; color:var(--text-tertiary); margin-bottom:14px; }
+    .modal-desc { font-size:13px; color:var(--text-secondary); line-height:1.65; margin-bottom:16px; }
+    .modal-section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-tertiary); margin:14px 0 8px; }
+    .modal-beneficio { padding:12px 14px; background:rgba(29,158,117,0.08); border:0.5px solid rgba(29,158,117,0.25); border-radius:9px; font-size:13px; color:#6ee7b7; font-weight:600; margin-bottom:14px; }
+    .modal-contacto { display:flex; flex-direction:column; gap:8px; }
+    .modal-contacto-item { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-secondary); }
+    .modal-contacto-item a { color:var(--gold); }
+    .wa-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:9px; background:rgba(29,158,117,0.1); border:0.5px solid rgba(29,158,117,0.3); color:#6ee7b7; font-size:13px; font-weight:600; text-decoration:none; margin-top:14px; }
+    .wa-btn:hover { background:rgba(29,158,117,0.16); }
+
+    /* Overlay + responsive */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+    .overlay.show { display:block; }
+    @media(max-width:860px) {
+      #prov-sidebar { position:fixed; left:-260px; z-index:50; transition:left 0.25s; }
+      #prov-sidebar.open { left:0; }
+      .mobile-toggle { display:flex !important; }
+    }
+    .foot { color:var(--text-tertiary); font-size:11px; text-align:center; padding:16px 0; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="prov-sidebar">
+    <div class="brand">
+      <div class="logo">TC</div>
+      <div><h1>TaxiConfianza</h1><p>Proveedores</p></div>
+    </div>
+
+    <nav class="nav">
+      <a href="/dashboard-conductor.html" id="nav-dashboard">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        Dashboard
+      </a>
+      <a href="/gremio.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        El Gremio
+      </a>
+      <a class="active" href="/proveedores.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.6"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.6"/></svg>
+        Proveedores
+      </a>
+    </nav>
+
+    <div class="sep"></div>
+
+    <!-- Filtro ciudad -->
+    <div class="sidebar-label">📍 Ciudad</div>
+    <select class="tc-input-sm" id="prov-filtro-ciudad">
+      <option value="">Todas las ciudades</option>
+      <option value="Bogotá">Bogotá</option>
+      <option value="Medellín">Medellín</option>
+      <option value="Cali">Cali</option>
+      <option value="Barranquilla">Barranquilla</option>
+      <option value="Bucaramanga">Bucaramanga</option>
+    </select>
+
+    <!-- Filtro categoría -->
+    <div class="sidebar-label">🗂 Categoría</div>
+    <div class="cat-filters">
+      <button class="cat-btn active" data-cat="">🏪 Todos</button>
+      <button class="cat-btn" data-cat="taller">🔧 Talleres</button>
+      <button class="cat-btn" data-cat="seguro">🛡️ Seguros</button>
+      <button class="cat-btn" data-cat="combustible">⛽ Combustible</button>
+      <button class="cat-btn" data-cat="tecnologia">📱 Tecnología</button>
+      <button class="cat-btn" data-cat="credito">💳 Crédito</button>
+      <button class="cat-btn" data-cat="uniforme">👔 Uniformes</button>
+      <button class="cat-btn" data-cat="otro">📦 Otros</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Toggle tema -->
+    <div style="padding:4px;">
+      <div class="tc-theme-toggle" data-tc-theme-toggle style="width:100%;justify-content:center;">
+        <span class="tc-toggle-icon" data-tc-theme-icon="sun">☀️</span>
+        <div class="tc-toggle-track"><div class="tc-toggle-knob"></div></div>
+        <span class="tc-toggle-icon" data-tc-theme-icon="moon">🌙</span>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <button class="btn danger" id="prov-logout" style="width:100%;justify-content:center;margin-top:auto;">Cerrar sesión</button>
+  </aside>
+
+  <div class="overlay" id="prov-overlay"></div>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <button class="btn mobile-toggle" id="prov-btn-menu" type="button">☰</button>
+        <h2 class="title">Directorio de Proveedores 🏪</h2>
+        <p class="subtitle">Servicios exclusivos para el gremio taxista · Beneficios negociados por TaxiConfianza</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn primary" onclick="window.TC?.proveedores?.load()" type="button">↻ Actualizar</button>
+      </div>
+    </header>
+
+    <!-- Hero proveedor destacado -->
+    <div class="hero-destacado" id="prov-hero" style="display:none;">
+      <div class="hero-destacado-icon" id="hero-icon">🏪</div>
+      <div class="hero-destacado-body">
+        <div class="hero-destacado-badge">⭐ Proveedor destacado del mes</div>
+        <div class="hero-destacado-name" id="hero-nombre">—</div>
+        <div class="hero-destacado-desc" id="hero-desc">—</div>
+        <div class="hero-destacado-beneficio" id="hero-beneficio">🎁 —</div>
+      </div>
+      <button class="btn primary" id="hero-ver-btn" type="button" style="padding:10px 18px;font-size:13px;">Ver beneficio →</button>
+    </div>
+
+    <!-- Grid de proveedores -->
+    <div id="prov-loading" style="text-align:center;padding:40px;color:var(--text-tertiary);font-size:13px;">Cargando proveedores…</div>
+    <div class="prov-grid" id="prov-grid" style="display:none;"></div>
+
+    <!-- Estado vacío -->
+    <div class="empty" id="prov-empty" style="display:none;">
+      <div class="icon">🏪</div>
+      <p>No hay proveedores en esta categoría aún.<br>¡Pronto estarán disponibles!</p>
+    </div>
+
+    <!-- CTA anunciante -->
+    <div class="cta-anunciante">
+      <div style="font-size:32px;">📢</div>
+      <div class="cta-anunciante-body">
+        <h4>¿Tienes un negocio para taxistas?</h4>
+        <p>Llega directamente a conductores y propietarios de taxi verificados en Colombia. Más de 170 usuarios activos en Bogotá, Medellín y Cali.</p>
+        <div class="planes-row">
+          <span class="plan-chip">Básico $80k/mes</span>
+          <span class="plan-chip">Patrocinado $150k/mes</span>
+          <span class="plan-chip" style="border-color:rgba(212,160,23,0.3);color:var(--gold);">⭐ Destacado $280k/mes</span>
+        </div>
+      </div>
+      <button class="btn primary" id="btn-anunciante" type="button" style="padding:10px 16px;font-size:13px;white-space:nowrap;">Anunciarme →</button>
+    </div>
+
+    <footer class="foot">© 2026 TaxiConfianza · Directorio de Proveedores</footer>
+  </main>
+</div>
+
+<!-- Modal detalle proveedor -->
+<div class="tc-modal" id="prov-modal">
+  <div class="tc-modal-backdrop" id="prov-modal-backdrop"></div>
+  <div class="tc-modal-card">
+    <div class="tc-modal-head">
+      <h3>Detalle del proveedor</h3>
+      <button class="btn" id="prov-modal-close" type="button" style="padding:5px 10px;">✕</button>
+    </div>
+    <div class="tc-modal-body">
+      <div class="modal-icon" id="modal-icon">🏪</div>
+      <div class="modal-nombre" id="modal-nombre">—</div>
+      <div class="modal-cat" id="modal-cat">—</div>
+      <div class="modal-desc" id="modal-desc">—</div>
+      <div class="modal-section-label">🎁 Beneficio exclusivo TaxiConfianza</div>
+      <div class="modal-beneficio" id="modal-beneficio">—</div>
+      <div class="modal-section-label">📞 Contacto</div>
+      <div class="modal-contacto" id="modal-contacto"></div>
+      <div id="modal-wa-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal formulario anunciante -->
+<div class="tc-modal" id="anunciante-modal">
+  <div class="tc-modal-backdrop" id="anunciante-backdrop"></div>
+  <div class="tc-modal-card">
+    <div class="tc-modal-head">
+      <h3>Anúnciate en TaxiConfianza</h3>
+      <button class="btn" id="anunciante-close" type="button" style="padding:5px 10px;">✕</button>
+    </div>
+    <div class="tc-modal-body">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">Completa el formulario y te contactamos en menos de 24 horas para activar tu presencia en el directorio.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div><label style="font-size:12px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:5px;">Nombre del negocio *</label>
+          <input class="tc-input-sm" id="an-nombre" placeholder="Ej: Taller El Eje" /></div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:5px;">Categoría *</label>
+          <select class="tc-input-sm" id="an-categoria">
+            <option value="">Seleccionar</option>
+            <option value="taller">🔧 Taller</option>
+            <option value="seguro">🛡️ Seguro</option>
+            <option value="combustible">⛽ Combustible</option>
+            <option value="tecnologia">📱 Tecnología</option>
+            <option value="credito">💳 Crédito</option>
+            <option value="uniforme">👔 Uniformes</option>
+            <option value="otro">📦 Otro</option>
+          </select></div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:5px;">Ciudad *</label>
+          <input class="tc-input-sm" id="an-ciudad" placeholder="Ej: Bogotá" /></div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:5px;">WhatsApp o teléfono *</label>
+          <input class="tc-input-sm" id="an-tel" placeholder="Ej: 3001234567" /></div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:5px;">Plan de interés</label>
+          <select class="tc-input-sm" id="an-plan">
+            <option value="basico">Básico $80.000/mes</option>
+            <option value="patrocinado">Patrocinado $150.000/mes</option>
+            <option value="destacado">Destacado $280.000/mes</option>
+          </select></div>
+        <div id="an-msg" style="display:none;padding:9px 12px;border-radius:8px;font-size:12px;"></div>
+        <button class="btn primary" id="an-submit" type="button" style="width:100%;justify-content:center;padding:11px;font-size:13px;font-weight:700;">Enviar solicitud →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/tc-theme.js"></script>
+<script>
+  // Ajustar link dashboard por rol
+  try {
+    const u = JSON.parse(localStorage.getItem("userTaxiConfianza")||"{}");
+    const navD = document.getElementById("nav-dashboard");
+    if (navD && u.tipo === "propietario") navD.href = "/dashboard-propietario.html";
+  } catch {}
+
+  // Menú móvil
+  const sidebar  = document.getElementById("prov-sidebar");
+  const overlay  = document.getElementById("prov-overlay");
+  document.getElementById("prov-btn-menu")?.addEventListener("click", () => { sidebar.classList.add("open"); overlay.classList.add("show"); });
+  overlay?.addEventListener("click", () => { sidebar.classList.remove("open"); overlay.classList.remove("show"); });
+
+  // Logout
+  document.getElementById("prov-logout")?.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "/login.html";
+  });
+
+  // Modal anunciante
+  document.getElementById("btn-anunciante")?.addEventListener("click", () => document.getElementById("anunciante-modal").classList.add("open"));
+  document.getElementById("anunciante-close")?.addEventListener("click", () => document.getElementById("anunciante-modal").classList.remove("open"));
+  document.getElementById("anunciante-backdrop")?.addEventListener("click", () => document.getElementById("anunciante-modal").classList.remove("open"));
+</script>
+<script src="/js/tc-session.js"></script>
+<script src="/js/tc-proveedores.js"></script>
+</body>
+</html>

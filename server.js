@@ -134,6 +134,73 @@ async function runMigrations() {
       INDEX idx_token (token),
       INDEX idx_usuario (usuario_id)
     )`,
+    // ── El Gremio ──────────────────────────────────────
+    `CREATE TABLE IF NOT EXISTS gremio_posts (
+      id          INT AUTO_INCREMENT PRIMARY KEY,
+      usuario_id  INT NOT NULL,
+      tipo        ENUM('alerta','normativa','tip','encuesta','general') NOT NULL DEFAULT 'general',
+      contenido   TEXT NOT NULL,
+      ciudad      VARCHAR(100) DEFAULT NULL,
+      likes_count INT NOT NULL DEFAULT 0,
+      created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+      deleted_at  DATETIME DEFAULT NULL,
+      INDEX idx_gp_usuario (usuario_id),
+      INDEX idx_gp_ciudad  (ciudad),
+      INDEX idx_gp_tipo    (tipo)
+    )`,
+    `CREATE TABLE IF NOT EXISTS gremio_likes (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      post_id    INT NOT NULL,
+      usuario_id INT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_like (post_id, usuario_id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS gremio_comentarios (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      post_id    INT NOT NULL,
+      usuario_id INT NOT NULL,
+      contenido  VARCHAR(500) NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_gc_post (post_id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS gremio_alertas (
+      id          INT AUTO_INCREMENT PRIMARY KEY,
+      titulo      VARCHAR(200) NOT NULL,
+      descripcion VARCHAR(500) DEFAULT NULL,
+      ciudad      VARCHAR(100) DEFAULT NULL,
+      tipo        ENUM('trafico','seguridad','normativa','evento','otro') NOT NULL DEFAULT 'otro',
+      activa      TINYINT(1) NOT NULL DEFAULT 1,
+      created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    // ── Toggle tema claro/oscuro ────────────────────────
+    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tema_preferido VARCHAR(10) NOT NULL DEFAULT 'dark'",
+    `CREATE TABLE IF NOT EXISTS proveedores (
+      id           INT AUTO_INCREMENT PRIMARY KEY,
+      nombre       VARCHAR(200) NOT NULL,
+      categoria    ENUM('taller','seguro','combustible','tecnologia','credito','uniforme','otro') NOT NULL DEFAULT 'otro',
+      descripcion  TEXT DEFAULT NULL,
+      ciudad       VARCHAR(100) DEFAULT NULL,
+      telefono     VARCHAR(30) DEFAULT NULL,
+      whatsapp     VARCHAR(30) DEFAULT NULL,
+      website      VARCHAR(200) DEFAULT NULL,
+      beneficio_tc VARCHAR(300) DEFAULT NULL,
+      plan         ENUM('basico','patrocinado','destacado') NOT NULL DEFAULT 'basico',
+      activo       TINYINT(1) NOT NULL DEFAULT 1,
+      destacado    TINYINT(1) NOT NULL DEFAULT 0,
+      created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_prov_cat    (categoria),
+      INDEX idx_prov_ciudad (ciudad),
+      INDEX idx_prov_plan   (plan)
+    )`,
+    `CREATE TABLE IF NOT EXISTS proveedores_contacto (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      nombre     VARCHAR(200) NOT NULL,
+      categoria  VARCHAR(50) DEFAULT NULL,
+      ciudad     VARCHAR(100) DEFAULT NULL,
+      telefono   VARCHAR(30) DEFAULT NULL,
+      plan       VARCHAR(30) DEFAULT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
   ];
   for (const sql of cols) {
     try {
@@ -1496,8 +1563,8 @@ app.post("/api/chat", async (req, res) => {
 // ==============================
 const mailer = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // STARTTLS en puerto 587
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -1693,6 +1760,273 @@ app.post("/api/auth/reset-password", async (req, res) => {
   } catch (err) {
     console.error("[RESET-PWD] Error:", err);
     res.status(500).json({ success: false, message: "Error interno. Intenta de nuevo más tarde." });
+  }
+});
+
+
+// ==============================
+// API — PROVEEDORES
+// ==============================
+
+// GET /api/proveedores?ciudad=&categoria=
+app.get("/api/proveedores", requireUser, async (req, res) => {
+  try {
+    const ciudad    = (req.query.ciudad    || "").trim();
+    const categoria = (req.query.categoria || "").trim();
+    let where = "WHERE activo = 1";
+    const params = [];
+    if (ciudad)    { where += " AND ciudad = ?";    params.push(ciudad); }
+    if (categoria) { where += " AND categoria = ?"; params.push(categoria); }
+    const rows = await q(
+      `SELECT id, nombre, categoria, descripcion, ciudad, telefono, whatsapp, website, beneficio_tc, plan, destacado FROM proveedores ${where} ORDER BY destacado DESC, plan DESC, created_at DESC`,
+      params
+    );
+    res.json({ ok: true, data: rows || [] });
+  } catch (err) {
+    console.error("GET /api/proveedores", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /api/proveedores/:id
+app.get("/api/proveedores/:id", requireUser, async (req, res) => {
+  try {
+    const id   = Number(req.params.id);
+    const rows = await q(
+      "SELECT id, nombre, categoria, descripcion, ciudad, telefono, whatsapp, website, beneficio_tc, plan FROM proveedores WHERE id = ? AND activo = 1 LIMIT 1",
+      [id]
+    );
+    if (!rows[0]) return res.status(404).json({ ok: false, error: "Proveedor no encontrado" });
+    res.json({ ok: true, data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/proveedores/contacto (solicitud anunciante)
+app.post("/api/proveedores/contacto", requireUser, async (req, res) => {
+  try {
+    const nombre    = String(req.body?.nombre    || "").trim();
+    const categoria = String(req.body?.categoria || "").trim();
+    const ciudad    = String(req.body?.ciudad    || "").trim();
+    const telefono  = String(req.body?.telefono  || "").trim();
+    const plan      = String(req.body?.plan      || "basico").trim();
+    if (!nombre || !telefono) return res.status(400).json({ ok: false, error: "Nombre y teléfono son obligatorios" });
+    await q(
+      "INSERT INTO proveedores_contacto (nombre, categoria, ciudad, telefono, plan) VALUES (?, ?, ?, ?, ?)",
+      [nombre, categoria, ciudad, telefono, plan]
+    );
+    res.status(201).json({ ok: true, message: "Solicitud recibida. Te contactamos pronto." });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+// ==============================
+// API — EL GREMIO
+// ==============================
+
+// GET /api/gremio/posts?ciudad=&tipo=&page=
+app.get("/api/gremio/posts", requireUser, async (req, res) => {
+  try {
+    const ciudad = (req.query.ciudad || "").trim();
+    const tipo   = (req.query.tipo   || "").trim();
+    const page   = Math.max(1, parseInt(req.query.page) || 1);
+    const limit  = 20;
+    const offset = (page - 1) * limit;
+
+    let where = "WHERE p.deleted_at IS NULL";
+    const params = [];
+
+    if (ciudad) { where += " AND p.ciudad = ?"; params.push(ciudad); }
+    if (tipo && ["alerta","normativa","tip","encuesta","general"].includes(tipo)) {
+      where += " AND p.tipo = ?"; params.push(tipo);
+    }
+
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+
+    const rows = await q(
+      `SELECT
+        p.id, p.tipo, p.contenido, p.ciudad, p.likes_count, p.created_at,
+        u.nombres, u.apellidos, u.tipo AS usuario_tipo, u.nivel_actual,
+        (SELECT COUNT(*) FROM gremio_likes gl WHERE gl.post_id = p.id AND gl.usuario_id = ?) AS yo_di_like,
+        (SELECT COUNT(*) FROM gremio_comentarios gc WHERE gc.post_id = p.id) AS comentarios_count
+       FROM gremio_posts p
+       JOIN usuarios u ON u.id = p.usuario_id
+       ${where}
+       ORDER BY p.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [u?.id || 0, ...params, limit, offset]
+    );
+
+    const total = await q(
+      `SELECT COUNT(*) AS n FROM gremio_posts p ${where}`,
+      params
+    );
+
+    res.json({ ok: true, data: rows || [], page, total: total[0]?.n || 0, has_more: (page * limit) < (total[0]?.n || 0) });
+  } catch (err) {
+    console.error("GET /api/gremio/posts", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/gremio/posts
+app.post("/api/gremio/posts", requireUser, async (req, res) => {
+  try {
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+
+    const contenido = String(req.body?.contenido || "").trim();
+    const tipo      = String(req.body?.tipo || "general").trim();
+    const ciudad    = String(req.body?.ciudad || "").trim() || null;
+
+    if (!contenido || contenido.length < 5) return res.status(400).json({ ok: false, error: "El contenido debe tener al menos 5 caracteres" });
+    if (contenido.length > 500) return res.status(400).json({ ok: false, error: "El contenido no puede superar 500 caracteres" });
+
+    const tiposValidos = ["alerta","normativa","tip","encuesta","general"];
+    if (!tiposValidos.includes(tipo)) return res.status(400).json({ ok: false, error: "Tipo de post inválido" });
+
+    const r = await q(
+      "INSERT INTO gremio_posts (usuario_id, tipo, contenido, ciudad) VALUES (?, ?, ?, ?)",
+      [u.id, tipo, contenido, ciudad]
+    );
+    res.status(201).json({ ok: true, id: r.insertId });
+  } catch (err) {
+    console.error("POST /api/gremio/posts", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// DELETE /api/gremio/posts/:id (soft delete, solo el autor)
+app.delete("/api/gremio/posts/:id", requireUser, async (req, res) => {
+  try {
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    const postId = Number(req.params.id);
+    const r = await q(
+      "UPDATE gremio_posts SET deleted_at = NOW() WHERE id = ? AND usuario_id = ? AND deleted_at IS NULL",
+      [postId, u.id]
+    );
+    if (!r?.affectedRows) return res.status(404).json({ ok: false, error: "Post no encontrado o no tienes permiso" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/gremio/posts/:id/like (toggle)
+app.post("/api/gremio/posts/:id/like", requireUser, async (req, res) => {
+  try {
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    const postId = Number(req.params.id);
+    const ya = await q("SELECT id FROM gremio_likes WHERE post_id = ? AND usuario_id = ? LIMIT 1", [postId, u.id]);
+    if (ya[0]) {
+      await q("DELETE FROM gremio_likes WHERE post_id = ? AND usuario_id = ?", [postId, u.id]);
+      await q("UPDATE gremio_posts SET likes_count = GREATEST(0, likes_count - 1) WHERE id = ?", [postId]);
+      res.json({ ok: true, action: "unlike" });
+    } else {
+      await q("INSERT INTO gremio_likes (post_id, usuario_id) VALUES (?, ?)", [postId, u.id]);
+      await q("UPDATE gremio_posts SET likes_count = likes_count + 1 WHERE id = ?", [postId]);
+      res.json({ ok: true, action: "like" });
+    }
+  } catch (err) {
+    console.error("POST /api/gremio/posts/:id/like", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /api/gremio/posts/:id/comentarios
+app.get("/api/gremio/posts/:id/comentarios", requireUser, async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const rows = await q(
+      `SELECT gc.id, gc.contenido, gc.created_at,
+              u.nombres, u.apellidos, u.tipo AS usuario_tipo, u.nivel_actual
+       FROM gremio_comentarios gc
+       JOIN usuarios u ON u.id = gc.usuario_id
+       WHERE gc.post_id = ?
+       ORDER BY gc.created_at ASC LIMIT 50`,
+      [postId]
+    );
+    res.json({ ok: true, data: rows || [] });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/gremio/posts/:id/comentarios
+app.post("/api/gremio/posts/:id/comentarios", requireUser, async (req, res) => {
+  try {
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    const postId    = Number(req.params.id);
+    const contenido = String(req.body?.contenido || "").trim();
+    if (!contenido || contenido.length < 2) return res.status(400).json({ ok: false, error: "El comentario es muy corto" });
+    if (contenido.length > 500) return res.status(400).json({ ok: false, error: "Comentario demasiado largo (máx 500 caracteres)" });
+    const r = await q(
+      "INSERT INTO gremio_comentarios (post_id, usuario_id, contenido) VALUES (?, ?, ?)",
+      [postId, u.id, contenido]
+    );
+    res.status(201).json({ ok: true, id: r.insertId });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /api/gremio/alertas?ciudad=
+app.get("/api/gremio/alertas", requireUser, async (req, res) => {
+  try {
+    const ciudad = (req.query.ciudad || "").trim();
+    let where = "WHERE activa = 1";
+    const params = [];
+    if (ciudad) { where += " AND (ciudad = ? OR ciudad IS NULL)"; params.push(ciudad); }
+    const rows = await q(
+      `SELECT id, titulo, descripcion, ciudad, tipo, created_at
+       FROM gremio_alertas ${where}
+       ORDER BY created_at DESC LIMIT 10`,
+      params
+    );
+    res.json({ ok: true, data: rows || [] });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/gremio/alertas (solo admin)
+app.post("/api/gremio/alertas", requireUser, async (req, res) => {
+  try {
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    if (tipoLower(u.tipo) !== "admin") return res.status(403).json({ ok: false, error: "Solo administradores pueden crear alertas" });
+    const titulo      = String(req.body?.titulo || "").trim();
+    const descripcion = String(req.body?.descripcion || "").trim() || null;
+    const ciudad      = String(req.body?.ciudad || "").trim() || null;
+    const tipo        = String(req.body?.tipo || "otro").trim();
+    if (!titulo) return res.status(400).json({ ok: false, error: "El título es requerido" });
+    const tiposValidos = ["trafico","seguridad","normativa","evento","otro"];
+    const tipoFinal = tiposValidos.includes(tipo) ? tipo : "otro";
+    const r = await q(
+      "INSERT INTO gremio_alertas (titulo, descripcion, ciudad, tipo) VALUES (?, ?, ?, ?)",
+      [titulo, descripcion, ciudad, tipoFinal]
+    );
+    res.status(201).json({ ok: true, id: r.insertId });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// PATCH /api/usuario/tema (guardar preferencia tema claro/oscuro)
+app.patch("/api/usuario/tema", requireUser, async (req, res) => {
+  try {
+    const tema = String(req.body?.tema_preferido || "").trim().toLowerCase();
+    if (!["dark","light"].includes(tema)) return res.status(400).json({ ok: false, error: "tema_preferido debe ser 'dark' o 'light'" });
+    const u = await getUsuarioByEmail(req.tcAuth.email);
+    if (!u) return res.status(404).json({ ok: false, error: "Usuario no existe" });
+    await q("UPDATE usuarios SET tema_preferido = ? WHERE id = ?", [tema, u.id]);
+    res.json({ ok: true, tema_preferido: tema });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
   }
 });
 

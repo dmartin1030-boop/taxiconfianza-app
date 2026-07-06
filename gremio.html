@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Gremio | TaxiConfianza</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    body { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { display: flex; min-height: 100vh; background: var(--bg-app); }
+
+    /* ── Sidebar izquierdo ── */
+    .sidebar {
+      width: 240px; background: var(--bg-card-solid);
+      border-right: 0.5px solid var(--border);
+      padding: 16px 12px; position: sticky; top: 0;
+      height: 100vh; overflow-y: auto; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .sidebar.open { left: 0 !important; }
+
+    .brand { display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:11px; background:var(--bg-card); border:0.5px solid var(--border); margin-bottom:6px; }
+    .logo  { width:32px; height:32px; border-radius:9px; display:grid; place-items:center; background:rgba(212,160,23,0.15); color:var(--gold); font-weight:900; font-size:12px; }
+    .brand h1 { font-size:13px; margin:0; color:var(--text-primary); line-height:1.1; }
+    .brand p  { margin:0; font-size:10px; color:var(--text-tertiary); }
+
+    /* Perfil mini en sidebar */
+    .sidebar-perfil {
+      padding: 12px; border-radius: 10px;
+      background: var(--bg-card); border: 0.5px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .sidebar-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(212,160,23,0.15); color: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; margin-bottom: 8px;
+    }
+    .sidebar-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .sidebar-rol  { font-size: 11px; color: var(--text-tertiary); }
+
+    /* Nav sidebar */
+    .nav { margin-top: 10px; display: flex; flex-direction: column; gap: 3px; }
+    .nav a { display:flex; align-items:center; gap:9px; padding:8px 11px; border-radius:9px; color:var(--text-secondary); border:0.5px solid transparent; font-size:12px; transition:all 0.15s; }
+    .nav a:hover { background:var(--bg-card); border-color:var(--border); color:var(--text-primary); }
+    .nav a.active { background:rgba(212,160,23,0.1); border-color:rgba(212,160,23,0.3); color:var(--gold); }
+    .ico { width:16px; height:16px; flex-shrink:0; }
+    .sep { height:0.5px; background:var(--border); margin:10px 5px; }
+
+    /* Filtros de ciudad */
+    .sidebar-section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-tertiary); margin:12px 0 7px; padding:0 2px; }
+
+    .tc-input-sm { width:100%; background:var(--bg-card-solid); border:0.5px solid var(--border); border-radius:9px; color:var(--text-primary); padding:8px 10px; font-size:12px; font-family:var(--font-sans); outline:none; transition:border-color 0.15s; box-sizing:border-box; }
+    .tc-input-sm:focus { border-color:rgba(212,160,23,0.4); }
+
+    /* Filtros de tipo */
+    .tipo-filters { display:flex; flex-direction:column; gap:4px; }
+    .gremio-filtro-tipo {
+      display:flex; align-items:center; gap:8px;
+      padding:7px 10px; border-radius:9px;
+      background:var(--bg-card); border:0.5px solid var(--border);
+      color:var(--text-tertiary); font-size:12px;
+      cursor:pointer; font-family:var(--font-sans);
+      transition:all 0.15s; text-align:left;
+    }
+    .gremio-filtro-tipo:hover { background:var(--bg-card-solid); color:var(--text-primary); }
+
+    /* ── Main (centro) ── */
+    .main { flex:1; padding:16px 18px 40px; min-width:0; max-width:680px; }
+
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; border:0.5px solid var(--border); border-radius:14px; background:var(--bg-card); margin-bottom:14px; flex-wrap:wrap; }
+    .title    { font-size:16px; margin:0; font-weight:600; color:var(--text-primary); }
+    .subtitle { margin:0; font-size:11px; color:var(--text-tertiary); }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 12px; border-radius:9px; border:0.5px solid var(--border); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-size:12px; font-family:var(--font-sans); transition:all 0.15s; }
+    .btn:hover { background:var(--bg-card-solid); }
+    .btn.primary { border-color:rgba(212,160,23,0.35); background:rgba(212,160,23,0.1); color:var(--gold); }
+    .btn.danger  { border-color:rgba(239,68,68,0.35); background:rgba(239,68,68,0.1); color:#F87171; }
+    .mobile-toggle { display:none; }
+
+    /* Composer — crear post */
+    .composer {
+      border:0.5px solid var(--border); border-radius:12px;
+      background:var(--bg-card); padding:14px; margin-bottom:14px;
+    }
+    .composer-top { display:flex; gap:10px; align-items:flex-start; }
+    .composer-avatar { width:36px; height:36px; border-radius:50%; background:rgba(212,160,23,0.15); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+    .composer-textarea {
+      flex:1; background:var(--bg-card-solid); border:0.5px solid var(--border);
+      border-radius:10px; padding:10px 12px; color:var(--text-primary);
+      font-size:13px; font-family:var(--font-sans); outline:none; resize:none;
+      transition:border-color 0.2s; min-height:80px; line-height:1.6;
+    }
+    .composer-textarea:focus { border-color:rgba(212,160,23,0.4); }
+    .composer-textarea::placeholder { color:var(--text-tertiary); }
+    .composer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .composer-tipos { display:flex; gap:6px; flex-wrap:wrap; }
+    .tipo-chip {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:4px 10px; border-radius:999px;
+      border:0.5px solid var(--border); background:var(--bg-card-solid);
+      color:var(--text-tertiary); font-size:11px; cursor:pointer;
+      font-family:var(--font-sans); transition:all 0.15s;
+    }
+    .tipo-chip.selected { border-color:rgba(212,160,23,0.35); background:rgba(212,160,23,0.1); color:var(--gold); }
+    .composer-actions { display:flex; align-items:center; gap:8px; }
+    .composer-count { font-size:11px; color:var(--text-tertiary); }
+    .composer-msg { font-size:11px; margin-top:6px; }
+
+    /* Ciudad selector composer */
+    .composer-ciudad { background:var(--bg-card-solid); border:0.5px solid var(--border); border-radius:8px; padding:5px 9px; color:var(--text-primary); font-size:11px; font-family:var(--font-sans); outline:none; }
+
+    /* Feed */
+    #gremio-feed { min-height: 200px; }
+    #gremio-load-more {
+      display:none; width:100%; justify-content:center;
+      padding:11px; margin-top:10px;
+      background:var(--bg-card); border:0.5px solid var(--border);
+      border-radius:10px; color:var(--text-tertiary);
+      font-size:13px; cursor:pointer; font-family:var(--font-sans);
+    }
+    #gremio-load-more:hover { background:var(--bg-card-solid); }
+
+    /* ── Sidebar derecho ── */
+    .sidebar-right {
+      width: 260px; flex-shrink: 0;
+      padding: 16px 14px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .widget {
+      border:0.5px solid var(--border); border-radius:12px;
+      background:var(--bg-card); padding:13px;
+    }
+    .widget h4 { font-size:12px; font-weight:600; color:var(--text-primary); margin:0 0 10px; }
+    .widget p.muted { font-size:11px; color:var(--text-tertiary); margin:0; }
+
+    /* Overlay móvil */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+    .overlay.show { display:block; }
+
+    @media (max-width: 1100px) {
+      .sidebar-right { display: none; }
+    }
+    @media (max-width: 860px) {
+      #gremio-sidebar { position:fixed; left:-260px; z-index:50; transition:left 0.25s; }
+      .main { padding:14px 14px 40px; }
+      .mobile-toggle { display:flex !important; }
+    }
+
+    .foot { color:var(--text-tertiary); font-size:11px; text-align:center; padding:16px 0; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── Sidebar izquierdo ── -->
+  <aside class="sidebar" id="gremio-sidebar">
+    <div class="brand">
+      <div class="logo">TC</div>
+      <div><h1>TaxiConfianza</h1><p>El Gremio</p></div>
+    </div>
+
+    <!-- Perfil mini -->
+    <div class="sidebar-perfil">
+      <div class="sidebar-avatar" id="gremio-user-avatar">TC</div>
+      <div class="sidebar-name" id="gremio-user-name">Cargando…</div>
+      <div class="sidebar-rol"  id="gremio-user-rol">—</div>
+    </div>
+
+    <nav class="nav">
+      <a href="/dashboard-conductor.html" id="nav-dashboard">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        Dashboard
+      </a>
+      <a class="active" href="/gremio.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        El Gremio
+      </a>
+      <a href="/conductor-ofertas.html" id="nav-ofertas">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Ofertas
+      </a>
+    </nav>
+
+    <div class="sep"></div>
+
+    <!-- Filtro ciudad -->
+    <div class="sidebar-section-label">📍 Ciudad</div>
+    <select class="tc-input-sm" id="gremio-filtro-ciudad">
+      <option value="">Todas las ciudades</option>
+      <option value="Bogotá">Bogotá</option>
+      <option value="Medellín">Medellín</option>
+      <option value="Cali">Cali</option>
+      <option value="Barranquilla">Barranquilla</option>
+      <option value="Bucaramanga">Bucaramanga</option>
+    </select>
+
+    <!-- Filtros de tipo -->
+    <div class="sidebar-section-label">🗂 Tipo de post</div>
+    <div class="tipo-filters">
+      <button class="gremio-filtro-tipo" data-tipo="alerta">🚨 Alertas de tráfico</button>
+      <button class="gremio-filtro-tipo" data-tipo="normativa">📋 Normativas RUNT</button>
+      <button class="gremio-filtro-tipo" data-tipo="tip">💡 Tips conductores</button>
+      <button class="gremio-filtro-tipo" data-tipo="encuesta">📊 Encuestas</button>
+      <button class="gremio-filtro-tipo" data-tipo="general">💬 General</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Toggle tema -->
+    <div style="padding:4px;">
+      <div class="tc-theme-toggle" data-tc-theme-toggle style="width:100%;justify-content:center;">
+        <span class="tc-toggle-icon" data-tc-theme-icon="sun">☀️</span>
+        <div class="tc-toggle-track"><div class="tc-toggle-knob"></div></div>
+        <span class="tc-toggle-icon" data-tc-theme-icon="moon">🌙</span>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <button class="btn danger" id="gremio-logout" style="width:100%;justify-content:center;margin-top:auto;">Cerrar sesión</button>
+  </aside>
+
+  <div class="overlay" id="gremio-overlay"></div>
+
+  <!-- ── Main — Feed ── -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <button class="btn mobile-toggle" id="gremio-btn-menu" type="button">☰</button>
+        <h2 class="title">El Gremio 🚕</h2>
+        <p class="subtitle">La red social del gremio taxista colombiano</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn primary" onclick="window.TC?.gremio?.loadPosts(false)" type="button">↻ Actualizar</button>
+      </div>
+    </header>
+
+    <!-- Composer -->
+    <div class="composer">
+      <div class="composer-top">
+        <div class="composer-avatar" id="composer-avatar">TC</div>
+        <textarea
+          class="composer-textarea"
+          id="gremio-nuevo-post"
+          placeholder="¿Qué está pasando en el gremio? Comparte una alerta, tip o novedad…"
+          maxlength="500"
+        ></textarea>
+      </div>
+      <div class="composer-bottom">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <div class="composer-tipos">
+            <button class="tipo-chip selected" data-tipo-composer="general">💬 General</button>
+            <button class="tipo-chip" data-tipo-composer="alerta">🚨 Alerta</button>
+            <button class="tipo-chip" data-tipo-composer="normativa">📋 Normativa</button>
+            <button class="tipo-chip" data-tipo-composer="tip">💡 Tip</button>
+          </div>
+          <select class="composer-ciudad" id="gremio-nuevo-ciudad">
+            <option value="">📍 Todas</option>
+            <option value="Bogotá">Bogotá</option>
+            <option value="Medellín">Medellín</option>
+            <option value="Cali">Cali</option>
+            <option value="Barranquilla">Barranquilla</option>
+            <option value="Bucaramanga">Bucaramanga</option>
+          </select>
+        </div>
+        <div class="composer-actions">
+          <span class="composer-count" id="gremio-char-count">0/500</span>
+          <button class="btn primary" id="gremio-publicar-btn" type="button">Publicar</button>
+        </div>
+      </div>
+      <div class="composer-msg" id="gremio-post-msg"></div>
+    </div>
+
+    <!-- Feed -->
+    <div id="gremio-feed">
+      <div style="text-align:center;padding:40px;color:var(--text-tertiary);font-size:13px;">Cargando El Gremio…</div>
+    </div>
+
+    <button id="gremio-load-more" type="button">Cargar más publicaciones →</button>
+
+    <footer class="foot">© 2026 TaxiConfianza · El Gremio</footer>
+  </main>
+
+  <!-- ── Sidebar derecho ── -->
+  <aside class="sidebar-right">
+
+    <!-- Alertas activas -->
+    <div class="widget">
+      <h4>🚨 Alertas activas</h4>
+      <div id="gremio-alertas">
+        <p class="muted">Cargando alertas…</p>
+      </div>
+    </div>
+
+    <!-- Tendencias -->
+    <div class="widget">
+      <h4>📈 Tendencias del gremio</h4>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+          <span style="color:var(--text-secondary);">#TarifasBogotá</span>
+          <span style="color:var(--text-tertiary);font-size:11px;">128 posts</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+          <span style="color:var(--text-secondary);">#RUNT2026</span>
+          <span style="color:var(--text-tertiary);font-size:11px;">94 posts</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+          <span style="color:var(--text-secondary);">#GasolinaCali</span>
+          <span style="color:var(--text-tertiary);font-size:11px;">71 posts</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+          <span style="color:var(--text-secondary);">#TaxiMedellín</span>
+          <span style="color:var(--text-tertiary);font-size:11px;">58 posts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proveedor destacado -->
+    <div class="widget" style="border-color:rgba(212,160,23,0.25);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--gold);margin-bottom:8px;">⭐ Proveedor destacado</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Taller El Eje</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">🔧 Mantenimiento preventivo · Bogotá · 20% descuento para TC</div>
+      <a href="/proveedores.html" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:0.5px solid rgba(212,160,23,0.3);background:rgba(212,160,23,0.08);color:var(--gold);font-size:11px;font-weight:600;">Ver beneficio →</a>
+    </div>
+
+    <!-- Reglas del gremio -->
+    <div class="widget">
+      <h4>📌 Reglas del Gremio</h4>
+      <div style="font-size:11px;color:var(--text-secondary);line-height:1.7;">
+        ✅ Comparte información útil y real<br>
+        ✅ Respeta a todos los miembros<br>
+        ❌ Sin spam ni publicidad no autorizada<br>
+        ❌ Sin información falsa o alarmista<br>
+        🛡️ Los posts son moderados por TC
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- Campo oculto para tipo de post seleccionado en el composer -->
+<input type="hidden" id="gremio-nuevo-tipo" value="general" />
+
+<script src="/js/tc-theme.js"></script>
+<script>
+  // Selector de tipo en el composer
+  document.querySelectorAll(".tipo-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".tipo-chip").forEach(c => c.classList.remove("selected"));
+      chip.classList.add("selected");
+      document.getElementById("gremio-nuevo-tipo").value = chip.dataset.tipoComposer;
+    });
+  });
+
+  // Inicializar avatar del composer con iniciales del usuario
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("userTaxiConfianza") || "{}");
+      if (user.nombres) {
+        const initials = user.nombres.split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
+        const avatarEl = document.getElementById("composer-avatar");
+        const userAvatarEl = document.getElementById("gremio-user-avatar");
+        if (avatarEl) avatarEl.textContent = initials;
+        if (userAvatarEl) userAvatarEl.textContent = initials;
+      }
+      // Ajustar link del dashboard según rol
+      const navDash = document.getElementById("nav-dashboard");
+      const navOfertas = document.getElementById("nav-ofertas");
+      if (user.tipo === "propietario") {
+        if (navDash) navDash.href = "/dashboard-propietario.html";
+        if (navOfertas) navOfertas.style.display = "none";
+      }
+    } catch {}
+  });
+</script>
+<script src="/js/tc-gremio.js"></script>
+</body>
+</html>

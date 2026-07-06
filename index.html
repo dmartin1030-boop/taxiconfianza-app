@@ -1,1225 +1,213 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TaxiConfianza | Conecta con conductores y propietarios verificados</title>
-  <link rel="stylesheet" href="css/dashboard-theme.css" />
-  <style>
-    /* ── NAV ── */
-    .top-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 28px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(11,18,32,.88);
-      backdrop-filter: blur(10px);
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-logo {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      display: grid; place-items: center;
-      background: rgba(251,191,36,.16);
-      border: 1px solid rgba(251,191,36,.28);
-      font-weight: 800; font-size: 13px; color: #fbbf24;
-    }
-    .nav-brand-name { font-weight: 700; font-size: 16px; }
-    .nav-actions { display: flex; gap: 10px; align-items: center; }
-
-    /* ── HERO ── */
-    .hero {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 72px 28px 56px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 56px;
-      align-items: center;
-    }
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: #fbbf24;
-      background: rgba(251,191,36,.1);
-      border: 1px solid rgba(251,191,36,.25);
-      border-radius: 20px;
-      padding: 5px 12px;
-      margin-bottom: 20px;
-    }
-    .hero h1 {
-      font-size: clamp(28px, 4vw, 44px);
-      font-weight: 800;
-      line-height: 1.18;
-      margin: 0 0 18px;
-      letter-spacing: -.02em;
-    }
-    .hero h1 em { font-style: normal; color: #fbbf24; }
-    .hero-sub {
-      font-size: 16px;
-      color: var(--muted);
-      line-height: 1.65;
-      margin: 0 0 36px;
-      max-width: 460px;
-    }
-    .hero-ctas {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .cta-btn {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px 22px;
-      border-radius: 14px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      transition: transform .15s, box-shadow .15s, background .15s;
-    }
-    .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
-    .cta-btn-icon {
-      width: 42px; height: 42px;
-      border-radius: 12px;
-      display: grid; place-items: center;
-      flex-shrink: 0;
-      font-size: 20px;
-    }
-    .cta-btn-text small {
-      display: block;
-      font-size: 11px;
-      font-weight: 400;
-      opacity: .7;
-      margin-top: 2px;
-    }
-    .cta-conductor {
-      background: rgba(251,191,36,.14);
-      border-color: rgba(251,191,36,.35);
-      color: #fef3c7;
-    }
-    .cta-conductor .cta-btn-icon { background: rgba(251,191,36,.18); color: #fbbf24; }
-    .cta-conductor:hover { background: rgba(251,191,36,.22); }
-    .cta-propietario {
-      background: rgba(56,189,248,.1);
-      border-color: rgba(56,189,248,.3);
-      color: #e0f2fe;
-    }
-    .cta-propietario .cta-btn-icon { background: rgba(56,189,248,.14); color: #38bdf8; }
-    .cta-propietario:hover { background: rgba(56,189,248,.16); }
-
-    .hero-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .hero-divider::before,
-    .hero-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* ── HERO RIGHT CARD ── */
-    .hero-preview {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.4);
-    }
-    .preview-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .preview-title::before {
-      content: "";
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 6px #22c55e;
-    }
-    .preview-offer {
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: border-color .15s;
-    }
-    .preview-offer:hover { border-color: rgba(251,191,36,.3); }
-    .preview-offer-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .preview-offer-title { font-size: 14px; font-weight: 600; margin: 0; }
-    .preview-badge {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 20px;
-      white-space: nowrap;
-    }
-    .badge-dia   { background: rgba(251,191,36,.15); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
-    .badge-noche { background: rgba(56,189,248,.12); color: #38bdf8; border: 1px solid rgba(56,189,248,.3); }
-    .badge-mixto { background: rgba(167,139,250,.12); color: #a78bfa; border: 1px solid rgba(167,139,250,.3); }
-    .preview-meta {
-      display: flex;
-      gap: 10px;
-      font-size: 12px;
-      color: var(--muted);
-      flex-wrap: wrap;
-    }
-    .preview-meta span { display: flex; align-items: center; gap: 4px; }
-    .preview-owner {
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .blurred { filter: blur(5px); user-select: none; pointer-events: none; color: var(--text); }
-
-    .preview-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .stat-box {
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 12px;
-      text-align: center;
-    }
-    .stat-num { font-size: 22px; font-weight: 800; color: #fbbf24; line-height: 1; }
-    .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-    /* ── OFFERS SECTION ── */
-    .offers-section {
-      border-top: 1px solid var(--border);
-      padding: 48px 0 72px;
-    }
-    .offers-wrap {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 28px;
-    }
-    .section-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .section-header h2 { font-size: 20px; font-weight: 700; margin: 0; }
-    .section-header p  { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
-
-    /* ── CTA BANNER ── */
-    .cta-band {
-      background: linear-gradient(135deg, rgba(251,191,36,.09), rgba(56,189,248,.06));
-      border: 1px solid rgba(251,191,36,.2);
-      border-radius: 16px;
-      padding: 20px 24px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .cta-band p { margin: 0; font-size: 13px; color: var(--muted); }
-    .cta-band strong { color: var(--text); display: block; margin-bottom: 3px; font-size: 14px; }
-    .cta-band-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-
-    /* ── TOOLBAR ── */
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-      align-items: center;
-    }
-    .toolbar .search-box {
-      flex: 1 1 220px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0 12px;
-    }
-    .toolbar .search-box input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-size: 13px;
-      padding: 10px 0;
-      width: 100%;
-    }
-    .toolbar select {
-      background: rgba(0,0,0,.22);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
-    }
-    .count-pill { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-    .count-pill strong { color: var(--text); }
-
-    /* ── OFFER CARDS ── */
-    .offers-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 16px;
-    }
-    .offer-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: border-color .15s, transform .15s;
-    }
-    .offer-card:hover { border-color: rgba(251,191,36,.3); transform: translateY(-1px); }
-    .offer-card-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .offer-title { font-size: 15px; font-weight: 600; margin: 0; line-height: 1.3; }
-    .badge {
-      font-size: 11px; padding: 3px 8px;
-      border-radius: 20px; white-space: nowrap; flex-shrink: 0;
-    }
-    .badge-turno-dia    { background: rgba(251,191,36,.15); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
-    .badge-turno-noche  { background: rgba(56,189,248,.12); color: #38bdf8; border: 1px solid rgba(56,189,248,.3); }
-    .badge-turno-mixto  { background: rgba(167,139,250,.12); color: #a78bfa; border: 1px solid rgba(167,139,250,.3); }
-
-    .offer-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 12px; color: var(--muted);
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--border);
-      border-radius: 8px; padding: 5px 10px;
-    }
-    .chip strong { color: var(--text); }
-
-    .owner-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-    .owner-name {
-      filter: blur(5px);
-      user-select: none; pointer-events: none;
-      transition: filter .2s; color: var(--text); font-size: 13px;
-    }
-    .owner-name.revealed { filter: none; }
-    .owner-lock {
-      font-size: 11px; color: var(--muted);
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--border);
-      border-radius: 6px; padding: 2px 7px;
-    }
-    .stars { color: #fbbf24; font-size: 13px; letter-spacing: 1px; }
-    .offer-card-foot {
-      display: flex; gap: 8px;
-      justify-content: flex-end;
-      margin-top: auto; padding-top: 4px;
-    }
-
-    /* ── BUTTONS ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 16px; border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
-      color: var(--text); font-size: 13px; font-weight: 500;
-      cursor: pointer; text-decoration: none;
-      transition: background .15s, border-color .15s;
-    }
-    .btn:hover { background: rgba(255,255,255,.09); }
-    .btn.primary {
-      background: rgba(251,191,36,.18);
-      border-color: rgba(251,191,36,.4); color: #fbbf24;
-    }
-    .btn.primary:hover { background: rgba(251,191,36,.28); }
-    .btn.ghost { background: transparent; border-color: transparent; }
-    .btn.ghost:hover { background: rgba(255,255,255,.05); }
-    .btn.outline-info {
-      background: rgba(56,189,248,.1);
-      border-color: rgba(56,189,248,.3); color: #38bdf8;
-    }
-    .btn.outline-info:hover { background: rgba(56,189,248,.18); }
-
-    /* ── EMPTY / LOADING ── */
-    .state-msg {
-      grid-column: 1/-1; text-align: center;
-      padding: 60px 20px; color: var(--muted); font-size: 14px;
-    }
-
-    /* ── FOOTER ── */
-    .site-footer {
-      border-top: 1px solid var(--border);
-      padding: 28px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    /* ── RESPONSIVE ── */
-    @media(max-width: 860px) {
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 40px 20px 36px;
-        gap: 32px;
-      }
-      .hero-preview { display: none; }
-      .top-nav { padding: 12px 18px; }
-      .offers-wrap { padding: 0 16px; }
-    }
-    @media(max-width: 520px) {
-      .section-header { flex-direction: column; align-items: flex-start; }
-      .cta-band { flex-direction: column; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaxiConfianza — Conecta con conductores y propietarios de confianza</title>
+<meta name="description" content="TaxiConfianza valida historial, documentación y reputación para que conductores y propietarios de taxi encuentren el socio ideal en Colombia." />
+<link rel="stylesheet" href="/css/styles.css" />
 </head>
-
 <body>
 
-<!-- ── NAV ── -->
-<nav class="top-nav">
-  <a class="nav-brand" href="/">
-    <div class="nav-logo">TC</div>
-    <span class="nav-brand-name">TaxiConfianza</span>
-  </a>
-  <div class="nav-actions" id="navActions"><!-- JS --></div>
-</nav>
+<div class="tc-page">
 
-<!-- ── HERO ── -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="hero-eyebrow">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
-      </svg>
-      Plataforma verificada · Colombia
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="tc-nav">
+    <div class="tc-nav-logo">
+      <div class="tc-logo-badge">TC</div>
+      TaxiConfianza
+    </div>
+    <div class="tc-nav-right">
+      <div class="tc-theme-toggle" data-tc-theme-toggle title="Cambiar tema">
+        <span class="tc-toggle-icon" data-tc-theme-icon="sun">☀️</span>
+        <div class="tc-toggle-track"><div class="tc-toggle-knob"></div></div>
+        <span class="tc-toggle-icon" data-tc-theme-icon="moon">🌙</span>
+      </div>
+      <a href="/login.html" class="tc-btn-ghost">Ingresar</a>
+      <a href="/register.html" class="tc-btn-gold">Registrarse gratis</a>
+    </div>
+  </nav>
+
+  <!-- ===================== TRUST BAR ===================== -->
+  <div class="tc-trust-bar">
+    <div class="tc-trust-item"><span class="tc-trust-dot"></span>Documentación verificada</div>
+    <div class="tc-trust-item"><span class="tc-trust-dot"></span>Datos protegidos · Ley 1581</div>
+    <div class="tc-trust-item"><span class="tc-trust-dot"></span>SSL cifrado</div>
+    <div class="tc-trust-item"><span class="tc-trust-dot"></span>Soporte Colombia 24/7</div>
+  </div>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="tc-hero">
+    <div class="tc-hero-left">
+      <div class="tc-hero-badge">★ Plataforma verificada · Colombia</div>
+      <h1>El conductor que necesitas, <span>verificado y listo</span></h1>
+      <p>TaxiConfianza conecta propietarios de taxi con conductores profesionales. Sin grupos de WhatsApp, sin intermediarios — solo conexiones reales y seguras, con documentación validada y reputación real.</p>
+
+      <div class="tc-cta-group">
+        <a href="/register.html?rol=conductor" class="tc-cta-card">
+          <div class="tc-cta-icon" style="background: rgba(212,160,23,0.14);">🚗</div>
+          <div class="tc-cta-text">
+            <h4>Busco trabajo como conductor</h4>
+            <p>Regístrate y postúlate a ofertas verificadas</p>
+          </div>
+          <span class="tc-cta-arrow">→</span>
+        </a>
+        <a href="/register.html?rol=propietario" class="tc-cta-card">
+          <div class="tc-cta-icon" style="background: rgba(29,158,117,0.14);">🏷️</div>
+          <div class="tc-cta-text">
+            <h4>Tengo un taxi y busco conductor</h4>
+            <p>Publica tu oferta gratis y conecta hoy</p>
+          </div>
+          <span class="tc-cta-arrow">→</span>
+        </a>
+      </div>
+
+      <p class="tc-login-hint">¿Ya tienes cuenta? <a href="/login.html"><span>Inicia sesión</span></a></p>
     </div>
 
-    <h1>
-      Conecta con<br/>
-      <em>conductores</em> y<br/>
-      <em>propietarios</em> reales
-    </h1>
-
-    <p class="hero-sub">
-      TaxiConfianza valida historiales, documentación y reputación para que conductores y propietarios de taxi encuentren el socio ideal — con confianza y transparencia.
-    </p>
-
-    <div class="hero-ctas">
-      <a class="cta-btn cta-conductor" href="register.html?tipo=conductor">
-        <div class="cta-btn-icon">🚗</div>
-        <div class="cta-btn-text">
-          Busco trabajo como conductor
-          <small>Regístrate y postúlate a ofertas verificadas</small>
+    <div class="tc-hero-right">
+      <div class="tc-organic-graphic">
+        <div class="tc-blob-bg"></div>
+        <div class="tc-accent-circle"></div>
+        <div class="tc-accent-ring"></div>
+        <div class="tc-photo-mask">
+          <!--
+            TODO: reemplazar por foto real subida a /img/hero-conductor.jpg
+            Recomendación: foto de un conductor colombiano sonriendo en su taxi,
+            descargada de Unsplash y servida desde el propio dominio (no hotlink externo).
+          -->
+          <img
+            src="/img/hero-conductor.jpg"
+            alt="Conductor de taxi colombiano sonriendo"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <div class="tc-photo-placeholder" style="display:none;">
+            <span class="icon">🚕</span>
+            <span class="label">Foto del conductor (pendiente subir)</span>
+          </div>
         </div>
-      </a>
+      </div>
+    </div>
+  </section>
 
-      <div class="hero-divider">o</div>
+  <!-- ===================== STATS + BENEFICIOS (debajo del hero, full width) ===================== -->
+  <section class="tc-section" style="border-top: 0.5px solid var(--border-soft); padding-top: 32px;">
+    <div class="tc-stats-grid" style="max-width: 700px;">
+      <div class="tc-stat-cell">
+        <div class="tc-stat-num" id="stat-conductores">127</div>
+        <div class="tc-stat-label">Conductores activos</div>
+      </div>
+      <div class="tc-stat-cell">
+        <div class="tc-stat-num" id="stat-propietarios">43</div>
+        <div class="tc-stat-label">Propietarios</div>
+      </div>
+      <div class="tc-stat-cell">
+        <div class="tc-stat-num">100%</div>
+        <div class="tc-stat-label">Verificados</div>
+      </div>
+    </div>
+  </section>
 
-      <a class="cta-btn cta-propietario" href="register.html?tipo=propietario">
-        <div class="cta-btn-icon">🔑</div>
-        <div class="cta-btn-text">
-          Tengo un taxi y busco conductor
-          <small>Publica tu oferta y encuentra conductores confiables</small>
+  <!-- ===================== ¿CÓMO FUNCIONA? ===================== -->
+  <section class="tc-section">
+    <div class="tc-section-label">¿Cómo funciona?</div>
+    <h2 class="tc-section-title">En 3 pasos simples</h2>
+    <div class="tc-steps">
+      <div class="tc-step">
+        <div class="tc-step-num">1</div>
+        <h4>Regístrate gratis</h4>
+        <p>Crea tu perfil como conductor o propietario. Validamos tus documentos en menos de 24 horas.</p>
+      </div>
+      <div class="tc-step">
+        <div class="tc-step-num">2</div>
+        <h4>Encuentra o publica oferta</h4>
+        <p>Conductores: explora ofertas verificadas por ciudad y turno. Propietarios: publica tu taxi con condiciones claras.</p>
+      </div>
+      <div class="tc-step">
+        <div class="tc-step-num">3</div>
+        <h4>Conecta y trabaja</h4>
+        <p>Acuerdan condiciones directamente. Sin intermediarios, sin comisiones por conexión. Solo confianza.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CIUDADES ACTIVAS ===================== -->
+  <section class="tc-section">
+    <div class="tc-section-label">Cobertura</div>
+    <h2 class="tc-section-title">Ciudades activas en Colombia</h2>
+    <div class="tc-cities-grid">
+      <div class="tc-city-pill">
+        <div class="tc-city-dot"></div>
+        <div>
+          <div class="tc-city-name">Bogotá</div>
+          <div class="tc-city-count">61 registros</div>
         </div>
-      </a>
-
-      <p style="font-size:13px; color:var(--muted); margin: 4px 0 0; text-align:center;">
-        ¿Ya tienes cuenta? <a href="login.html" style="color:#fbbf24;">Inicia sesión</a>
-      </p>
-    </div>
-  </div>
-
-  <!-- Preview card (decorativa) -->
-  <aside class="hero-preview">
-    <div class="preview-title">Ofertas activas ahora</div>
-
-    <div class="preview-offer">
-      <div class="preview-offer-head">
-        <p class="preview-offer-title">Conductor para turno de día</p>
-        <span class="preview-badge badge-dia">Día</span>
       </div>
-      <div class="preview-meta">
-        <span>📍 <strong>Bogotá</strong></span>
-        <span>💰 <strong>$90.000/día</strong></span>
+      <div class="tc-city-pill">
+        <div class="tc-city-dot"></div>
+        <div>
+          <div class="tc-city-name">Medellín</div>
+          <div class="tc-city-count">38 registros</div>
+        </div>
       </div>
-      <div class="preview-owner">
-        👤 Propietario: <span class="blurred">Carlos M.</span>
-        <span style="font-size:11px; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:6px; padding:2px 7px;">🔒 Regístrate</span>
+      <div class="tc-city-pill">
+        <div class="tc-city-dot"></div>
+        <div>
+          <div class="tc-city-name">Cali</div>
+          <div class="tc-city-count">22 registros</div>
+        </div>
+      </div>
+      <div class="tc-city-pill soon">
+        <div class="tc-city-dot"></div>
+        <div>
+          <div class="tc-city-name">Barranquilla</div>
+          <div class="tc-city-count">Próximamente</div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="preview-offer">
-      <div class="preview-offer-head">
-        <p class="preview-offer-title">Conductor taxi ejecutivo noche</p>
-        <span class="preview-badge badge-noche">Noche</span>
-      </div>
-      <div class="preview-meta">
-        <span>📍 <strong>Medellín</strong></span>
-        <span>💰 <strong>$75.000/día</strong></span>
-      </div>
-      <div class="preview-owner">
-        👤 Propietario: <span class="blurred">Ana R.</span>
-        <span style="font-size:11px; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:6px; padding:2px 7px;">🔒 Regístrate</span>
-      </div>
-    </div>
-
-    <div class="preview-stats">
-      <div class="stat-box">
-        <div class="stat-num" id="statOfertas">—</div>
-        <div class="stat-lbl">Ofertas activas</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" style="color:#38bdf8;">100%</div>
-        <div class="stat-lbl">Verificadas</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" style="color:#22c55e;">Gratis</div>
-        <div class="stat-lbl">Registro</div>
+  <!-- ===================== TESTIMONIO ===================== -->
+  <section class="tc-section">
+    <div class="tc-section-label">Testimonios</div>
+    <h2 class="tc-section-title">Lo que dice el gremio</h2>
+    <div class="tc-testimonial-card">
+      <div class="tc-stars">★★★★★</div>
+      <blockquote>"Encontré conductor confiable en 2 días. La verificación de documentos me dio tranquilidad que un grupo de WhatsApp nunca me hubiera dado."</blockquote>
+      <div class="tc-testimonial-author">
+        <div class="tc-author-avatar">MR</div>
+        <div>
+          <div class="tc-author-name">Miguel Rojas</div>
+          <div class="tc-author-role">Propietario de taxi · Bogotá</div>
+        </div>
       </div>
     </div>
-  </aside>
-</section>
+  </section>
 
-<!-- ── OFFERS FEED ── -->
-<section class="offers-section">
-  <div class="offers-wrap">
-
-    <div class="section-header">
-      <div>
-        <h2>Ofertas de trabajo disponibles</h2>
-        <p>Todas las publicaciones activas en la plataforma</p>
-      </div>
+  <!-- ===================== FINAL CTA ===================== -->
+  <section class="tc-final-cta">
+    <h2>¿Listo para conectar con confianza?</h2>
+    <p>Registro gratuito · Sin tarjeta de crédito · Verificación en 24h</p>
+    <div class="tc-final-btns">
+      <a href="/register.html" class="tc-btn-gold-lg">Registrarme gratis</a>
+      <a href="#como-funciona" class="tc-btn-ghost">Ver cómo funciona</a>
     </div>
+  </section>
 
-    <!-- Banner solo sin sesión -->
-    <div class="cta-band" id="ctaBand" style="display:none">
-      <div>
-        <strong>¿Te interesa alguna oferta?</strong>
-        <p>Crea tu cuenta gratis en segundos y postúlate directamente.</p>
-      </div>
-      <div class="cta-band-btns">
-        <a class="btn primary" href="register.html?tipo=conductor">Crear cuenta gratis</a>
-        <a class="btn" href="login.html">Ya tengo cuenta</a>
-      </div>
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="tc-footer">
+    <div class="tc-footer-copy">© 2026 TaxiConfianza</div>
+    <div class="tc-footer-links">
+      <a href="/terminos.html">Términos y condiciones</a>
+      <a href="/privacidad.html">Política de privacidad</a>
+      <a href="/proveedores.html">¿Eres proveedor? Anúnciate</a>
     </div>
+  </footer>
 
-    <!-- Barra de búsqueda y filtros -->
-    <div class="toolbar">
-      <div class="search-box">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.5">
-          <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <input id="q" placeholder="Buscar ciudad, título, requisitos…" autocomplete="off" />
-      </div>
-
-      <select id="f-turno">
-        <option value="">Todos los turnos</option>
-        <option value="dia">Día</option>
-        <option value="noche">Noche</option>
-        <option value="mixto">Mixto</option>
-      </select>
-
-      <select id="f-order">
-        <option value="recent">Más recientes</option>
-        <option value="cuota_desc">Mayor cuota</option>
-      </select>
-    </div>
-
-    <p class="count-pill">Mostrando <strong id="count">0</strong> ofertas activas</p>
-
-    <div class="offers-grid" id="offersGrid">
-      <div class="state-msg">Cargando ofertas…</div>
-    </div>
-  </div>
-</section>
-
-<footer class="site-footer">
-  <small>© 2026 TaxiConfianza. Todos los derechos reservados.</small>
-</footer>
-
-<script src="js/tc-session.js"></script>
-<script>
-(function () {
-  const session = window.TC?.session;
-  const user    = session?.getUser() ?? null;
-
-  /* ── Redirect automático si ya hay sesión ── */
-  if (user) {
-    const role = session.normalizeRole(user.tipo);
-    window.location.replace(
-      role === "propietario" ? "dashboard-propietario.html" : "dashboard-conductor.html"
-    );
-    return; // detener ejecución del resto
-  }
-
-  /* ── Nav sin sesión ── */
-  document.getElementById("navActions").innerHTML = `
-    <a class="btn ghost" href="login.html">Ingresar</a>
-    <a class="btn primary" href="register.html">Registrarse</a>`;
-
-  document.getElementById("ctaBand").style.display = "flex";
-
-  /* ── Utilidades ── */
-  function esc(s) {
-    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  }
-  function escAttr(s) { return String(s ?? "").replace(/"/g,"&quot;"); }
-
-  const TURNO_LABEL = { dia: "Día", noche: "Noche", mixto: "Mixto" };
-  const TURNO_CLASS = { dia: "badge-turno-dia", noche: "badge-turno-noche", mixto: "badge-turno-mixto" };
-
-  function formatCuota(v) {
-    if (!v && v !== 0) return "—";
-    return "$" + Number(v).toLocaleString("es-CO");
-  }
-
-  function renderCard(o) {
-    const nombre = [o.propietario_nombres, o.propietario_apellidos].filter(Boolean).join(" ") || "Propietario";
-
-    return `
-    <div class="offer-card">
-      <div class="offer-card-head">
-        <h2 class="offer-title">${esc(o.titulo || "Sin título")}</h2>
-        <span class="badge ${TURNO_CLASS[o.turno] || "badge-turno-dia"}">${TURNO_LABEL[o.turno] || (o.turno || "—")}</span>
-      </div>
-
-      <div class="offer-chips">
-        <span class="chip">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.6"/></svg>
-          <strong>${esc(o.ciudad || "—")}</strong>
-        </span>
-        <span class="chip">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg>
-          Turno&nbsp;<strong>${TURNO_LABEL[o.turno] || (o.turno || "—")}</strong>
-        </span>
-        <span class="chip">💰&nbsp;Cuota&nbsp;<strong>${formatCuota(o.cuota_diaria)}/día</strong></span>
-        ${o.vehiculo ? `<span class="chip">🚗&nbsp;<strong>${esc(o.vehiculo)}</strong></span>` : ""}
-      </div>
-
-      <div class="owner-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        Propietario:&nbsp;<span class="owner-name">${esc(nombre)}</span>
-        <span class="owner-lock" title="Regístrate para ver el nombre">🔒 Inicia sesión</span>
-      </div>
-
-      <div class="owner-row">
-        <span class="stars">★★★★☆</span>
-        <span style="font-size:12px; color:var(--muted);">&nbsp;Rating del propietario</span>
-      </div>
-
-      <div class="offer-card-foot">
-        <button class="btn primary btn-postular" data-id="${o.id}" data-titulo="${escAttr(o.titulo)}">
-          Postular →
-        </button>
-      </div>
-    </div>`;
-  }
-
-  let allOffers = [];
-
-  function render(list) {
-    const grid = document.getElementById("offersGrid");
-    document.getElementById("count").textContent = list.length;
-    if (!list.length) {
-      grid.innerHTML = `<div class="state-msg">No se encontraron ofertas con esos filtros.</div>`;
-      return;
-    }
-    grid.innerHTML = list.map(renderCard).join("");
-
-    grid.querySelectorAll(".btn-postular").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.id;
-        window.location.href = `register.html?tipo=conductor&redirect=postular.html%3Foferta_id%3D${id}`;
-      });
-    });
-  }
-
-  function applyFilters() {
-    const q     = document.getElementById("q").value.trim().toLowerCase();
-    const turno = document.getElementById("f-turno").value;
-    const order = document.getElementById("f-order").value;
-
-    let list = allOffers.filter(o => {
-      if (turno && o.turno !== turno) return false;
-      if (q) {
-        const hay = [o.titulo, o.descripcion, o.ciudad, o.requisitos, o.vehiculo].join(" ").toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-
-    if (order === "cuota_desc") {
-      list.sort((a, b) => (b.cuota_diaria ?? 0) - (a.cuota_diaria ?? 0));
-    }
-    render(list);
-  }
-
-  async function loadOffers() {
-    try {
-      const res  = await fetch("/api/ofertas/activas");
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.message || "Error al cargar ofertas");
-      allOffers = data.data || [];
-
-      // Actualizar stat en el hero
-      const statEl = document.getElementById("statOfertas");
-      if (statEl) statEl.textContent = allOffers.length;
-
-      applyFilters();
-    } catch (err) {
-      document.getElementById("offersGrid").innerHTML =
-        `<div class="state-msg">Error al cargar ofertas: ${esc(err.message)}</div>`;
-    }
-  }
-
-  ["q", "f-turno", "f-order"].forEach(id => {
-    document.getElementById(id).addEventListener("input", applyFilters);
-  });
-
-  loadOffers();
-})();
-</script>
-
-<!-- ══════════════════════════════════════════════
-     TAXIBOT — Widget flotante v2
-══════════════════════════════════════════════ -->
-<style>
-  /* ── Contenedor flotante ── */
-  #taxibot-launcher {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-    user-select: none;
-  }
-
-  /* ── Ventana de chat ── */
-  #taxibot-window {
-    width: 340px;
-    max-height: 500px;
-    background: #0d1525;
-    border: 1px solid rgba(245,197,24,.28);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,.6);
-    animation: tbSlideIn .25s ease;
-  }
-  #taxibot-window.hidden { display: none; }
-  @keyframes tbSlideIn {
-    from { opacity: 0; transform: translateY(16px) scale(.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  /* ── Header del chat ── */
-  .tb-header {
-    background: linear-gradient(135deg, #1a2540, #0d1525);
-    border-bottom: 1px solid rgba(245,197,24,.18);
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .tb-header-info { flex: 1; }
-  .tb-header-name { font-weight: 700; font-size: 14px; color: #f1f5f9; }
-  .tb-beta-badge {
-    display: inline-block;
-    background: #F5C518;
-    color: #0d1525;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .08em;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-  .tb-header-status { font-size: 11px; color: #64748b; margin-top: 2px; }
-  .tb-close-btn {
-    background: none;
-    border: none;
-    color: #64748b;
-    font-size: 18px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-    border-radius: 6px;
-    transition: color .15s;
-  }
-  .tb-close-btn:hover { color: #f1f5f9; }
-
-  /* ── Mensajes ── */
-  .tb-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(245,197,24,.2) transparent;
-  }
-  .tb-bubble {
-    max-width: 82%;
-    padding: 9px 13px;
-    border-radius: 12px;
-    font-size: 13px;
-    line-height: 1.5;
-    word-break: break-word;
-  }
-  .tb-bubble.bot {
-    background: rgba(245,197,24,.1);
-    border: 1px solid rgba(245,197,24,.2);
-    color: #e2e8f0;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-  }
-  .tb-bubble.user {
-    background: rgba(59,130,246,.18);
-    border: 1px solid rgba(59,130,246,.22);
-    color: #e2e8f0;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-  }
-  .tb-bubble.typing { color: #64748b; font-style: italic; }
-
-  /* ── Sugerencias ── */
-  .tb-suggestions {
-    padding: 0 12px 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .tb-chip {
-    background: rgba(245,197,24,.08);
-    border: 1px solid rgba(245,197,24,.22);
-    color: #F5C518;
-    font-size: 11px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background .15s;
-    white-space: nowrap;
-  }
-  .tb-chip:hover { background: rgba(245,197,24,.18); }
-
-  /* ── Input ── */
-  .tb-input-row {
-    padding: 10px 12px;
-    display: flex;
-    gap: 8px;
-    border-top: 1px solid rgba(245,197,24,.12);
-  }
-  .tb-input {
-    flex: 1;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    color: #f1f5f9;
-    font-size: 13px;
-    padding: 8px 12px;
-    outline: none;
-    transition: border-color .15s;
-  }
-  .tb-input:focus { border-color: rgba(245,197,24,.4); }
-  .tb-input::placeholder { color: #475569; }
-  .tb-send-btn {
-    background: #F5C518;
-    border: none;
-    border-radius: 8px;
-    color: #0d1525;
-    font-size: 16px;
-    width: 36px;
-    cursor: pointer;
-    transition: opacity .15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .tb-send-btn:hover { opacity: .85; }
-  .tb-send-btn:disabled { opacity: .4; cursor: default; }
-
-  /* ══ ZONA DEL PERSONAJE ══ */
-  #tb-character-zone {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 8px;
-  }
-
-  /* Burbuja permanente "¿Necesitas ayuda?" */
-  #tb-callout {
-    background: #fff;
-    color: #1a2e5a;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 7px 12px;
-    border-radius: 14px 14px 4px 14px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.35);
-    white-space: nowrap;
-    pointer-events: none;
-    animation: tbCalloutPulse 3s ease-in-out infinite;
-  }
-  @keyframes tbCalloutPulse {
-    0%,100% { transform: scale(1); }
-    50%      { transform: scale(1.04); }
-  }
-
-  /* Wrapper del robot + etiqueta inferior */
-  #tb-bot-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    position: relative;
-  }
-
-  /* Tooltip hover */
-  #tb-bot-wrap::after {
-    content: "Soy TaxiBot, tu asistente virtual";
-    position: absolute;
-    bottom: calc(100% + 10px);
-    right: 0;
-    background: #1a2e5a;
-    color: #F5C518;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 6px 10px;
-    border-radius: 8px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(4px);
-    transition: opacity .2s, transform .2s;
-    box-shadow: 0 3px 12px rgba(0,0,0,.4);
-  }
-  #tb-bot-wrap:hover::after {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Botón lanzador ── SVG del robot taxi */
-  #taxibot-btn {
-    width: 76px;
-    height: auto;
-    cursor: pointer;
-    filter: drop-shadow(0 4px 18px rgba(245,197,24,.45));
-    animation: tbBounce 2.6s ease-in-out infinite;
-    display: block;
-  }
-  @keyframes tbBounce {
-    0%,100% { transform: translateY(0); }
-    50%      { transform: translateY(-9px); }
-  }
-
-  /* Brazo que saluda */
-  #tb-arm-right {
-    transform-origin: 3px 4px;
-    animation: tbWave 1.8s ease-in-out infinite;
-  }
-  @keyframes tbWave {
-    0%,100% { transform: rotate(0deg); }
-    25%      { transform: rotate(-28deg); }
-    75%      { transform: rotate(18deg); }
-  }
-
-  /* Etiqueta "Soporte IA · 24/7" */
-  #tb-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: .05em;
-    text-align: center;
-    pointer-events: none;
-  }
-
-  /* Punto verde parpadeante */
-  #tb-online {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    background: #4ade80;
-    border-radius: 50%;
-    box-shadow: 0 0 5px #4ade80;
-    vertical-align: middle;
-    margin-right: 4px;
-    animation: tbPulse 1.4s ease-in-out infinite;
-  }
-  @keyframes tbPulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: .45; transform: scale(.7); }
-  }
-</style>
-
-<div id="taxibot-launcher">
-  <!-- ── Ventana de chat ── -->
-  <div id="taxibot-window" class="hidden">
-    <div class="tb-header">
-      <!-- Mini avatar en header -->
-      <svg width="34" height="34" viewBox="0 0 60 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Letrero TAXI -->
-        <rect x="14" y="2" width="32" height="10" rx="3" fill="#1a2e5a"/>
-        <text x="30" y="10" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#F5C518" text-anchor="middle">TAXI</text>
-        <!-- Cabina -->
-        <rect x="10" y="12" width="40" height="16" rx="6" fill="#F5C518"/>
-        <!-- Cuerpo principal -->
-        <rect x="4" y="24" width="52" height="28" rx="5" fill="#F5C518"/>
-        <!-- Franja tablero ajedrez -->
-        <rect x="4" y="34" width="52" height="8" fill="#111"/>
-        <rect x="10" y="34" width="6" height="4" fill="#F5C518"/>
-        <rect x="22" y="34" width="6" height="4" fill="#F5C518"/>
-        <rect x="34" y="34" width="6" height="4" fill="#F5C518"/>
-        <rect x="46" y="34" width="6" height="4" fill="#F5C518"/>
-        <rect x="4"  y="38" width="6" height="4" fill="#F5C518"/>
-        <rect x="16" y="38" width="6" height="4" fill="#F5C518"/>
-        <rect x="28" y="38" width="6" height="4" fill="#F5C518"/>
-        <rect x="40" y="38" width="6" height="4" fill="#F5C518"/>
-        <!-- Ojos -->
-        <rect x="14" y="15" width="10" height="9" rx="2" fill="#1a2e5a"/>
-        <rect x="36" y="15" width="10" height="9" rx="2" fill="#1a2e5a"/>
-        <circle cx="19" cy="19.5" r="3" fill="#4ade80"/>
-        <circle cx="41" cy="19.5" r="3" fill="#4ade80"/>
-        <!-- Sonrisa -->
-        <path d="M22 29 Q30 34 38 29" stroke="#111" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <!-- Ruedas -->
-        <circle cx="16" cy="56" r="8" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
-        <circle cx="16" cy="56" r="3" fill="#888"/>
-        <circle cx="44" cy="56" r="8" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
-        <circle cx="44" cy="56" r="3" fill="#888"/>
-      </svg>
-      <div class="tb-header-info">
-        <div class="tb-header-name">TaxiBot <span class="tb-beta-badge">BETA</span></div>
-        <div class="tb-header-status"><span id="tb-online"></span>Asistente de TaxiConfianza</div>
-      </div>
-      <button class="tb-close-btn" id="taxibot-close" aria-label="Cerrar">✕</button>
-    </div>
-
-    <div class="tb-messages" id="tb-messages">
-      <div class="tb-bubble bot">¡Hola! Soy TaxiBot 🚕<br>¿En qué puedo ayudarte hoy?</div>
-    </div>
-
-    <div class="tb-suggestions" id="tb-suggestions">
-      <button class="tb-chip">¿Cómo funciona?</button>
-      <button class="tb-chip">Reportar error</button>
-      <button class="tb-chip">Hablar con soporte</button>
-    </div>
-
-    <div class="tb-input-row">
-      <input class="tb-input" id="tb-input" type="text" placeholder="Escribe tu mensaje…" maxlength="500" autocomplete="off"/>
-      <button class="tb-send-btn" id="tb-send" aria-label="Enviar">➤</button>
-    </div>
-  </div>
-
-  <!-- ── Zona del personaje + burbuja ── -->
-  <div id="tb-character-zone">
-    <!-- Burbuja permanente -->
-    <div id="tb-callout">¿Necesitas ayuda? 🚕</div>
-
-    <!-- Robot + etiqueta -->
-    <div id="tb-bot-wrap">
-      <!-- SVG TaxiBot robot-taxi rediseñado -->
-      <svg id="taxibot-btn" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg"
-           role="button" aria-label="Abrir chat con TaxiBot">
-
-        <!-- Antena -->
-        <rect x="37" y="0" width="6" height="13" rx="3" fill="#F5C518"/>
-        <circle cx="40" cy="0" r="4" fill="#F5C518" stroke="#1a2e5a" stroke-width="2"/>
-
-        <!-- Letrero TAXI -->
-        <rect x="16" y="13" width="48" height="12" rx="4" fill="#1a2e5a"/>
-        <text x="40" y="22" font-family="Arial,sans-serif" font-size="8" font-weight="900"
-              fill="#F5C518" text-anchor="middle" letter-spacing="1">TAXI</text>
-
-        <!-- Cabina (techo redondeado) -->
-        <rect x="12" y="25" width="56" height="20" rx="9" fill="#F5C518"/>
-
-        <!-- Faros laterales cabina -->
-        <rect x="4"  y="30" width="10" height="8" rx="2" fill="#fff" opacity=".9"/>
-        <rect x="66" y="30" width="10" height="8" rx="2" fill="#fff" opacity=".9"/>
-
-        <!-- Ojos rectangulares (sobre cabina) -->
-        <rect x="19" y="28" width="14" height="12" rx="3" fill="#1a2e5a"/>
-        <rect x="47" y="28" width="14" height="12" rx="3" fill="#1a2e5a"/>
-        <!-- Pupilas verdes -->
-        <circle cx="26" cy="34" r="4.5" fill="#4ade80"/>
-        <circle cx="54" cy="34" r="4.5" fill="#4ade80"/>
-        <!-- Brillo pupila -->
-        <circle cx="27.5" cy="32.5" r="1.5" fill="#fff" opacity=".7"/>
-        <circle cx="55.5" cy="32.5" r="1.5" fill="#fff" opacity=".7"/>
-
-        <!-- Sonrisa curva -->
-        <path d="M28 44 Q40 52 52 44" stroke="#1a2e5a" stroke-width="3"
-              stroke-linecap="round" fill="none"/>
-
-        <!-- Cuerpo principal -->
-        <rect x="6" y="44" width="68" height="34" rx="7" fill="#F5C518"/>
-
-        <!-- Franja tablero ajedrez -->
-        <rect x="6" y="55" width="68" height="11" fill="#111" rx="1"/>
-        <!-- Cuadros blancos/amarillos del tablero -->
-        <rect x="9"  y="55" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="25" y="55" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="41" y="55" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="57" y="55" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="17" y="60.5" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="33" y="60.5" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="49" y="60.5" width="8" height="5.5" fill="#F5C518"/>
-        <rect x="65" y="60.5" width="8" height="5.5" fill="#F5C518"/>
-
-        <!-- Brazo izquierdo (quieto) -->
-        <rect x="0" y="46" width="8" height="18" rx="4" fill="#F5C518"/>
-
-        <!-- Brazo derecho (saluda, animado) -->
-        <g id="tb-arm-right" transform="translate(72, 46)">
-          <rect x="0" y="0" width="8" height="18" rx="4" fill="#F5C518"/>
-          <rect x="1" y="16" width="7" height="5" rx="2" fill="#F5C518"/>
-        </g>
-
-        <!-- Ruedas -->
-        <circle cx="22" cy="84" r="11" fill="#1a1a1a" stroke="#555" stroke-width="2.5"/>
-        <circle cx="22" cy="84" r="4.5" fill="#666"/>
-        <circle cx="22" cy="84" r="2" fill="#333"/>
-
-        <circle cx="58" cy="84" r="11" fill="#1a1a1a" stroke="#555" stroke-width="2.5"/>
-        <circle cx="58" cy="84" r="4.5" fill="#666"/>
-        <circle cx="58" cy="84" r="2" fill="#333"/>
-      </svg>
-
-      <!-- Etiqueta inferior -->
-      <div id="tb-label"><span id="tb-online-dot" style="display:inline-block;width:6px;height:6px;background:#4ade80;border-radius:50%;box-shadow:0 0 5px #4ade80;vertical-align:middle;margin-right:3px;animation:tbPulse 1.4s ease-in-out infinite;"></span>Soporte IA · 24/7</div>
-    </div>
-  </div>
 </div>
 
-<script>
-(function () {
-  const launcher = document.getElementById('taxibot-launcher');
-  const win      = document.getElementById('taxibot-window');
-  const btn      = document.getElementById('taxibot-btn');
-  const closeBtn = document.getElementById('taxibot-close');
-  const input    = document.getElementById('tb-input');
-  const sendBtn  = document.getElementById('tb-send');
-  const msgs     = document.getElementById('tb-messages');
-  const sugs     = document.getElementById('tb-suggestions');
-
-  let history  = [];
-  let loading  = false;
-
-  function openChat()  { win.classList.remove('hidden'); sugs.style.display = ''; input.focus(); }
-  function closeChat() { win.classList.add('hidden'); }
-
-  btn.addEventListener('click', openChat);
-  closeBtn.addEventListener('click', closeChat);
-
-  // Chips de sugerencias
-  sugs.querySelectorAll('.tb-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      sugs.style.display = 'none';
-      sendMessage(chip.textContent.trim());
-    });
-  });
-
-  function addBubble(text, role) {
-    const div = document.createElement('div');
-    div.className = 'tb-bubble ' + role;
-    div.textContent = text;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    return div;
-  }
-
-  async function sendMessage(text) {
-    if (loading || !text.trim()) return;
-    sugs.style.display = 'none';
-    loading = true;
-    sendBtn.disabled = true;
-    input.value = '';
-
-    addBubble(text, 'user');
-    const typingEl = addBubble('Escribiendo…', 'bot typing');
-
-    try {
-      const res  = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history }),
-      });
-      const data = await res.json();
-
-      typingEl.remove();
-
-      const reply = data.reply || 'Lo siento, hubo un error.';
-      addBubble(reply, 'bot');
-
-      history.push({ role: 'user', content: text });
-      history.push({ role: 'assistant', content: reply });
-      if (history.length > 20) history = history.slice(-20);
-    } catch (e) {
-      typingEl.remove();
-      addBubble('Error de conexión. Intenta de nuevo.', 'bot');
-    } finally {
-      loading = false;
-      sendBtn.disabled = false;
-      input.focus();
-    }
-  }
-
-  sendBtn.addEventListener('click', () => sendMessage(input.value));
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input.value); }
-  });
-})();
-</script>
+<script src="/js/tc-theme.js"></script>
+<!-- Aquí se cargarían también tc-api.js y tc-session.js si esta página los necesita -->
 
 </body>
 </html>

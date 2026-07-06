@@ -1,954 +1,736 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Conductor | TaxiConfianza</title>
+  <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    :root{
-      --bg:#0b1220;
-      --surface:#0f172a;
-      --card:#111c33;
-      --card2:#0f1a2f;
-      --text:#e5e7eb;
-      --muted:#9ca3af;
-      --border:rgba(255,255,255,.08);
-      --shadow: 0 10px 25px rgba(0,0,0,.35);
-      --brand:#fbbf24;      /* taxi yellow */
-      --brand2:#22c55e;     /* success */
-      --danger:#ef4444;
-      --warn:#f59e0b;
-      --info:#38bdf8;
-      --link:#93c5fd;
-      --chip:#0b1326;
-      --radius:16px;
-      --radius2:12px;
-      --max:1600px;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    /* ── Variables heredadas del sistema original para compatibilidad con tc-dashboard-conductor.js ── */
+    :root {
+      --bg: var(--bg-app);
+      --surface: var(--bg-card-solid);
+      --card: var(--bg-card-solid);
+      --card2: var(--bg-card);
+      --text: var(--text-primary);
+      --muted: var(--text-tertiary);
+      --border: var(--border);
+      --shadow: var(--shadow);
+      --brand: var(--gold);
+      --brand2: var(--green);
+      --danger: var(--red);
+      --warn: #f59e0b;
+      --info: #38bdf8;
+      --link: #93c5fd;
+      --chip: var(--bg-card-solid);
+      --radius: 14px;
+      --radius2: 10px;
+      --max: 1400px;
+      --font: var(--font-sans);
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:var(--font);
-      background: radial-gradient(1100px 600px at 15% 0%, rgba(251,191,36,.12), transparent 60%),
-                  radial-gradient(900px 500px at 90% 15%, rgba(56,189,248,.10), transparent 55%),
-                  var(--bg);
-      color:var(--text);
+
+    /* ── Layout principal ── */
+    body { margin:0; }
+    a { color:inherit; text-decoration:none; }
+    .wrap { display:flex; min-height:100vh; background:var(--bg-app); }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-card-solid);
+      border-right: 0.5px solid var(--border);
+      padding: 18px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.25s, border-color 0.25s;
     }
-    a{color:inherit; text-decoration:none}
-    .wrap{display:flex; min-height:100vh;}
-    /* Sidebar */
-    .sidebar{
-      width:280px;
-      background: linear-gradient(180deg, rgba(17,28,51,.9), rgba(15,23,42,.7));
-      border-right:1px solid var(--border);
-      padding:18px 14px;
-      position:sticky;
-      top:0;
-      height:100vh;
-      overflow:auto;
+
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 12px;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      margin-bottom: 6px;
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px; border-radius:14px;
-      background: rgba(255,255,255,.03);
-      border:1px solid var(--border);
+    .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: rgba(212,160,23,0.15);
+      color: var(--gold); font-weight: 900; font-size: 13px;
     }
-    .logo{
-      width:38px; height:38px;
-      border-radius:12px;
-      display:grid; place-items:center;
-      background: rgba(251,191,36,.18);
-      color: var(--brand);
-      font-weight:900;
-      letter-spacing:.5px;
+    .brand h1 { font-size: 14px; margin: 0; color: var(--text-primary); line-height: 1.1; }
+    .brand p  { margin: 0; font-size: 11px; color: var(--text-tertiary); }
+
+    .nav { margin-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+    .nav a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 10px;
+      color: var(--text-secondary);
+      border: 0.5px solid transparent;
+      font-size: 13px;
+      transition: all 0.15s;
     }
-    .brand h1{font-size:14px; margin:0; line-height:1.1}
-    .brand p{margin:0; font-size:12px; color:var(--muted)}
-    .nav{margin-top:16px; display:flex; flex-direction:column; gap:6px;}
-    .nav a{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      color:var(--text);
-      border:1px solid transparent;
-    }
-    .nav a:hover{background:rgba(255,255,255,.04); border-color:var(--border);}
-    .nav a.active{
-      background: rgba(251,191,36,.12);
-      border-color: rgba(251,191,36,.35);
-    }
-    .ico{
-      width:18px;height:18px; flex:0 0 auto;
-      opacity:.9;
-    }
-    .sep{height:1px;background:var(--border); margin:14px 6px;}
-    .mini{
-      margin: 10px 6px 0;
+    .nav a:hover { background: var(--bg-card); border-color: var(--border); color: var(--text-primary); }
+    .nav a.active { background: rgba(212,160,23,0.1); border-color: rgba(212,160,23,0.3); color: var(--gold); }
+    .ico { width: 17px; height: 17px; flex-shrink: 0; opacity: 0.85; }
+    .sep { height: 0.5px; background: var(--border); margin: 12px 6px; }
+
+    /* Mini perfil en sidebar */
+    .mini {
+      margin-top: auto;
       padding: 12px;
-      border-radius: var(--radius2);
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
+      border-radius: 10px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-card);
     }
-    .mini .row{display:flex; justify-content:space-between; gap:10px; align-items:center;}
-    .mini small{color:var(--muted)}
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:999px;
-      background: rgba(255,255,255,.04);
-      border:1px solid var(--border);
-      font-size:12px;
+    .mini .row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .mini small { color: var(--text-tertiary); font-size: 11px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 9px; border-radius: 999px;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      font-size: 11px; color: var(--text-secondary);
     }
-    .dot{width:8px;height:8px;border-radius:999px;background:var(--brand2)}
-    /* Main */
-    .main{flex:1; padding:18px 18px 40px;}
-    .topbar{
-      max-width: var(--max);
-      margin:0 auto 16px;
-      display:flex; align-items:center; justify-content:space-between; gap:14px;
-      padding:14px 14px;
-      border:1px solid var(--border);
+    .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--green); }
+
+    /* ── Main ── */
+    .main { flex: 1; padding: 16px 18px 40px; min-width: 0; }
+
+    .topbar {
+      max-width: var(--max); margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 12px 16px;
+      border: 0.5px solid var(--border);
       border-radius: var(--radius);
-      background: rgba(255,255,255,.03);
-      backdrop-filter: blur(10px);
+      background: var(--bg-card);
     }
-    .topbar .left{display:flex; flex-direction:column; gap:4px;}
-    .title{font-size:18px; margin:0;}
-    .subtitle{margin:0; font-size:13px; color:var(--muted)}
-    .top-actions{display:flex; gap:10px; align-items:center;}
-    .search{
-      display:flex; align-items:center; gap:8px;
-      background: rgba(0,0,0,.25);
-      border:1px solid var(--border);
+    .topbar .left { display: flex; flex-direction: column; gap: 3px; }
+    .title { font-size: 17px; margin: 0; font-weight: 600; color: var(--text-primary); }
+    .subtitle { margin: 0; font-size: 12px; color: var(--text-tertiary); }
+    .top-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* Toggle de tema en topbar */
+    .topbar-theme { display: flex; align-items: center; }
+
+    .search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-card-solid);
+      border: 0.5px solid var(--border);
       border-radius: 999px;
-      padding:10px 12px;
-      min-width: 260px;
+      padding: 8px 12px;
+      min-width: 200px;
     }
-    .search input{
-      border:0; outline:0; background:transparent; color:var(--text);
-      width:100%;
-      font-size:13px;
+    .search input {
+      border: 0; outline: 0;
+      background: transparent;
+      color: var(--text-primary);
+      width: 100%; font-size: 12px;
+      font-family: var(--font-sans);
     }
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      padding:10px 12px;
-      border-radius: 12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      cursor:pointer;
-      font-size:13px;
+    .search input::placeholder { color: var(--text-tertiary); }
+
+    /* Botones */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 8px 12px; border-radius: 10px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      cursor: pointer; font-size: 12px;
+      font-family: var(--font-sans);
+      transition: all 0.15s;
     }
-    .btn:hover{background:rgba(255,255,255,.06)}
-    .btn.primary{
-      border-color: rgba(251,191,36,.35);
-      background: rgba(251,191,36,.14);
+    .btn:hover { background: var(--bg-card-solid); }
+    .btn.primary { border-color: rgba(212,160,23,0.35); background: rgba(212,160,23,0.1); color: var(--gold); }
+    .btn.primary:hover { background: rgba(212,160,23,0.16); }
+    .btn.danger { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.1); color: #F87171; }
+
+    /* Notif badge */
+    .notif { position: relative; }
+    .bubble {
+      position: absolute; top: -6px; right: -6px;
+      width: 17px; height: 17px; border-radius: 999px;
+      background: var(--red); color: white; font-size: 10px;
+      display: grid; place-items: center;
+      border: 2px solid var(--bg-app);
     }
-    .btn.primary:hover{background: rgba(251,191,36,.18);}
-    .btn.danger{
-      border-color: rgba(239,68,68,.35);
-      background: rgba(239,68,68,.12);
+
+    /* Badge */
+    .badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 10px; border-radius: 999px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-card);
+      font-size: 11px; color: var(--text-secondary);
     }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px;
-      border-radius: 999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
-      font-size:12px;
-      color: var(--muted);
+    .badge strong { color: var(--text-primary); font-weight: 800; }
+
+    /* Grid de cards */
+    .grid {
+      max-width: var(--max); margin: 0 auto;
+      display: grid; grid-template-columns: 1fr; gap: 12px;
     }
-    .badge strong{color:var(--text); font-weight:800}
-    .notif{
-      position:relative;
+    @media(min-width:980px) {
+      .grid { grid-template-columns: 1.2fr 0.8fr; }
+      .span-2 { grid-column: 1 / -1; }
     }
-    .bubble{
-      position:absolute;
-      top:-6px; right:-6px;
-      width:18px;height:18px;border-radius:999px;
-      background: var(--danger);
-      color:white;
-      font-size:11px;
-      display:grid; place-items:center;
-      border:2px solid var(--bg);
-    }
-    /* Grid cards */
-    .grid{
-      max-width: var(--max);
-      margin:0 auto;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
-    }
-    @media(min-width: 980px){
-      .grid{grid-template-columns: 1.2fr .8fr;}
-      .span-2{grid-column: 1 / -1;}
-    }
-    .card{
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+
+    .card {
+      border: 0.5px solid var(--border);
+      background: var(--bg-card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding:14px;
+      padding: 14px;
+      transition: background 0.25s, border-color 0.25s;
     }
-    .card h3{margin:0 0 8px; font-size:14px;}
-    .muted{color:var(--muted); font-size:13px;}
-    .kpis{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
+    .card h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .muted { color: var(--text-tertiary); font-size: 12px; }
+
+    /* KPIs */
+    .kpis { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+    .kpi {
+      background: var(--bg-card-solid);
+      border: 0.5px solid var(--border);
+      border-radius: 12px; padding: 12px;
     }
-    .kpi{
-      background: rgba(0,0,0,.18);
-      border:1px solid var(--border);
+    .kpi .v { font-size: 20px; font-weight: 900; margin: 2px 0 4px; color: var(--text-primary); }
+    .kpi .l { font-size: 11px; color: var(--text-tertiary); margin: 0; }
+
+    .stars { color: var(--gold); letter-spacing: 1px; font-size: 13px; }
+    .row-between { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+
+    /* Progress bar */
+    .progress {
+      height: 8px; border-radius: 999px;
+      background: var(--border);
+      overflow: hidden; margin-top: 10px;
+    }
+    .progress > div {
+      height: 100%; width: 62%;
+      background: linear-gradient(90deg, rgba(212,160,23,0.5), rgba(29,158,117,0.5));
+    }
+
+    /* Listas */
+    .list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .item {
+      display: flex; justify-content: space-between; gap: 10px; align-items: flex-start;
+      padding: 11px 12px; border-radius: 12px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-card-solid);
+    }
+    .item .left { display: flex; flex-direction: column; gap: 3px; }
+    .item strong { font-size: 12px; color: var(--text-primary); }
+
+    /* Chips */
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 9px; border-radius: 999px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-card-solid);
+      font-size: 11px; color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+    .chip.warn { border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.10); color:#fcd34d; }
+    .chip.ok   { border-color:rgba(29,158,117,.35); background:rgba(29,158,117,.10); color:#6ee7b7; }
+    .chip.info { border-color:rgba(56,189,248,.35); background:rgba(56,189,248,.10); color:#bae6fd; }
+
+    /* Quick actions */
+    .quick {
+      display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px; margin-top: 10px;
+    }
+    @media(min-width:980px) { .quick { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+    .qbtn {
+      display: flex; flex-direction: column; gap: 5px;
+      padding: 11px; border-radius: 12px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-card-solid);
+      cursor: pointer; transition: background 0.15s;
+      text-align: left;
+    }
+    .qbtn:hover { background: var(--bg-card); }
+    .qbtn .t { font-weight: 700; font-size: 12px; color: var(--text-primary); }
+    .qbtn .d { color: var(--text-tertiary); font-size: 11px; }
+
+    /* Inputs */
+    .tc-input {
+      width: 100%; background: var(--bg-card-solid);
+      border: 0.5px solid var(--border);
+      border-radius: 9px; color: var(--text-primary);
+      padding: 9px 12px; font-size: 13px;
+      font-family: var(--font-sans); outline: none;
+      transition: border-color 0.15s;
+    }
+    .tc-input:focus { border-color: rgba(212,160,23,0.4); }
+    .tc-input[readonly] { opacity: 0.55; cursor: default; }
+    textarea.tc-input { resize: vertical; }
+
+    /* Hoja de vida / perfil */
+    .hv-foto-grid {
+      display: grid; grid-template-columns: 120px 1fr;
+      gap: 18px; align-items: start; margin-top: 12px;
+    }
+    @media(max-width:680px) { .hv-foto-grid { grid-template-columns: 1fr; } }
+    .hv-foto-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .hv-foto-wrap {
+      width: 100px; height: 100px; border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(212,160,23,0.3);
+      background: var(--bg-card-solid);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hv-foto-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .hv-fields { display: flex; flex-direction: column; gap: 10px; }
+    .hv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:680px) { .hv-row { grid-template-columns: 1fr; } }
+    .hv-field { display: flex; flex-direction: column; gap: 5px; }
+    .hv-field label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; }
+    .hv-ref-box {
+      background: var(--bg-card-solid); border: 0.5px solid var(--border);
+      border-radius: 10px; padding: 14px; margin-top: 10px;
+    }
+    .hv-ref-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+
+    /* Footer */
+    .foot { max-width:var(--max); margin:16px auto 0; color:var(--text-tertiary); font-size:11px; text-align:center; }
+
+    /* Overlay móvil */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+    .overlay.show { display:block; }
+
+    /* Botón menú móvil */
+    .btn-menu { display:none; }
+    @media(max-width:900px) {
+      .sidebar { position:fixed; left:-280px; z-index:50; transition:left 0.25s; }
+      .sidebar.open { left:0; }
+      .btn-menu { display:flex; }
+    }
+
+    /* Modal detalle asignación */
+    #modal-detalle-trabajo {
+      display:none; position:fixed; inset:0; z-index:1000;
+      background:rgba(0,0,0,.6); overflow-y:auto; padding:24px 16px;
+    }
+    .modal-inner {
+      background: var(--bg-card-solid);
+      border: 0.5px solid var(--border);
       border-radius: 14px;
-      padding:12px;
+      max-width: 500px; margin: 0 auto;
+      padding: 24px; position: relative;
     }
-    .kpi .v{font-size:20px; font-weight:900; margin:2px 0 4px;}
-    .kpi .l{font-size:12px; color:var(--muted); margin:0;}
-    .stars{color:var(--brand); letter-spacing:1px; font-size:14px;}
-    .row-between{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
-    .progress{
-      height:10px; border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--border);
-      overflow:hidden;
-      margin-top:10px;
+    .modal-close {
+      position: absolute; top:12px; right:12px;
+      background:none; border:none;
+      color: var(--text-tertiary); font-size:20px;
+      cursor:pointer; line-height:1;
     }
-    .progress > div{
-      height:100%;
-      width: 62%; /* placeholder */
-      background: linear-gradient(90deg, rgba(251,191,36,.35), rgba(34,197,94,.35));
-    }
-    .list{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
-    .item{
-      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
-      padding:12px;
-      border-radius: 14px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.16);
-    }
-    .item .left{display:flex; flex-direction:column; gap:4px;}
-    .item strong{font-size:13px;}
-    .chip{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:999px;
-      border:1px solid var(--border);
-      background: var(--chip);
-      font-size:12px;
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .chip.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#fcd34d;}
-    .chip.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color:#bbf7d0;}
-    .chip.info{border-color: rgba(56,189,248,.35); background: rgba(56,189,248,.10); color:#bae6fd;}
-    .quick{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-    @media(min-width: 980px){
-      .quick{grid-template-columns: repeat(4, minmax(0,1fr));}
-    }
-    .qbtn{
-      display:flex; flex-direction:column; gap:6px;
-      padding:12px;
-      border-radius: 14px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      cursor:pointer;
-    }
-    .qbtn:hover{background: rgba(0,0,0,.24);}
-    .qbtn .t{font-weight:800; font-size:13px;}
-    .qbtn .d{color:var(--muted); font-size:12px;}
-    .foot{
-      max-width: var(--max);
-      margin: 18px auto 0;
-      color: var(--muted);
-      font-size: 12px;
-      text-align:center;
-    }
-    /* Inputs HV */
-    .tc-input{
-      width:100%;
-      background:rgba(0,0,0,.25);
-      border:1px solid var(--border);
-      border-radius:10px;
-      color:var(--text);
-      padding:10px 12px;
-      font-size:14px;
-      font-family:var(--font);
-      outline:none;
-    }
-    .tc-input:focus{border-color:rgba(251,191,36,.4);}
-    .tc-input[readonly]{opacity:.55;cursor:default;}
-    .tc-input option{background:#0b1220;}
-    textarea.tc-input{resize:vertical;}
-    /* Grid HV */
-    .hv-foto-grid{
-      display:grid;
-      grid-template-columns:130px 1fr;
-      gap:20px;
-      align-items:start;
-      margin-top:12px;
-    }
-    @media(max-width:680px){.hv-foto-grid{grid-template-columns:1fr;}}
-    .hv-foto-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
-    .hv-foto-wrap{
-      width:110px;height:110px;
-      border-radius:50%;
-      border:2px solid var(--border);
-      background:rgba(0,0,0,.25);
-      display:grid;place-items:center;
-      overflow:hidden;
-    }
-    .hv-foto-wrap img{width:100%;height:100%;object-fit:cover;}
-    .hv-fields{display:flex;flex-direction:column;gap:12px;}
-    .hv-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
-    .hv-field{display:flex;flex-direction:column;gap:5px;}
-    .hv-field label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.3px;}
-    .hv-ref-box{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:8px;}
-    .hv-ref-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;margin-bottom:8px;}
-    .alert-ok{padding:10px 14px;border-radius:10px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.10);color:#bbf7d0;font-size:13px;}
-    .alert-err{padding:10px 14px;border-radius:10px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.10);color:#fca5a5;font-size:13px;}
-    /* Mobile */
-    .mobile-toggle{display:none;}
-    @media(max-width: 980px){
-      .sidebar{
-        position:fixed; left:-320px; top:0;
-        transition:left .22s ease;
-        z-index:50;
-      }
-      .sidebar.open{left:0;}
-      .main{padding:14px;}
-      .search{display:none;}
-      .mobile-toggle{display:inline-flex;}
-      .overlay{
-        display:none;
-        position:fixed; inset:0;
-        background: rgba(0,0,0,.55);
-        z-index:40;
-      }
-      .overlay.show{display:block;}
-    }
+    .modal-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .modal-label { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-tertiary); margin-bottom:4px; }
+    .modal-val { font-weight:600; color:var(--text-primary); }
+    .modal-hr { border:none; border-top:0.5px solid var(--border); margin:10px 0; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <a class="brand" href="/" title="Ir al inicio público">
-        <div class="logo">TC</div>
-        <div>
-          <h1>TaxiConfianza</h1>
-          <p>Panel Conductor</p>
-        </div>
+
+<div class="wrap">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">TC</div>
+      <div>
+        <h1>TaxiConfianza</h1>
+        <p>Panel Conductor</p>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Navegación del conductor">
+      <a href="dashboard-conductor.html" class="active" id="nav-inicio">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        Dashboard
       </a>
+      <a href="conductor-ofertas.html" id="nav-ofertas">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Ver ofertas
+      </a>
+      <a href="#" id="nav-trabajo-actual">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        Trabajo actual
+      </a>
+      <a href="#" id="nav-mi-perfil">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        Mi hoja de vida
+      </a>
+    </nav>
 
-      <nav class="nav" aria-label="Navegación del conductor">
-        <a class="active" href="#" aria-current="page">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Dashboard
-        </a>
-        <a href="conductor-ofertas.html">
-          <svg class="ico" viewBox="0 0 24 24" fill="none">
-           <path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-          Ofertas
-        </a>
+    <div class="sep"></div>
 
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h6M7 16h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v14l-4-2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Mis postulaciones
-        </a>
-        <a href="#" id="nav-trabajo-actual">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Trabajo actual
-        </a>
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v4H7V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M6 8h12v12H6V8Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Historial de trabajos
-        </a>
+    <!-- Toggle de tema en sidebar -->
+    <div style="padding: 8px 6px;">
+      <div class="tc-theme-toggle" data-tc-theme-toggle style="width:100%; justify-content:center;">
+        <span class="tc-toggle-icon" data-tc-theme-icon="sun">☀️</span>
+        <div class="tc-toggle-track"><div class="tc-toggle-knob"></div></div>
+        <span class="tc-toggle-icon" data-tc-theme-icon="moon">🌙</span>
+      </div>
+    </div>
 
-        <div class="sep"></div>
+    <div class="sep"></div>
 
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 17.5l-6.2 3.3 1.2-7-5-4.8 7-1 3-6.4 3 6.4 7 1-5 4.8 1.2 7L12 17.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Calificaciones
-        </a>
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 18V6m0 12c2-2 4-3 8-3s6 1 8 3V6c-2-2-4-3-8-3S6 4 4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Reputación y nivel
-        </a>
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M8 2h8v4H8V2Z" stroke="currentColor" stroke-width="1.6"/><path d="M6 6h12v16H6V6Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Documentos
-        </a>
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Puntos
-        </a>
-        <a href="#">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v12H7l-3 3V4Z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Notificaciones
-        </a>
-        <a href="#" id="nav-mi-perfil">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c1.5-4 14.5-4 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Mi perfil
-        </a>
-      </nav>
+    <div class="mini">
+      <div class="row">
+        <div class="pill"><div class="dot"></div><span id="sidebar-nivel">Plata</span></div>
+        <small id="sidebar-score">—</small>
+      </div>
+    </div>
 
-      <div class="mini">
-        <div class="row">
-          <div>
-            <small>Sesión</small>
-            <div class="pill" title="Estado de verificación">
-              <span class="dot"></span>
-              <span id="badge-verificacion">Verificado</span>
-            </div>
-          </div>
-          <button class="btn danger" type="button">Salir</button>
+    <div class="sep"></div>
+    <button class="btn danger" id="btnLogout" style="width:100%; justify-content:center; margin-top:6px;">Cerrar sesión</button>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <header class="topbar">
+      <div class="left">
+        <button class="btn btn-menu" id="btnOpenMenu" type="button">☰</button>
+        <h2 class="title" id="topbar-titulo">Dashboard</h2>
+        <p class="subtitle" id="topbar-sub">Bienvenido a TaxiConfianza</p>
+      </div>
+      <div class="top-actions">
+        <div class="search">
+          <span style="opacity:0.5">🔍</span>
+          <input type="text" id="searchInput" placeholder="Buscar ofertas…" />
+        </div>
+        <div class="notif btn" id="btnNotif" title="Notificaciones">
+          🔔
+          <span class="bubble" id="notif-bubble" style="display:none">0</span>
+        </div>
+        <div class="badge">
+          Hola, <strong id="topbar-nombre">…</strong>
         </div>
       </div>
-    </aside>
+    </header>
 
-    <div class="overlay" id="overlay"></div>
+    <!-- ===== SECCIÓN DASHBOARD ===== -->
+    <section id="section-dashboard" style="max-width:var(--max); margin:0 auto;">
 
-    <!-- Main -->
-    <main class="main">
-      <header class="topbar">
-        <div class="left">
-          <h2 class="title">Hola, <span id="user-name">Juan Pérez</span> 👋</h2>
-          <p class="subtitle">Tu panel de conductor: ofertas, trabajo activo, reputación y alertas.</p>
-        </div>
-
-        <div class="top-actions">
-          <button class="btn mobile-toggle" id="btnOpenMenu" type="button" aria-label="Abrir menú">
-            ☰ Menú
-          </button>
-
-          <div class="search" role="search" aria-label="Buscar en el panel">
-            <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M10.5 18a7.5 7.5 0 1 1 7.5-7.5A7.5 7.5 0 0 1 10.5 18Z" stroke="currentColor" stroke-width="1.6"/><path d="M16.8 16.8 21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            <input placeholder="Buscar ofertas, calificaciones, historial…" />
-          </div>
-
-          <a class="btn notif" href="#" title="Ver notificaciones">
-            🔔
-            <span class="bubble" id="notif-count">3</span>
-          </a>
-
-          <a class="btn primary" href="conductor-ofertas.html">Explorar ofertas</a>
-        </div>
-      </header>
-
-      <section class="grid" id="section-dashboard">
-        <!-- Reputación -->
-        <article class="card">
-          <div class="row-between">
-            <div>
-              <h3>Mi reputación</h3>
-              <div class="badge">
-                Nivel: <strong id="nivel">Plata</strong> · Score <strong id="score">812</strong>
-              </div>
-              <div style="margin-top:8px" class="stars" aria-label="Estrellas promedio">
-                <span id="stars">★★★★☆</span>
-                <span class="muted">(<span id="avg">4.6</span>)</span>
-              </div>
-              <p class="muted" style="margin:8px 0 0">
-                Basado en <strong id="reviews">32</strong> calificaciones · Rating 90 días: <strong id="rating90">4.7</strong>
-              </p>
-              <div class="progress" aria-label="Progreso al siguiente nivel">
-                <div id="progress-bar" style="width:62%"></div>
-              </div>
-              <p class="muted" style="margin:8px 0 0">Te faltan <strong id="faltan">8</strong> trabajos para llegar a <strong>Oro</strong>.</p>
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
-              <a class="btn" href="#">Ver historial</a>
-              <a class="btn primary" href="#">Ver reputación</a>
-            </div>
-          </div>
-
+      <!-- KPIs -->
+      <div class="grid" style="margin-bottom:12px;">
+        <article class="card span-2">
+          <h3>Mi desempeño</h3>
           <div class="kpis">
             <div class="kpi">
-              <p class="l">Trabajos finalizados</p>
-              <div class="v" id="jobs">27</div>
-              <p class="l">Historial confirmado</p>
+              <div class="v" id="kpi-rating">—</div>
+              <div class="stars" id="kpi-stars"></div>
+              <p class="l">Calificación promedio</p>
             </div>
             <div class="kpi">
+              <div class="v" id="kpi-reviews">—</div>
+              <p class="l">Calificaciones recibidas</p>
+            </div>
+            <div class="kpi">
+              <div class="v" id="kpi-nivel">—</div>
+              <p class="l">Nivel actual</p>
+            </div>
+            <div class="kpi">
+              <div class="v" id="kpi-puntos">—</div>
               <p class="l">Puntos de carrera</p>
-              <div class="v" id="points">1500</div>
-              <p class="l">Acumulados</p>
             </div>
           </div>
+          <div style="margin-top:12px;">
+            <div class="row-between">
+              <span class="muted">Progreso al siguiente nivel</span>
+              <span class="muted" id="kpi-progreso-label">62%</span>
+            </div>
+            <div class="progress"><div id="kpi-progreso-bar"></div></div>
+          </div>
         </article>
+      </div>
 
-        <!-- Trabajo actual -->
+      <!-- Trabajo actual + Acciones rápidas -->
+      <div class="grid">
         <article class="card" id="card-trabajo-actual">
           <h3>Trabajo actual</h3>
-          <p class="muted" id="job-status">Cargando...</p>
-
-          <div class="list">
-            <div class="item">
-              <div class="left">
-                <strong id="job-title">—</strong>
-                <span class="muted">Propietario: <span id="job-owner">—</span> · Placa: <span id="job-placa">—</span></span>
-                <span class="muted">Inicio: <span id="job-start">—</span> · Ciudad: <span id="job-city">—</span></span>
-              </div>
-              <span class="chip ok" id="job-estado-chip" style="display:none">Activa</span>
-            </div>
-
-            <div class="item">
-              <div class="left">
-                <strong>Documentación</strong>
-                <span class="muted">Verifica tus documentos para recibir más ofertas.</span>
-              </div>
-              <span class="chip warn" id="docs-chip">1 por verificar</span>
-            </div>
+          <div id="trabajo-actual-content">
+            <p class="muted">Cargando información…</p>
           </div>
-
-          <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
-            <button class="btn" type="button" id="btn-ver-detalle-trabajo">Ver detalle</button>
-            <a class="btn primary" href="#">Calificar al finalizar</a>
-          </div>
-
-          <p class="muted" style="margin-top:10px">
-            *La calificación solo se habilita cuando la asignación esté <strong>finalizada</strong>.
-          </p>
         </article>
 
-        <!-- Acciones rápidas -->
-        <article class="card span-2">
+        <article class="card">
           <h3>Acciones rápidas</h3>
-          <p class="muted">Atajos para mantener tu perfil confiable y aumentar tus oportunidades.</p>
-
           <div class="quick">
-            <a class="qbtn" href="#">
-              <div class="t">Postular a oferta</div>
-              <div class="d">Encuentra nuevas oportunidades</div>
-            </a>
-            <a class="qbtn" href="#" id="quick-mi-perfil">
-              <div class="t">Mi hoja de vida</div>
-              <div class="d">Completa tu perfil conductor</div>
-            </a>
-            <a class="qbtn" href="#">
-              <div class="t">Subir documentos</div>
-              <div class="d">Acelera tu verificación</div>
-            </a>
-            <a class="qbtn" href="#">
-              <div class="t">Ver postulaciones</div>
-              <div class="d">Estado: pendientes y aceptadas</div>
-            </a>
-          </div>
-        </article>
-
-        <!-- Ofertas recomendadas -->
-        <article class="card">
-          <h3>Ofertas recomendadas</h3>
-          <p class="muted">Basado en tu ciudad, disponibilidad y reputación.</p>
-
-          <div class="list" id="offers-list">
-            <div class="item">
-              <div class="left">
-                <strong>Turno mañana — Cuota $90.000</strong>
-                <span class="muted">Bogotá · Propietario 4.8 ★ · Publicada hace 2h</span>
-              </div>
-              <a class="btn primary" href="#">Ver</a>
+            <div class="qbtn" id="quick-ver-ofertas" onclick="window.location.href='conductor-ofertas.html'">
+              <span style="font-size:18px;">📋</span>
+              <div class="t">Ver ofertas</div>
+              <div class="d">Buscar trabajo</div>
             </div>
-            <div class="item">
-              <div class="left">
-                <strong>Turno noche — Porcentaje 30%</strong>
-                <span class="muted">Soacha · Propietario 4.6 ★ · Publicada ayer</span>
-              </div>
-              <a class="btn" href="#">Ver</a>
+            <div class="qbtn" id="quick-mi-perfil">
+              <span style="font-size:18px;">👤</span>
+              <div class="t">Mi perfil</div>
+              <div class="d">Hoja de vida</div>
             </div>
-            <div class="item">
-              <div class="left">
-                <strong>Turno completo — Cuota $120.000</strong>
-                <span class="muted">Bogotá · Propietario 4.9 ★ · Publicada hoy</span>
-              </div>
-              <a class="btn" href="#">Ver</a>
+            <div class="qbtn" onclick="window.location.href='conductor-ofertas.html'">
+              <span style="font-size:18px;">🔔</span>
+              <div class="t">Alertas</div>
+              <div class="d">Notificaciones</div>
             </div>
-          </div>
-        </article>
-
-        <!-- Notificaciones -->
-        <article class="card">
-          <h3>Notificaciones</h3>
-          <p class="muted">Alertas importantes: documentos, ofertas y calificaciones.</p>
-
-          <div class="list" id="notifications-list">
-            <div class="item">
-              <div class="left">
-                <strong>Documento por verificar</strong>
-                <span class="muted">Subiste tu licencia. Pendiente de aprobación.</span>
-              </div>
-              <span class="chip info">Pendiente</span>
+            <div class="qbtn" id="quick-calificaciones">
+              <span style="font-size:18px;">⭐</span>
+              <div class="t">Calificaciones</div>
+              <div class="d">Mi reputación</div>
             </div>
-            <div class="item">
-              <div class="left">
-                <strong>Nueva oferta en tu ciudad</strong>
-                <span class="muted">Hay una oferta de turno noche disponible.</span>
-              </div>
-              <span class="chip">Info</span>
-            </div>
-            <div class="item">
-              <div class="left">
-                <strong>Calificación recibida</strong>
-                <span class="muted">Te calificaron con 5★ en tu último trabajo.</span>
-              </div>
-              <span class="chip ok">OK</span>
-            </div>
-          </div>
-
-          <div style="margin-top:10px">
-            <a class="btn" href="#">Ver todas</a>
           </div>
         </article>
 
         <!-- Calificaciones recientes -->
         <article class="card span-2">
           <h3>Calificaciones recientes</h3>
-          <p class="muted">Responde o reporta si algo es incorrecto. Eso alimenta el “Centro de Confianza”.</p>
-
+          <p class="muted">Tu reputación construida en TaxiConfianza.</p>
           <div class="list" id="ratings-list">
             <div class="item">
               <div class="left">
-                <strong>★★★★★ — “Excelente conductor, puntual y cuidadoso.”</strong>
+                <strong>★★★★★ — "Excelente conductor, puntual y cuidadoso."</strong>
                 <span class="muted">De: Propietario Carlos R. · Hace 1 día</span>
-              </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end">
-                <a class="btn" href="#">Responder</a>
-                <a class="btn" href="#">Reportar</a>
               </div>
             </div>
             <div class="item">
               <div class="left">
-                <strong>★★★★☆ — “Buen trabajo, mejorar comunicación.”</strong>
+                <strong>★★★★☆ — "Buen trabajo, mejorar comunicación."</strong>
                 <span class="muted">De: Propietario Ana M. · Hace 5 días</span>
               </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end">
-                <a class="btn" href="#">Responder</a>
-                <a class="btn" href="#">Reportar</a>
-              </div>
             </div>
-          </div>
-
-          <div style="margin-top:10px">
-            <a class="btn primary" href="#">Ir a Calificaciones</a>
           </div>
         </article>
-      </section>
+      </div>
 
-      <!-- ===== SECCIÓN MI PERFIL / HOJA DE VIDA ===== -->
-      <section id="section-perfil" style="display:none; max-width:var(--max); margin:0 auto; padding-bottom:40px;">
+    </section>
+    <!-- ===== FIN SECCIÓN DASHBOARD ===== -->
 
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-          <div>
-            <h2 class="title">Mi hoja de vida</h2>
-            <p class="subtitle">Los propietarios ven esta información cuando te postulas a una oferta.</p>
-          </div>
-          <button class="btn" id="btn-volver-dashboard" type="button">← Volver al dashboard</button>
+    <!-- ===== SECCIÓN MI PERFIL / HOJA DE VIDA ===== -->
+    <section id="section-perfil" style="display:none; max-width:var(--max); margin:0 auto; padding-bottom:40px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <div>
+          <h2 class="title">Mi hoja de vida</h2>
+          <p class="subtitle">Los propietarios ven esta información cuando te postulas.</p>
         </div>
+        <button class="btn" id="btn-volver-dashboard" type="button">← Volver al dashboard</button>
+      </div>
 
-        <!-- Datos personales -->
-        <div class="card" style="margin-bottom:14px;">
-          <h3>Datos personales</h3>
-          <div class="hv-foto-grid">
-            <div class="hv-foto-col">
-              <div class="hv-foto-wrap" id="hv-foto-preview">
-                <span style="font-size:36px; opacity:.5;">👤</span>
-              </div>
-              <label class="btn" style="cursor:pointer; font-size:12px; width:110px; justify-content:center;">
-                📷 Subir foto
-                <input type="file" id="hv-foto-input" accept="image/*" style="display:none">
-              </label>
-              <input type="hidden" id="hv-foto-url">
-            </div>
-            <div class="hv-fields">
-              <div class="hv-row">
-                <div class="hv-field">
-                  <label>Nombre completo</label>
-                  <input class="tc-input" id="hv-nombres" type="text">
-                </div>
-                <div class="hv-field">
-                  <label>Email</label>
-                  <input class="tc-input" id="hv-email" type="email" >
-                </div>
-              </div>
-              <div class="hv-row">
-                <div class="hv-field">
-                  <label>Número de cédula</label>
-                  <input class="tc-input" id="hv-cedula" type="text" placeholder="Ej: 1012345678" maxlength="20">
-                </div>
-                <div class="hv-field">
-                  <label>Teléfono celular</label>
-                  <input class="tc-input" id="hv-telefono" type="tel" >
-                </div>
-              </div>
-              <div class="hv-row">
-                <div class="hv-field">
-                  <label>Fecha de nacimiento</label>
-                  <input class="tc-input" id="hv-fecha-nacimiento" type="date">
-                </div>
-                <div class="hv-field">
-                  <label>Dirección de residencia</label>
-                  <input class="tc-input" id="hv-direccion" type="text" placeholder="Ej: Cra 45 # 12-30">
-                </div>
-              </div>
-              <div class="hv-row">
-                <div class="hv-field">
-                  <label>Barrio</label>
-                  <input class="tc-input" id="hv-barrio" type="text" placeholder="Ej: Chapinero">
-                </div>
-                <div class="hv-field">
-                  <label>Ciudad donde vive</label>
-                  <input class="tc-input" id="hv-ciudad-residencia" type="text" placeholder="Ej: Bogotá">
-                </div>
-              </div>
-            </div>
+      <div class="card" style="margin-bottom:12px;">
+        <h3>Datos personales</h3>
+        <div class="hv-foto-grid">
+          <div class="hv-foto-col">
+            <div class="hv-foto-wrap" id="hv-foto-preview"><span style="font-size:32px; opacity:.4;">👤</span></div>
+            <label class="btn" style="cursor:pointer; font-size:11px; width:100px; justify-content:center;">
+              📷 Subir foto
+              <input type="file" id="hv-foto-input" accept="image/*" style="display:none">
+            </label>
+            <input type="hidden" id="hv-foto-url">
           </div>
-        </div>
-
-        <!-- Experiencia -->
-        <div class="card" style="margin-bottom:14px;">
-          <h3>Experiencia como conductor</h3>
-          <div class="hv-fields" style="margin-top:10px;">
+          <div class="hv-fields">
             <div class="hv-row">
-              <div class="hv-field">
-                <label>Años de experiencia manejando taxi</label>
-                <input class="tc-input" id="hv-anios-exp" type="number" min="0" max="60" placeholder="Ej: 5">
-              </div>
-              <div class="hv-field">
-                <label>Ciudades donde ha trabajado</label>
-                <input class="tc-input" id="hv-ciudades-trabajadas" type="text" placeholder="Ej: Bogotá, Medellín">
-              </div>
+              <div class="hv-field"><label>Nombre completo</label><input class="tc-input" id="hv-nombres" type="text"></div>
+              <div class="hv-field"><label>Email</label><input class="tc-input" id="hv-email" type="email"></div>
             </div>
             <div class="hv-row">
-              <div class="hv-field">
-                <label>Turno preferido</label>
-                <select class="tc-input" id="hv-turno-preferido">
-                  <option value="">-- Seleccionar --</option>
-                  <option value="dia">Día</option>
-                  <option value="noche">Noche</option>
-                  <option value="mixto">Mixto</option>
-                </select>
-              </div>
-              <div class="hv-field">
-                <label>Categoría de licencia</label>
-                <select class="tc-input" id="hv-categoria-licencia">
-                  <option value="">-- Seleccionar --</option>
-                  <option value="B1">B1</option>
-                  <option value="B2">B2</option>
-                  <option value="C1">C1</option>
-                  <option value="C2">C2</option>
-                </select>
-              </div>
-              <div class="hv-field">
-                <label>Número de licencia de conducción</label>
-                <input class="tc-input" id="hv-numero-licencia" type="text" placeholder="Ej: 80123456">
-              </div>
+              <div class="hv-field"><label>Número de cédula</label><input class="tc-input" id="hv-cedula" type="text" placeholder="Ej: 1012345678" maxlength="20"></div>
+              <div class="hv-field"><label>Teléfono celular</label><input class="tc-input" id="hv-telefono" type="tel"></div>
             </div>
-          </div>
-        </div>
-
-        <!-- Referencias -->
-        <div class="card" style="margin-bottom:14px;">
-          <h3>Referencias personales</h3>
-          <p class="muted">Dos personas que puedan dar referencia de usted.</p>
-          <div class="hv-ref-box">
-            <div class="hv-ref-label">REFERENCIA 1</div>
             <div class="hv-row">
-              <div class="hv-field">
-                <label>Nombre</label>
-                <input class="tc-input" id="hv-ref1-nombre" type="text" placeholder="Nombre completo">
-              </div>
-              <div class="hv-field">
-                <label>Teléfono</label>
-                <input class="tc-input" id="hv-ref1-telefono" type="tel" placeholder="Ej: 3001234567">
-              </div>
-              <div class="hv-field">
-                <label>Relación</label>
-                <select class="tc-input" id="hv-ref1-relacion">
-                  <option value="">-- Tipo --</option>
-                  <option value="familiar">Familiar</option>
-                  <option value="laboral">Laboral</option>
-                  <option value="personal">Personal</option>
-                </select>
-              </div>
+              <div class="hv-field"><label>Fecha de nacimiento</label><input class="tc-input" id="hv-fecha-nacimiento" type="date"></div>
+              <div class="hv-field"><label>Dirección de residencia</label><input class="tc-input" id="hv-direccion" type="text" placeholder="Ej: Cra 45 # 12-30"></div>
             </div>
-          </div>
-          <div class="hv-ref-box">
-            <div class="hv-ref-label">REFERENCIA 2</div>
             <div class="hv-row">
-              <div class="hv-field">
-                <label>Nombre</label>
-                <input class="tc-input" id="hv-ref2-nombre" type="text" placeholder="Nombre completo">
-              </div>
-              <div class="hv-field">
-                <label>Teléfono</label>
-                <input class="tc-input" id="hv-ref2-telefono" type="tel" placeholder="Ej: 3009876543">
-              </div>
-              <div class="hv-field">
-                <label>Relación</label>
-                <select class="tc-input" id="hv-ref2-relacion">
-                  <option value="">-- Tipo --</option>
-                  <option value="familiar">Familiar</option>
-                  <option value="laboral">Laboral</option>
-                  <option value="personal">Personal</option>
-                </select>
-              </div>
+              <div class="hv-field"><label>Barrio</label><input class="tc-input" id="hv-barrio" type="text" placeholder="Ej: Chapinero"></div>
+              <div class="hv-field"><label>Ciudad donde vive</label><input class="tc-input" id="hv-ciudad-residencia" type="text" placeholder="Ej: Bogotá"></div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Descripción personal -->
-        <div class="card" style="margin-bottom:14px;">
-          <h3>Descripción personal</h3>
-          <p class="muted">Cuéntele al propietario quién es usted y por qué es un buen conductor.</p>
-          <textarea class="tc-input" id="hv-descripcion" rows="4" maxlength="300"
-            placeholder="Ej: Soy conductor con 8 años de experiencia, responsable, puntual y con buen conocimiento de la ciudad..." style="margin-top:10px;"></textarea>
-          <div style="text-align:right; font-size:12px; opacity:.55; margin-top:4px;"><span id="hv-desc-count">0</span>/300</div>
-        </div>
-
-        <!-- Guardar -->
-        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:40px;">
-          <div id="hv-alert" style="display:none; flex:1;"></div>
-          <button class="btn primary" id="btn-guardar-hv" type="button" style="padding:12px 28px; font-size:15px; font-weight:700; margin-left:auto;">
-            💾 Guardar hoja de vida
-          </button>
-        </div>
-
-      </section>
-      <!-- ===== FIN SECCIÓN PERFIL ===== -->
-
-      <footer class="foot">
-        © 2026 TaxiConfianza · Panel Conductor · Diseñado para crear confianza real.
-      </footer>
-    </main>
-  </div>
-
-  <script>
-    // Menú móvil
-    const btnOpenMenu = document.getElementById('btnOpenMenu');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    if (btnOpenMenu) btnOpenMenu.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
-    if (overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
-
-    // Toggle secciones dashboard ↔ perfil
-    function showSection(name) {
-      const dash = document.getElementById('section-dashboard');
-      const perf = document.getElementById('section-perfil');
-      const foot = document.querySelector('footer.foot');
-      if (name === 'perfil') {
-        dash.style.display = 'none';
-        perf.style.display = 'block';
-        if (foot) foot.style.display = 'none';
-        document.getElementById('nav-mi-perfil').classList.add('active');
-      } else {
-        perf.style.display = 'none';
-        dash.style.display = '';
-        if (foot) foot.style.display = '';
-        document.getElementById('nav-mi-perfil').classList.remove('active');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('nav-mi-perfil').addEventListener('click', (e) => {
-        e.preventDefault();
-        showSection('perfil');
-        if (typeof window.TC_loadHV === 'function') window.TC_loadHV();
-        sidebar.classList.remove('open');
-        overlay.classList.remove('show');
-      });
-      document.getElementById('quick-mi-perfil').addEventListener('click', (e) => {
-        e.preventDefault();
-        showSection('perfil');
-        if (typeof window.TC_loadHV === 'function') window.TC_loadHV();
-      });
-      document.getElementById('btn-volver-dashboard').addEventListener('click', () => showSection('dashboard'));
-
-      document.getElementById('nav-trabajo-actual').addEventListener('click', (e) => {
-        e.preventDefault();
-        showSection('dashboard');
-        sidebar.classList.remove('open');
-        overlay.classList.remove('show');
-        const card = document.getElementById('card-trabajo-actual');
-        if (card) requestAnimationFrame(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-      });
-    });
-  </script>
-  <!-- Modal: detalle de asignación activa -->
-  <div id="modal-detalle-trabajo" style="display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.6); overflow-y:auto; padding:24px 16px;" role="dialog" aria-modal="true" aria-labelledby="modal-detalle-titulo">
-    <div style="background:var(--card,#1a1f2e); border:1px solid var(--border,rgba(255,255,255,.08)); border-radius:16px; max-width:520px; margin:0 auto; padding:28px 24px; position:relative;">
-      <button type="button" id="btn-cerrar-detalle-trabajo" aria-label="Cerrar" style="position:absolute; top:14px; right:14px; background:none; border:none; color:var(--muted,#8b95a1); font-size:22px; cursor:pointer; line-height:1;">✕</button>
-      <h2 id="modal-detalle-titulo" style="margin:0 0 20px; font-size:17px; font-weight:700;">Detalle de tu asignación activa</h2>
-
-      <div style="display:grid; gap:14px;">
-        <div>
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Oferta</div>
-          <div style="font-weight:600;" id="det-titulo">—</div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Ciudad</div>
-            <div id="det-ciudad">—</div>
+      <div class="card" style="margin-bottom:12px;">
+        <h3>Experiencia como conductor</h3>
+        <div class="hv-fields" style="margin-top:10px;">
+          <div class="hv-row">
+            <div class="hv-field"><label>Años de experiencia</label><input class="tc-input" id="hv-anios-exp" type="number" min="0" max="60" placeholder="Ej: 5"></div>
+            <div class="hv-field"><label>Ciudades donde ha trabajado</label><input class="tc-input" id="hv-ciudades-trabajadas" type="text" placeholder="Ej: Bogotá, Medellín"></div>
           </div>
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Turno</div>
-            <div id="det-turno">—</div>
+          <div class="hv-row">
+            <div class="hv-field">
+              <label>Turno preferido</label>
+              <select class="tc-input" id="hv-turno-preferido">
+                <option value="">-- Seleccionar --</option>
+                <option value="dia">Día</option>
+                <option value="noche">Noche</option>
+                <option value="mixto">Mixto</option>
+              </select>
+            </div>
+            <div class="hv-field">
+              <label>Categoría de licencia</label>
+              <select class="tc-input" id="hv-categoria-licencia">
+                <option value="">-- Seleccionar --</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+              </select>
+            </div>
+            <div class="hv-field"><label>Número de licencia</label><input class="tc-input" id="hv-numero-licencia" type="text" placeholder="Ej: 80123456"></div>
           </div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Fecha inicio</div>
-            <div id="det-fecha">—</div>
-          </div>
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Zona</div>
-            <div id="det-zona">—</div>
-          </div>
-        </div>
-        <hr style="border:none; border-top:1px solid var(--border,rgba(255,255,255,.08)); margin:4px 0;">
-        <div>
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Propietario</div>
-          <div style="font-weight:600;" id="det-propietario">—</div>
-          <div style="font-size:13px; color:var(--muted,#8b95a1);" id="det-propietario-tel">—</div>
-        </div>
-        <hr style="border:none; border-top:1px solid var(--border,rgba(255,255,255,.08)); margin:4px 0;">
-        <div>
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Vehículo</div>
-          <div style="font-weight:600;" id="det-vehiculo">—</div>
-        </div>
-        <hr style="border:none; border-top:1px solid var(--border,rgba(255,255,255,.08)); margin:4px 0;">
-        <div>
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Tipo de acuerdo</div>
-          <div id="det-modalidad">—</div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">Cuota diaria</div>
-            <div style="font-weight:700; font-size:18px;" id="det-cuota">—</div>
-          </div>
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:4px;">% propietario</div>
-            <div style="font-weight:700; font-size:18px;" id="det-porcentaje">—</div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <h3>Referencias personales</h3>
+        <p class="muted">Dos personas que puedan dar referencia de usted.</p>
+        <div class="hv-ref-box">
+          <div class="hv-ref-label">REFERENCIA 1</div>
+          <div class="hv-row">
+            <div class="hv-field"><label>Nombre</label><input class="tc-input" id="hv-ref1-nombre" type="text" placeholder="Nombre completo"></div>
+            <div class="hv-field"><label>Teléfono</label><input class="tc-input" id="hv-ref1-telefono" type="tel" placeholder="Celular"></div>
+            <div class="hv-field">
+              <label>Relación</label>
+              <select class="tc-input" id="hv-ref1-relacion">
+                <option value="">-- Tipo --</option>
+                <option value="familiar">Familiar</option>
+                <option value="laboral">Laboral</option>
+                <option value="personal">Personal</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div id="det-incluye-row">
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#8b95a1); margin-bottom:6px;">Incluye</div>
-          <div id="det-incluye" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        <div class="hv-ref-box" style="margin-top:10px;">
+          <div class="hv-ref-label">REFERENCIA 2</div>
+          <div class="hv-row">
+            <div class="hv-field"><label>Nombre</label><input class="tc-input" id="hv-ref2-nombre" type="text" placeholder="Nombre completo"></div>
+            <div class="hv-field"><label>Teléfono</label><input class="tc-input" id="hv-ref2-telefono" type="tel" placeholder="Celular"></div>
+            <div class="hv-field">
+              <label>Relación</label>
+              <select class="tc-input" id="hv-ref2-relacion">
+                <option value="">-- Tipo --</option>
+                <option value="familiar">Familiar</option>
+                <option value="laboral">Laboral</option>
+                <option value="personal">Personal</option>
+              </select>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <h3>Descripción personal</h3>
+        <p class="muted">Cuéntele al propietario quién es usted.</p>
+        <textarea class="tc-input" id="hv-descripcion" rows="4" maxlength="300" placeholder="Ej: Soy conductor con 8 años de experiencia, responsable y puntual…" style="margin-top:10px;"></textarea>
+        <div style="text-align:right; font-size:11px; opacity:.5; margin-top:3px;"><span id="hv-desc-count">0</span>/300</div>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:40px;">
+        <div id="hv-alert" style="display:none; flex:1;"></div>
+        <button class="btn primary" id="btn-guardar-hv" type="button" style="padding:11px 24px; font-size:14px; font-weight:700; margin-left:auto;">
+          💾 Guardar hoja de vida
+        </button>
+      </div>
+    </section>
+    <!-- ===== FIN SECCIÓN PERFIL ===== -->
+
+    <footer class="foot">© 2026 TaxiConfianza · Panel Conductor</footer>
+  </main>
+</div>
+
+<!-- Modal detalle asignación activa -->
+<div id="modal-detalle-trabajo" role="dialog" aria-modal="true" aria-labelledby="modal-detalle-titulo">
+  <div class="modal-inner">
+    <button type="button" id="btn-cerrar-detalle-trabajo" class="modal-close" aria-label="Cerrar">✕</button>
+    <h2 id="modal-detalle-titulo" style="margin:0 0 18px; font-size:16px; font-weight:700;">Detalle de tu asignación activa</h2>
+    <div style="display:grid; gap:12px;">
+      <div><div class="modal-label">Oferta</div><div class="modal-val" id="det-titulo">—</div></div>
+      <div class="modal-row">
+        <div><div class="modal-label">Ciudad</div><div id="det-ciudad">—</div></div>
+        <div><div class="modal-label">Turno</div><div id="det-turno">—</div></div>
+      </div>
+      <div class="modal-row">
+        <div><div class="modal-label">Fecha inicio</div><div id="det-fecha">—</div></div>
+        <div><div class="modal-label">Zona</div><div id="det-zona">—</div></div>
+      </div>
+      <hr class="modal-hr">
+      <div>
+        <div class="modal-label">Propietario</div>
+        <div class="modal-val" id="det-propietario">—</div>
+        <div style="font-size:12px; color:var(--text-tertiary);" id="det-propietario-tel">—</div>
+      </div>
+      <hr class="modal-hr">
+      <div><div class="modal-label">Vehículo</div><div class="modal-val" id="det-vehiculo">—</div></div>
+      <hr class="modal-hr">
+      <div><div class="modal-label">Tipo de acuerdo</div><div id="det-modalidad">—</div></div>
+      <div class="modal-row">
+        <div><div class="modal-label">Cuota diaria</div><div style="font-weight:700; font-size:17px;" id="det-cuota">—</div></div>
+        <div><div class="modal-label">% propietario</div><div style="font-weight:700; font-size:17px;" id="det-porcentaje">—</div></div>
+      </div>
+      <div id="det-incluye-row">
+        <div class="modal-label">Incluye</div>
+        <div id="det-incluye" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
       </div>
     </div>
   </div>
+</div>
 
-  <script src="js/tc-session.js"></script>
-<script src="js/tc-api.js"></script>
-<script src="js/tc-dashboard-conductor.js"></script>
+<script src="/js/tc-theme.js"></script>
+<script>
+  // Menú móvil
+  const btnOpenMenu = document.getElementById('btnOpenMenu');
+  const sidebar     = document.getElementById('sidebar');
+  const overlay     = document.getElementById('overlay');
+  if (btnOpenMenu) btnOpenMenu.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
+  if (overlay)     overlay.addEventListener('click',     () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+  // Toggle secciones dashboard ↔ perfil (igual que el original)
+  function showSection(name) {
+    const dash = document.getElementById('section-dashboard');
+    const perf = document.getElementById('section-perfil');
+    const foot = document.querySelector('footer.foot');
+    if (name === 'perfil') {
+      dash.style.display = 'none';
+      perf.style.display = 'block';
+      if (foot) foot.style.display = 'none';
+      document.getElementById('nav-mi-perfil').classList.add('active');
+    } else {
+      perf.style.display = 'none';
+      dash.style.display = '';
+      if (foot) foot.style.display = '';
+      document.getElementById('nav-mi-perfil').classList.remove('active');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('nav-mi-perfil').addEventListener('click', (e) => {
+      e.preventDefault(); showSection('perfil');
+      if (typeof window.TC_loadHV === 'function') window.TC_loadHV();
+      sidebar.classList.remove('open'); overlay.classList.remove('show');
+    });
+    document.getElementById('quick-mi-perfil').addEventListener('click', (e) => {
+      e.preventDefault(); showSection('perfil');
+      if (typeof window.TC_loadHV === 'function') window.TC_loadHV();
+    });
+    document.getElementById('btn-volver-dashboard').addEventListener('click', () => showSection('dashboard'));
+    document.getElementById('nav-trabajo-actual').addEventListener('click', (e) => {
+      e.preventDefault(); showSection('dashboard');
+      sidebar.classList.remove('open'); overlay.classList.remove('show');
+      const card = document.getElementById('card-trabajo-actual');
+      if (card) requestAnimationFrame(() => card.scrollIntoView({ behavior:'smooth', block:'start' }));
+    });
+  });
+</script>
+
+<!-- JS externos originales — NO modificar -->
+<script src="/js/tc-session.js"></script>
+<script src="/js/tc-api.js"></script>
+<script src="/js/tc-dashboard-conductor.js"></script>
 
 </body>
 </html>
-

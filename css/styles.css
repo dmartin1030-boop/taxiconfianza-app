@@ -1,0 +1,818 @@
+/* =====================================================
+   TAXICONFIANZA — styles.css
+   Sistema de tema claro/oscuro compartido por TODA la plataforma
+   (landing, dashboard conductor, dashboard propietario, etc.)
+   ===================================================== */
+
+/* -----------------------------------------------------
+   1) VARIABLES DE TEMA
+   Modo oscuro = default (body sin clase)
+   Modo claro  = body.light-mode
+   ----------------------------------------------------- */
+:root {
+  --bg-app: #0f1117;
+  --bg-nav: #0f1117;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-solid: #161922;
+  --bg-alt: #0a0c11;
+  --bg-feed: #0f1117;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-soft: rgba(255, 255, 255, 0.05);
+
+  --text-primary: #ffffff;
+  --text-secondary: #a0a098;
+  --text-tertiary: #888888;
+
+  --gold: #d4a017;
+  --green: #1d9e75;
+  --red: #e24b4a;
+  --blue: #3b82f6;
+  --purple: #a78bfa;
+
+  --shadow: none;
+
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+body.light-mode {
+  --bg-app: #f4f2ed;
+  --bg-nav: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-solid: #f9f7f2;
+  --bg-alt: #f0ede6;
+  --bg-feed: #eae7e0;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(0, 0, 0, 0.05);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+
+  --gold: #b8860b;
+  --green: #1d9e75;
+  --red: #e24b4a;
+  --blue: #3b82f6;
+  --purple: #a78bfa;
+
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* -----------------------------------------------------
+   2) RESET BÁSICO
+   ----------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* -----------------------------------------------------
+   3) LAYOUT BASE — pantalla completa, sin márgenes muertos
+   ----------------------------------------------------- */
+.tc-page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-app);
+}
+
+.tc-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+@media (max-width: 768px) {
+  .tc-container {
+    padding: 0 16px;
+  }
+}
+
+/* -----------------------------------------------------
+   4) NAVBAR
+   ----------------------------------------------------- */
+.tc-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background: var(--bg-nav);
+  border-bottom: 0.5px solid var(--border);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.tc-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.tc-logo-badge {
+  background: var(--gold);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+body:not(.light-mode) .tc-logo-badge {
+  color: #0f1117;
+}
+
+.tc-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tc-btn-ghost {
+  background: transparent;
+  border: 0.5px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.tc-btn-ghost:hover {
+  border-color: var(--gold);
+}
+
+.tc-btn-gold {
+  background: var(--gold);
+  border: none;
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+body:not(.light-mode) .tc-btn-gold {
+  color: #0f1117;
+}
+.tc-btn-gold:hover {
+  opacity: 0.92;
+}
+
+.tc-btn-gold-lg {
+  background: var(--gold);
+  border: none;
+  color: #ffffff;
+  padding: 13px 28px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+body:not(.light-mode) .tc-btn-gold-lg {
+  color: #0f1117;
+}
+
+/* -----------------------------------------------------
+   5) THEME TOGGLE (☀️ / 🌙)
+   ----------------------------------------------------- */
+.tc-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  background: var(--bg-card-solid);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.2s;
+}
+.tc-theme-toggle:hover {
+  border-color: var(--gold);
+}
+
+.tc-toggle-icon {
+  font-size: 13px;
+  opacity: 0.4;
+  transition: opacity 0.25s;
+}
+.tc-toggle-icon.active {
+  opacity: 1;
+}
+
+.tc-toggle-track {
+  width: 36px;
+  height: 20px;
+  background: var(--gold);
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.25s;
+}
+
+.tc-toggle-knob {
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: left 0.25s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+body.light-mode .tc-toggle-knob {
+  left: 19px;
+}
+
+/* -----------------------------------------------------
+   6) TRUST BAR
+   ----------------------------------------------------- */
+.tc-trust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 10px 32px;
+  background: rgba(212, 160, 23, 0.07);
+  border-bottom: 0.5px solid rgba(212, 160, 23, 0.15);
+  flex-wrap: wrap;
+}
+
+.tc-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.tc-trust-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+/* -----------------------------------------------------
+   7) HERO
+   ----------------------------------------------------- */
+.tc-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 460px;
+}
+
+@media (max-width: 900px) {
+  .tc-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tc-hero-left {
+  padding: 56px 48px;
+}
+
+@media (max-width: 900px) {
+  .tc-hero-left {
+    padding: 40px 24px;
+  }
+}
+
+.tc-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 160, 23, 0.1);
+  border: 0.5px solid rgba(212, 160, 23, 0.28);
+  color: var(--gold);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.tc-hero-left h1 {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.18;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  max-width: 560px;
+}
+
+.tc-hero-left h1 span {
+  color: var(--gold);
+}
+
+.tc-hero-left p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  max-width: 460px;
+}
+
+.tc-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.tc-cta-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: border-color 0.2s, transform 0.15s;
+}
+.tc-cta-card:hover {
+  border-color: rgba(212, 160, 23, 0.4);
+  transform: translateY(-1px);
+}
+
+.tc-cta-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.tc-cta-text h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.tc-cta-text p {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.tc-cta-arrow {
+  margin-left: auto;
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.tc-login-hint {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: 14px;
+}
+.tc-login-hint span {
+  color: var(--gold);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ---- Hero right: foto estilo Workana (forma orgánica) ---- */
+.tc-hero-right {
+  position: relative;
+  padding: 40px 48px;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tc-organic-graphic {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 380px;
+}
+
+.tc-blob-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 220px;
+  height: 220px;
+  border-radius: 50% 50% 0 50%;
+  background: var(--gold);
+  opacity: 0.85;
+  transform: rotate(8deg);
+}
+
+.tc-accent-circle {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--green);
+  opacity: 0.9;
+}
+
+.tc-accent-ring {
+  position: absolute;
+  bottom: 30px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  opacity: 0.6;
+}
+
+.tc-photo-mask {
+  position: absolute;
+  top: 25px;
+  right: 35px;
+  width: 320px;
+  height: 290px;
+  border-radius: 50% 8% 50% 50%;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #2a3045, #1a2035);
+}
+
+.tc-photo-mask img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.tc-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tc-photo-placeholder .icon {
+  font-size: 64px;
+  opacity: 0.45;
+}
+
+.tc-photo-placeholder .label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* -----------------------------------------------------
+   8) STATS PANEL (alternativa al hero-right en algunas vistas)
+   ----------------------------------------------------- */
+.tc-stats-panel {
+  background: var(--bg-alt);
+  padding: 32px 28px;
+  border-radius: var(--radius-lg);
+}
+
+.tc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.tc-stat-cell {
+  background: var(--bg-card-solid);
+  padding: 16px 10px;
+  text-align: center;
+}
+
+.tc-stat-num {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.tc-stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+}
+
+.tc-benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 0.5px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.tc-benefit-item .icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.tc-benefit-item h5 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.tc-benefit-item p {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+/* -----------------------------------------------------
+   9) SECCIÓN GENÉRICA (cómo funciona, ciudades, testimonio)
+   ----------------------------------------------------- */
+.tc-section {
+  padding: 56px 48px;
+  border-top: 0.5px solid var(--border-soft);
+}
+
+@media (max-width: 900px) {
+  .tc-section {
+    padding: 40px 24px;
+  }
+}
+
+.tc-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.tc-section-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+}
+
+/* Cómo funciona — pasos */
+.tc-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .tc-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tc-step {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 22px;
+}
+
+.tc-step-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(212, 160, 23, 0.12);
+  border: 0.5px solid rgba(212, 160, 23, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.tc-step h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.tc-step p {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+/* Ciudades */
+.tc-cities-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .tc-cities-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tc-city-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 0.5px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.tc-city-pill.soon {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.tc-city-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--green);
+}
+
+.tc-city-pill.soon .tc-city-dot {
+  background: var(--gold);
+}
+
+.tc-city-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tc-city-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* Testimonio */
+.tc-testimonial-card {
+  background: var(--bg-card);
+  border: 0.5px solid rgba(212, 160, 23, 0.2);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  max-width: 480px;
+  box-shadow: var(--shadow);
+}
+
+.tc-stars {
+  color: var(--gold);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.tc-testimonial-card blockquote {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.tc-testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tc-author-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(212, 160, 23, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.tc-author-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tc-author-role {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* -----------------------------------------------------
+   10) FINAL CTA + FOOTER
+   ----------------------------------------------------- */
+.tc-final-cta {
+  padding: 48px;
+  text-align: center;
+  background: rgba(212, 160, 23, 0.05);
+  border-top: 0.5px solid var(--border-soft);
+}
+
+.tc-final-cta h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.tc-final-cta p {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 24px;
+}
+
+.tc-final-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tc-footer {
+  padding: 22px 32px;
+  border-top: 0.5px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tc-footer-links {
+  display: flex;
+  gap: 18px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.tc-footer-links a:hover {
+  color: var(--gold);
+}
+
+.tc-footer-copy {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}

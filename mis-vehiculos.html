@@ -1,213 +1,199 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mis vehículos | TaxiConfianza</title>
-
-  <link rel="stylesheet" href="css/dashboard-theme.css" />
-
+  <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    .main { padding: 24px 32px 40px !important; }
-    .card { padding: 22px 26px !important; }
-
-    .table { width:100%; border-collapse:collapse; min-width:760px; }
-    .table th, .table td {
-      padding: 11px 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      font-size: 13px;
-      vertical-align: middle;
+    :root {
+      --text: var(--text-primary); --muted: var(--text-tertiary);
+      --border: var(--border); --radius: 14px; --font: var(--font-sans);
     }
-    .table th { color: var(--muted); font-weight: 700; }
-    .right { text-align: right !important; }
+    body { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { display: flex; min-height: 100vh; background: var(--bg-app); }
 
-    .field label { display:block; font-size:13px; color:var(--muted); margin:0 0 7px; font-weight:500; }
-    .input, select {
-      width: 100%;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 12px;
-      padding: 11px 14px;
-      color: var(--text);
-      outline: none;
-      font-size: 14px;
-      font-family: var(--font);
-      box-sizing: border-box;
-      color-scheme: dark;
-      transition: border-color .15s;
+    .sidebar { width:240px; background:var(--bg-card-solid); border-right:0.5px solid var(--border); padding:16px 12px; position:sticky; top:0; height:100vh; overflow-y:auto; flex-shrink:0; display:flex; flex-direction:column; transition:background 0.25s; }
+    .brand { display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:11px; background:var(--bg-card); border:0.5px solid var(--border); margin-bottom:6px; }
+    .logo { width:32px; height:32px; border-radius:9px; display:grid; place-items:center; background:rgba(212,160,23,0.15); color:var(--gold); font-weight:900; font-size:12px; }
+    .brand h1 { font-size:13px; margin:0; color:var(--text-primary); line-height:1.1; }
+    .brand p  { margin:0; font-size:10px; color:var(--text-tertiary); }
+    .nav { margin-top:12px; display:flex; flex-direction:column; gap:3px; }
+    .nav a { display:flex; align-items:center; gap:9px; padding:8px 11px; border-radius:9px; color:var(--text-secondary); border:0.5px solid transparent; font-size:12px; transition:all 0.15s; }
+    .nav a:hover { background:var(--bg-card); border-color:var(--border); color:var(--text-primary); }
+    .nav a.active { background:rgba(212,160,23,0.1); border-color:rgba(212,160,23,0.3); color:var(--gold); }
+    .ico { width:16px; height:16px; flex-shrink:0; }
+    .sep { height:0.5px; background:var(--border); margin:10px 5px; }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 12px; border-radius:9px; border:0.5px solid var(--border); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-size:12px; font-family:var(--font-sans); transition:all 0.15s; }
+    .btn:hover { background:var(--bg-card-solid); }
+    .btn.primary { border-color:rgba(212,160,23,0.35); background:rgba(212,160,23,0.1); color:var(--gold); }
+    .btn.danger  { border-color:rgba(239,68,68,0.35); background:rgba(239,68,68,0.1); color:#F87171; }
+
+    .main { flex:1; padding:16px 18px 40px; min-width:0; }
+    .topbar { max-width:1400px; margin:0 auto 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; border:0.5px solid var(--border); border-radius:var(--radius); background:var(--bg-card); flex-wrap:wrap; }
+    .title    { font-size:16px; margin:0; font-weight:600; color:var(--text-primary); }
+    .subtitle { margin:0; font-size:11px; color:var(--text-tertiary); }
+    .top-actions { display:flex; gap:8px; align-items:center; }
+
+    .grid { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:1fr; gap:12px; }
+    @media(min-width:900px) { .grid { grid-template-columns:1.3fr 0.7fr; } }
+    .card { border:0.5px solid var(--border); background:var(--bg-card); border-radius:var(--radius); padding:14px; }
+    .card h3 { margin:0 0 4px; font-size:13px; font-weight:600; color:var(--text-primary); }
+    .muted { color:var(--text-tertiary); font-size:12px; }
+    .row { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+
+    .table { width:100%; border-collapse:collapse; min-width:600px; }
+    .table th,.table td { padding:10px 11px; border-bottom:0.5px solid var(--border); text-align:left; font-size:12px; vertical-align:middle; }
+    .table th { color:var(--text-tertiary); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; }
+    .table tr:hover td { background:var(--bg-card-solid); }
+    .right { text-align:right !important; }
+
+    .placa-badge { display:inline-block; font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; background:rgba(212,160,23,0.1); border:0.5px solid rgba(212,160,23,0.25); color:var(--gold); padding:2px 8px; border-radius:6px; }
+
+    .field { margin-bottom:12px; }
+    .field label { display:block; font-size:11px; color:var(--text-tertiary); margin:0 0 5px; font-weight:500; }
+    .tc-input { width:100%; background:var(--bg-card-solid); border:0.5px solid var(--border); border-radius:9px; color:var(--text-primary); padding:9px 12px; font-size:12px; font-family:var(--font-sans); outline:none; transition:border-color 0.15s; box-sizing:border-box; }
+    .tc-input:focus { border-color:rgba(212,160,23,0.4); }
+    .two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media(max-width:480px) { .two { grid-template-columns:1fr; } }
+    .actions-row { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:14px; }
+
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+    .overlay.show { display:block; }
+    .mobile-toggle { display:none; }
+    @media(max-width:860px) {
+      .sidebar { position:fixed; left:-260px; z-index:50; transition:left 0.25s; }
+      .sidebar.open { left:0; }
+      .mobile-toggle { display:flex !important; }
     }
-    .input:focus, select:focus { border-color: rgba(251,191,36,.45); }
-    select option { background: #111c33; color: #e5e7eb; }
-
-    .two { display:grid; grid-template-columns:1fr; gap:12px; }
-    @media(min-width:600px) { .two { grid-template-columns:1fr 1fr; } }
-
-    .actions-row { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:16px; }
-    .danger { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); }
-    .muted  { color: var(--muted); font-size:13px; }
-
-    .placa-badge {
-      display: inline-block;
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .06em;
-      background: rgba(251,191,36,.10);
-      border: 1px solid rgba(251,191,36,.25);
-      color: #fbbf24;
-      padding: 3px 9px;
-      border-radius: 7px;
-    }
+    .foot { max-width:1400px; margin:16px auto 0; color:var(--text-tertiary); font-size:11px; text-align:center; }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="logo">TC</div>
-        <div>
-          <h1>TaxiConfianza</h1>
-          <p>Panel Propietario</p>
-        </div>
+<div class="wrap">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">TC</div>
+      <div><h1>TaxiConfianza</h1><p>Panel Propietario</p></div>
+    </div>
+    <nav class="nav">
+      <a href="/dashboard-propietario.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        Dashboard
+      </a>
+      <a href="/publicar-oferta.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Publicar oferta
+      </a>
+      <a class="active" href="/mis-vehiculos.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M7 16l-2 2m2-2 2 2m-2-2V8m10 8 2 2m-2-2-2 2m2-2V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Mis vehículos
+      </a>
+    </nav>
+    <div class="sep"></div>
+    <div style="padding:6px;">
+      <div class="tc-theme-toggle" data-tc-theme-toggle style="width:100%;justify-content:center;">
+        <span class="tc-toggle-icon" data-tc-theme-icon="sun">☀️</span>
+        <div class="tc-toggle-track"><div class="tc-toggle-knob"></div></div>
+        <span class="tc-toggle-icon" data-tc-theme-icon="moon">🌙</span>
       </div>
+    </div>
+    <div class="sep"></div>
+    <button class="btn danger" id="btnLogout" style="width:100%;justify-content:center;margin-top:auto;">Salir</button>
+  </aside>
 
-      <nav class="nav" aria-label="Navegación del propietario">
-        <a href="dashboard-propietario.html">
-          <svg class="ico" viewBox="0 0 24 24" fill="none">
-            <path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/>
-          </svg>
-          Dashboard
-        </a>
-        <a href="publicar-oferta.html">
-          <svg class="ico" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-          Publicar oferta
-        </a>
-        <a class="active" href="mis-vehiculos.html" aria-current="page">
-          <svg class="ico" viewBox="0 0 24 24" fill="none">
-            <path d="M7 16l-2 2m2-2 2 2m-2-2V8m10 8 2 2m-2-2-2 2m2-2V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M6 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-          Mis vehículos
-        </a>
-      </nav>
+  <div class="overlay" id="overlay"></div>
 
-      <div class="sep"></div>
-      <button class="btn danger" id="btnLogout" style="width:100%; justify-content:center">Salir</button>
-    </aside>
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <button class="btn mobile-toggle" id="btnOpenMenu" type="button">☰</button>
+        <h2 class="title">Mis vehículos</h2>
+        <p class="subtitle">Registra los taxis de tu flota para poder publicar ofertas.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn primary" id="btnRefresh" type="button">Actualizar</button>
+      </div>
+    </header>
 
-    <div class="overlay" id="overlay"></div>
-
-    <main class="main">
-      <header class="topbar">
-        <div class="left">
-          <h2 class="title">Mis vehículos</h2>
-          <p class="subtitle">Registra los taxis de tu flota para poder publicar ofertas.</p>
+    <section class="grid">
+      <article class="card">
+        <div class="row" style="margin-bottom:12px;">
+          <div class="muted">Total registrados: <strong id="count">0</strong></div>
+          <div class="muted" id="msg"></div>
         </div>
-        <div class="top-actions">
-          <button class="btn primary" id="btnRefresh" type="button">Actualizar</button>
+        <div style="overflow:auto; border-radius:10px;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Placa</th><th>Marca</th>
+                <th>Modelo</th><th>Año</th><th>Combustible</th>
+                <th class="right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbl">
+              <tr><td colspan="7" class="muted" style="text-align:center;padding:20px;">Cargando…</td></tr>
+            </tbody>
+          </table>
         </div>
-      </header>
+      </article>
 
-      <section class="grid">
-        <!-- Tabla -->
-        <article class="card">
-          <div class="row" style="margin-bottom:12px;">
-            <div class="muted">Total registrados: <strong id="count">0</strong></div>
-            <div class="muted" id="msg"></div>
-          </div>
-
-          <div style="overflow:auto; border-radius:12px;">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Placa</th>
-                  <th>Marca</th>
-                  <th>Modelo</th>
-                  <th>Año</th>
-                  <th>Combustible</th>
-                  <th class="right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="tbl">
-                <tr><td colspan="7" class="muted">Cargando…</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
-
-        <!-- Formulario -->
-        <article class="card">
-          <h3 style="margin:0 0 4px">Registrar vehículo</h3>
-          <p class="muted" style="margin:0 0 20px">Solo la placa es obligatoria.</p>
-
+      <article class="card">
+        <h3>Registrar vehículo</h3>
+        <p class="muted" style="margin-bottom:16px;">Solo la placa es obligatoria.</p>
+        <div class="field">
+          <label>Placa *</label>
+          <input class="tc-input" id="placa" placeholder="Ej: ABC123" maxlength="8" />
+        </div>
+        <div class="two">
+          <div class="field"><label>Marca</label><input class="tc-input" id="marca" placeholder="Ej: Chevrolet" /></div>
+          <div class="field"><label>Modelo / Referencia</label><input class="tc-input" id="modelo" placeholder="Ej: Spark GT" /></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Año</label><input class="tc-input" id="anio" type="number" min="2000" max="2030" placeholder="Ej: 2021" /></div>
           <div class="field">
-            <label>Placa *</label>
-            <input class="input" id="placa" placeholder="Ej: ABC123" maxlength="8" />
+            <label>Combustible</label>
+            <select class="tc-input" id="combustible">
+              <option value="">Sin especificar</option>
+              <option value="gasolina">Gasolina</option>
+              <option value="gas">Gas natural (GNV)</option>
+              <option value="hibrido">Híbrido</option>
+              <option value="electrico">Eléctrico</option>
+            </select>
           </div>
+        </div>
+        <div class="actions-row">
+          <button class="btn" id="btnClear" type="button">Limpiar</button>
+          <button class="btn primary" id="btnCreate" type="button">Guardar vehículo</button>
+        </div>
+      </article>
+    </section>
+    <footer class="foot">© 2026 TaxiConfianza · Panel Propietario</footer>
+  </main>
+</div>
 
-          <div class="two" style="margin-top:12px;">
-            <div class="field">
-              <label>Marca</label>
-              <input class="input" id="marca" placeholder="Ej: Chevrolet" />
-            </div>
-            <div class="field">
-              <label>Modelo / Referencia</label>
-              <input class="input" id="modelo" placeholder="Ej: Spark GT, Sail" />
-            </div>
-          </div>
-
-          <div class="two" style="margin-top:12px;">
-            <div class="field">
-              <label>Año</label>
-              <input class="input" id="anio" type="number" min="2000" max="2030" placeholder="Ej: 2021" />
-            </div>
-            <div class="field">
-              <label>Combustible</label>
-              <select id="combustible">
-                <option value="">Sin especificar</option>
-                <option value="gasolina">Gasolina</option>
-                <option value="gas">Gas natural (GNV)</option>
-                <option value="hibrido">Híbrido</option>
-                <option value="electrico">Eléctrico</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="actions-row">
-            <button class="btn" id="btnClear" type="button">Limpiar</button>
-            <button class="btn primary" id="btnCreate" type="button">Guardar vehículo</button>
-          </div>
-        </article>
-      </section>
-    </main>
-  </div>
-
-  <script src="js/tc-session.js"></script>
-  <script>
-  const COMBUSTIBLE_LABEL = {
-    gasolina: "Gasolina",
-    gas:      "Gas natural (GNV)",
-    hibrido:  "Híbrido",
-    electrico:"Eléctrico",
-  };
-
-  const API = {
-    list:   "/api/propietario/vehiculos",
-    create: "/api/propietario/vehiculos",
-    del:    (id) => `/api/propietario/vehiculos/${id}`,
-  };
+<script src="/js/tc-theme.js"></script>
+<script>
+  // Menú móvil
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  document.getElementById('btnOpenMenu')?.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
+  overlay?.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+</script>
+<script src="/js/tc-session.js"></script>
+<script>
+  // ── Lógica JS original intacta ──
+  const COMBUSTIBLE_LABEL = { gasolina:"Gasolina", gas:"Gas natural (GNV)", hibrido:"Híbrido", electrico:"Eléctrico" };
+  const API = { list:"/api/propietario/vehiculos", create:"/api/propietario/vehiculos", del:(id)=>`/api/propietario/vehiculos/${id}` };
+  const $ = (s) => document.querySelector(s);
 
   function authHeaders() {
     const email = localStorage.getItem("user_email") || localStorage.getItem("email") || "";
     const tipo  = localStorage.getItem("user_tipo")  || localStorage.getItem("tipo")  || "";
-    return { "Content-Type": "application/json", "X-User-Email": email, "X-User-Tipo": tipo };
+    return { "Content-Type":"application/json", "X-User-Email":email, "X-User-Tipo":tipo };
   }
-
   function requireAuthOrStop() {
     const email = localStorage.getItem("user_email") || localStorage.getItem("email") || "";
     const tipo  = localStorage.getItem("user_tipo")  || localStorage.getItem("tipo")  || "";
@@ -215,106 +201,72 @@
     return true;
   }
 
-  const $ = (s) => document.querySelector(s);
-
   async function loadVehiculos() {
     if (!requireAuthOrStop()) return;
     $("#msg").textContent = "Cargando…";
     const res  = await fetch(API.list, { headers: authHeaders() });
     const json = await res.json();
-
-    if (!json.ok) {
-      $("#tbl").innerHTML = `<tr><td colspan="7" class="muted">No se pudo cargar</td></tr>`;
-      $("#msg").textContent = json.error || "Error";
-      return;
-    }
-
+    if (!json.ok) { $("#tbl").innerHTML=`<tr><td colspan="7" class="muted">No se pudo cargar</td></tr>`; $("#msg").textContent=json.error||"Error"; return; }
     const data = json.data || [];
     $("#count").textContent = data.length;
     $("#msg").textContent   = "";
-
-    if (!data.length) {
-      $("#tbl").innerHTML = `<tr><td colspan="7" class="muted">No tienes vehículos registrados aún</td></tr>`;
-      return;
-    }
-
+    if (!data.length) { $("#tbl").innerHTML=`<tr><td colspan="7" class="muted" style="text-align:center;padding:20px;">No tienes vehículos registrados aún</td></tr>`; return; }
     const dash = `<span class="muted">—</span>`;
     $("#tbl").innerHTML = data.map(v => `
       <tr>
-        <td style="color:var(--muted); font-size:12px">#${v.id}</td>
-        <td><span class="placa-badge">${(v.placa || "").toUpperCase()}</span></td>
-        <td>${v.marca  || dash}</td>
-        <td>${v.modelo || dash}</td>
-        <td>${v.anio   || dash}</td>
-        <td>${COMBUSTIBLE_LABEL[v.combustible] || (v.combustible ? v.combustible : dash)}</td>
-        <td class="right">
-          <button class="btn danger" data-del="${v.id}" type="button">Eliminar</button>
-        </td>
-      </tr>
-    `).join("");
+        <td style="color:var(--text-tertiary);font-size:11px">#${v.id}</td>
+        <td><span class="placa-badge">${(v.placa||"").toUpperCase()}</span></td>
+        <td>${v.marca||dash}</td><td>${v.modelo||dash}</td>
+        <td>${v.anio||dash}</td>
+        <td>${COMBUSTIBLE_LABEL[v.combustible]||(v.combustible?v.combustible:dash)}</td>
+        <td class="right"><button class="btn danger" data-del="${v.id}" type="button">Eliminar</button></td>
+      </tr>`).join("");
   }
 
   async function createVehiculo() {
     if (!requireAuthOrStop()) return;
-
-    const placa       = $("#placa").value.trim().toUpperCase();
-    const marca       = $("#marca").value.trim() || null;
-    const modelo      = $("#modelo").value.trim() || null;
-    const anio        = $("#anio").value.trim();
-    const combustible = $("#combustible").value || null;
-
+    const placa=$("#placa").value.trim().toUpperCase(), marca=$("#marca").value.trim()||null,
+          modelo=$("#modelo").value.trim()||null, anio=$("#anio").value.trim(), combustible=$("#combustible").value||null;
     if (!placa) { alert("La placa es obligatoria."); return; }
-
-    const btn = $("#btnCreate");
-    btn.disabled = true;
-    btn.textContent = "Guardando…";
-
+    const btn=$("#btnCreate"); btn.disabled=true; btn.textContent="Guardando…";
     try {
-      const res  = await fetch(API.create, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ placa, marca, modelo, anio: anio ? Number(anio) : null, combustible }),
-      });
-      const json = await res.json();
-
-      if (!json.ok) { alert(json.error || "Error creando vehículo"); return; }
-
-      alert("Vehículo registrado ✅");
-      clearForm();
-      await loadVehiculos();
-    } catch (e) {
-      console.error(e);
-      alert("Error de conexión: " + e.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Guardar vehículo";
-    }
+      const res=await fetch(API.create,{method:"POST",headers:authHeaders(),body:JSON.stringify({placa,marca,modelo,anio:anio?Number(anio):null,combustible})});
+      const json=await res.json();
+      if (!json.ok) { alert(json.error||"Error creando vehículo"); return; }
+      alert("Vehículo registrado ✅"); clearForm(); await loadVehiculos();
+    } catch(e) { alert("Error de conexión: "+e.message); }
+    finally { btn.disabled=false; btn.textContent="Guardar vehículo"; }
   }
 
   async function deleteVehiculo(id) {
     if (!requireAuthOrStop()) return;
     if (!confirm("¿Eliminar este vehículo?")) return;
-    const res  = await fetch(API.del(id), { method: "DELETE", headers: authHeaders() });
-    const json = await res.json();
-    if (!json.ok) { alert(json.error || "No se pudo eliminar"); return; }
+    const res=await fetch(API.del(id),{method:"DELETE",headers:authHeaders()});
+    const json=await res.json();
+    if (!json.ok) { alert(json.error||"No se pudo eliminar"); return; }
     await loadVehiculos();
   }
 
   function clearForm() {
-    ["#placa","#marca","#modelo","#anio"].forEach(id => { if ($(id)) $(id).value = ""; });
-    if ($("#combustible")) $("#combustible").value = "";
+    ["#placa","#marca","#modelo","#anio"].forEach(id=>{if($(id))$(id).value="";});
+    if($("#combustible"))$("#combustible").value="";
   }
 
   $("#btnRefresh").addEventListener("click", loadVehiculos);
-  $("#btnCreate").addEventListener("click", createVehiculo);
-  $("#btnClear").addEventListener("click", clearForm);
-
+  $("#btnCreate").addEventListener("click",  createVehiculo);
+  $("#btnClear").addEventListener("click",   clearForm);
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-del]");
     if (btn) deleteVehiculo(btn.getAttribute("data-del"));
   });
 
+  // Logout
+  document.getElementById("btnLogout")?.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "/login.html";
+  });
+
   loadVehiculos();
-  </script>
+</script>
 </body>
 </html>
