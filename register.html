@@ -1,135 +1,266 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Registro | TaxiConfianza</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrarse | TaxiConfianza</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .auth-wrap {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg-app);
+    }
+    .auth-left {
+      background: linear-gradient(135deg, rgba(212,160,23,0.15) 0%, rgba(29,158,117,0.08) 100%);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-left-blob { position:absolute; top:-80px; right:-80px; width:320px; height:320px; border-radius:50%; background:rgba(212,160,23,0.1); }
+    .auth-left-blob2 { position:absolute; bottom:-60px; left:-60px; width:220px; height:220px; border-radius:50%; background:rgba(29,158,117,0.08); }
+    .auth-brand { display:flex; align-items:center; gap:12px; margin-bottom:32px; position:relative; }
+    .auth-brand-badge { width:48px; height:48px; border-radius:12px; background:var(--gold); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; }
+    body:not(.light-mode) .auth-brand-badge { color:#0f1117; }
+    .auth-brand-name { font-size:22px; font-weight:700; color:var(--text-primary); }
+    .auth-tagline { font-size:24px; font-weight:700; color:var(--text-primary); line-height:1.3; text-align:center; margin-bottom:24px; position:relative; }
+    .auth-tagline span { color:var(--gold); }
+    .auth-steps { display:flex; flex-direction:column; gap:14px; position:relative; width:100%; max-width:320px; }
+    .auth-step { display:flex; align-items:center; gap:12px; }
+    .auth-step-num { width:28px; height:28px; border-radius:50%; background:rgba(212,160,23,0.15); border:0.5px solid rgba(212,160,23,0.3); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--gold); flex-shrink:0; }
+    .auth-step-text { font-size:13px; color:var(--text-secondary); }
 
+    .auth-right { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 40px; overflow-y:auto; }
+    .auth-card { width:100%; max-width:440px; }
+    .auth-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+    .auth-back { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-tertiary); text-decoration:none; transition:color 0.2s; }
+    .auth-back:hover { color:var(--gold); }
+    .auth-card h2 { font-size:24px; font-weight:700; color:var(--text-primary); margin-bottom:6px; }
+    .auth-sub { font-size:14px; color:var(--text-secondary); margin-bottom:28px; }
+
+    /* Selector de rol */
+    .rol-selector { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
+    .rol-option { border:0.5px solid var(--border); border-radius:10px; padding:14px; cursor:pointer; text-align:center; background:var(--bg-card); transition:all 0.2s; }
+    .rol-option:hover { border-color:rgba(212,160,23,0.4); }
+    .rol-option.selected { border-color:var(--gold); background:rgba(212,160,23,0.08); }
+    .rol-option .rol-icon { font-size:24px; margin-bottom:6px; }
+    .rol-option .rol-name { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:2px; }
+    .rol-option .rol-desc { font-size:11px; color:var(--text-tertiary); }
+    input[name="rol"] { display:none; }
+
+    .auth-field { margin-bottom:16px; }
+    .auth-field label { display:block; font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:7px; }
+    .auth-input { width:100%; background:var(--bg-card); border:0.5px solid var(--border); border-radius:10px; padding:12px 14px; font-size:14px; color:var(--text-primary); font-family:var(--font-sans); outline:none; transition:border-color 0.2s; }
+    .auth-input::placeholder { color:var(--text-tertiary); }
+    .auth-input:focus { border-color:var(--gold); }
+    .auth-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+    .auth-input-wrap { position:relative; }
+    .auth-input-wrap .auth-input { padding-right:44px; }
+    .toggle-pass { position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:16px; padding:0; }
+
+    .auth-btn { width:100%; background:var(--gold); border:none; color:#fff; padding:13px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; transition:opacity 0.2s; margin-top:8px; font-family:var(--font-sans); }
+    body:not(.light-mode) .auth-btn { color:#0f1117; }
+    .auth-btn:hover { opacity:0.92; }
+    .auth-btn:disabled { opacity:0.6; cursor:not-allowed; }
+
+    .auth-error { display:none; background:rgba(226,75,74,0.1); border:0.5px solid rgba(226,75,74,0.3); border-radius:9px; padding:11px 14px; font-size:13px; color:#F87171; margin-bottom:16px; }
+    .auth-error.show { display:block; }
+    .auth-success { display:none; background:rgba(29,158,117,0.1); border:0.5px solid rgba(29,158,117,0.3); border-radius:9px; padding:11px 14px; font-size:13px; color:#1D9E75; margin-bottom:16px; }
+    .auth-success.show { display:block; }
+
+    .auth-divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--text-tertiary); font-size:12px; }
+    .auth-divider::before, .auth-divider::after { content:''; flex:1; height:0.5px; background:var(--border); }
+    .auth-footer-links { text-align:center; margin-top:16px; font-size:13px; color:var(--text-tertiary); }
+    .auth-footer-links a { color:var(--gold); font-weight:600; text-decoration:none; }
+
+    .auth-theme-toggle { position:fixed; top:16px; right:20px; z-index:50; }
+
+    @media (max-width:768px) {
+      .auth-wrap { grid-template-columns:1fr; }
+      .auth-left { display:none; }
+      .auth-right { padding:32px 20px; }
+      .auth-row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
 <body>
 
-  <header class="nav">
-    <div class="container nav-inner">
-      <div class="brand">
-        <div class="brand-badge">TC</div>
-        <span class="brand-name">TaxiConfianza</span>
-      </div>
+<div class="auth-theme-toggle">
+  <div class="tc-theme-toggle" data-tc-theme-toggle title="Cambiar tema">
+    <span class="tc-toggle-icon" data-tc-theme-icon="sun">☀️</span>
+    <div class="tc-toggle-track"><div class="tc-toggle-knob"></div></div>
+    <span class="tc-toggle-icon" data-tc-theme-icon="moon">🌙</span>
+  </div>
+</div>
 
-      <nav class="nav-links">
-        <a href="index.html">Inicio</a>
-        <a href="index.html#como">Sobre Nosotros</a>
-        <a href="index.html#contacto">Contacto</a>
-      </nav>
-
-      <div class="nav-actions">
-        <a class="btn btn-ghost" href="login.html">Ingresar</a>
-        <a class="btn btn-primary" href="register.html">Registrarse</a>
-      </div>
+<div class="auth-wrap">
+  <div class="auth-left">
+    <div class="auth-left-blob"></div>
+    <div class="auth-left-blob2"></div>
+    <div class="auth-brand">
+      <div class="auth-brand-badge">TC</div>
+      <span class="auth-brand-name">TaxiConfianza</span>
     </div>
-  </header>
+    <p class="auth-tagline">Únete al <span>gremio taxista</span> más confiable de Colombia</p>
+    <div class="auth-steps">
+      <div class="auth-step"><div class="auth-step-num">1</div><span class="auth-step-text">Crea tu perfil en menos de 2 minutos</span></div>
+      <div class="auth-step"><div class="auth-step-num">2</div><span class="auth-step-text">Validamos tu documentación en 24h</span></div>
+      <div class="auth-step"><div class="auth-step-num">3</div><span class="auth-step-text">Conecta con conductores o propietarios verificados</span></div>
+      <div class="auth-step"><div class="auth-step-num">4</div><span class="auth-step-text">Accede al feed del gremio, alertas y más</span></div>
+    </div>
+  </div>
 
-  <main class="auth-page">
+  <div class="auth-right">
     <div class="auth-card">
-      <h2>Crear una cuenta</h2>
-      <p class="auth-sub">
-        Regístrate para conectarte con conductores o propietarios verificados
-      </p>
+      <div class="auth-nav">
+        <a href="/" class="auth-back">← Volver al inicio</a>
+      </div>
+      <h2>Crear cuenta gratis</h2>
+      <p class="auth-sub">¿Eres conductor o propietario de taxi?</p>
 
-      <form id="registrationForm">
-        <label>Nombres</label>
-        <input type="text" id="nombre" placeholder="Ingresa tus nombres" required />
+      <!-- Selector de rol -->
+      <div class="rol-selector">
+        <div class="rol-option selected" data-rol="conductor" onclick="selectRol('conductor')">
+          <div class="rol-icon">🚗</div>
+          <div class="rol-name">Soy conductor</div>
+          <div class="rol-desc">Busco taxi para trabajar</div>
+          <input type="radio" name="rol" value="conductor" checked />
+        </div>
+        <div class="rol-option" data-rol="propietario" onclick="selectRol('propietario')">
+          <div class="rol-icon">🏷️</div>
+          <div class="rol-name">Soy propietario</div>
+          <div class="rol-desc">Tengo taxi, busco conductor</div>
+          <input type="radio" name="rol" value="propietario" />
+        </div>
+      </div>
 
-        <label>Apellidos</label>
-        <input type="text" id="apellido" placeholder="Ingresa tus apellidos" required />
+      <div class="auth-error" id="authError"></div>
+      <div class="auth-success" id="authSuccess"></div>
 
-        <label>Número de celular</label>
-        <input type="tel" id="celular" placeholder="Ej: 3001234567" required />
-
-        <label>Correo electrónico</label>
-        <input type="email" id="email" placeholder="correo@ejemplo.com" required />
-
-        <label>Contraseña</label>
-        <input type="password" id="password" placeholder="Crea una contraseña" required />
-
-        <label>Confirmar contraseña</label>
-        <input type="password" id="confirmPassword" placeholder="Confirma tu contraseña" required />
-
-        <label class="radio-label">Tipo de usuario</label>
-        <div class="radio-group">
-          <label class="radio-option">
-            <input type="radio" name="rol" value="conductor" checked />
-            Conductor (Busco taxi para conducir)
-          </label>
-
-          <label class="radio-option">
-            <input type="radio" name="rol" value="propietario" />
-            Propietario (Busco conductor para mi taxi)
-          </label>
+      <form id="registerForm" autocomplete="on">
+        <div class="auth-row">
+          <div class="auth-field">
+            <label for="regNombre">Nombre</label>
+            <input class="auth-input" type="text" id="regNombre" name="nombre" placeholder="Tu nombre" autocomplete="given-name" required />
+          </div>
+          <div class="auth-field">
+            <label for="regApellido">Apellido</label>
+            <input class="auth-input" type="text" id="regApellido" name="apellido" placeholder="Tu apellido" autocomplete="family-name" required />
+          </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+        <div class="auth-field">
+          <label for="regCelular">Número de celular</label>
+          <input class="auth-input" type="tel" id="regCelular" name="celular" placeholder="Ej: 3001234567" autocomplete="tel" required />
+        </div>
+
+        <div class="auth-field">
+          <label for="regEmail">Correo electrónico</label>
+          <input class="auth-input" type="email" id="regEmail" name="email" placeholder="correo@ejemplo.com" autocomplete="email" required />
+        </div>
+
+        <div class="auth-field">
+          <label for="regPassword">Contraseña</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" type="password" id="regPassword" name="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required />
+            <button type="button" class="toggle-pass" id="togglePass" title="Ver contraseña">👁️</button>
+          </div>
+        </div>
+
+        <input type="hidden" id="regRol" name="rol" value="conductor" />
+
+        <button type="submit" class="auth-btn" id="btnRegister">Crear mi cuenta gratis</button>
       </form>
 
-      <p class="auth-footer">
-        ¿Ya tienes una cuenta?
-        <a href="login.html">Inicia sesión</a>
-      </p>
+      <div class="auth-divider">o</div>
+      <div class="auth-footer-links">
+        ¿Ya tienes cuenta? <a href="/login.html">Inicia sesión aquí</a>
+      </div>
     </div>
-  </main>
+  </div>
+</div>
 
-  <script>
-    // Pre-seleccionar rol desde ?tipo=conductor o ?tipo=propietario
-    (function () {
-      const tipo = new URLSearchParams(window.location.search).get("tipo");
-      if (tipo === "conductor" || tipo === "propietario") {
-        const radio = document.querySelector(`input[name="rol"][value="${tipo}"]`);
-        if (radio) radio.checked = true;
-      }
-    })();
+<script src="/js/tc-theme.js"></script>
+<script>
+  // Prellenar rol si viene en la URL (?rol=conductor)
+  const urlRol = new URLSearchParams(window.location.search).get('rol');
+  if (urlRol === 'propietario' || urlRol === 'conductor') selectRol(urlRol);
 
-    const form = document.getElementById('registrationForm');
-    
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault(); 
-      
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-
-      if (password !== confirmPassword) {
-        alert('Las contraseñas no coinciden');
-        return;
-      }
-
-      // Captura de todos los campos, incluyendo los nuevos
-      const data = {
-        nombre: document.getElementById('nombre').value,
-        apellido: document.getElementById('apellido').value,
-        celular: document.getElementById('celular').value,
-        email: document.getElementById('email').value,
-        password: password,
-        rol: form.querySelector('input[name="rol"]:checked').value
-      };
-
-      try {
-        const response = await fetch('/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('¡Usuario guardado en Hostinger con éxito!');
-          window.location.href = 'login.html';
-        } else {
-          alert('Error: ' + result.error);
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor.');
-      }
+  function selectRol(rol) {
+    document.querySelectorAll('.rol-option').forEach(el => {
+      el.classList.toggle('selected', el.dataset.rol === rol);
+      const radio = el.querySelector('input[type=radio]');
+      if (radio) radio.checked = el.dataset.rol === rol;
     });
-  </script>
+    document.getElementById('regRol').value = rol;
+  }
+
+  document.getElementById('togglePass').addEventListener('click', function () {
+    const input = document.getElementById('regPassword');
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    this.textContent = isPass ? '🙈' : '👁️';
+  });
+
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const errorEl   = document.getElementById('authError');
+    const successEl = document.getElementById('authSuccess');
+    const btnReg    = document.getElementById('btnRegister');
+
+    errorEl.classList.remove('show');
+    successEl.classList.remove('show');
+
+    const nombre   = document.getElementById('regNombre').value.trim();
+    const apellido = document.getElementById('regApellido').value.trim();
+    const celular  = document.getElementById('regCelular').value.trim();
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const rol      = document.getElementById('regRol').value;
+
+    if (password.length < 6) {
+      errorEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+      errorEl.classList.add('show');
+      return;
+    }
+
+    btnReg.disabled    = true;
+    btnReg.textContent = 'Creando cuenta…';
+
+    try {
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ nombre, apellido, celular, email, password, rol })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        successEl.textContent = '✅ Cuenta creada. Redirigiendo al login…';
+        successEl.classList.add('show');
+        setTimeout(() => { window.location.href = '/login.html'; }, 1800);
+      } else {
+        errorEl.textContent = result.error || 'Error al crear la cuenta. El correo puede estar ya registrado.';
+        errorEl.classList.add('show');
+      }
+    } catch (err) {
+      errorEl.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';
+      errorEl.classList.add('show');
+    } finally {
+      btnReg.disabled    = false;
+      btnReg.textContent = 'Crear mi cuenta gratis';
+    }
+  });
+</script>
 </body>
 </html>
