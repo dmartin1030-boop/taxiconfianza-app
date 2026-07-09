@@ -71,19 +71,16 @@
         <div class="tc-accent-circle"></div>
         <div class="tc-accent-ring"></div>
         <div class="tc-photo-mask">
-          <!--
-            TODO: reemplazar por foto real subida a /img/hero-conductor.jpg
-            Recomendación: foto de un conductor colombiano sonriendo en su taxi,
-            descargada de Unsplash y servida desde el propio dominio (no hotlink externo).
-          -->
           <img
-            src="/img/hero-conductor.jpg"
+            id="hero-foto"
+            src="/img/hero-1.png"
             alt="Conductor de taxi colombiano sonriendo"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            style="transition: opacity 0.6s ease;"
+            onerror="this.style.display='none'; document.getElementById('hero-placeholder').style.display='flex';"
           />
-          <div class="tc-photo-placeholder" style="display:none;">
+          <div id="hero-placeholder" style="display:none;" class="tc-photo-placeholder">
             <span class="icon">🚕</span>
-            <span class="label">Foto del conductor (pendiente subir)</span>
+            <span class="label">TaxiConfianza</span>
           </div>
         </div>
       </div>
@@ -207,7 +204,28 @@
 </div>
 
 <script src="/js/tc-theme.js"></script>
-<!-- Aquí se cargarían también tc-api.js y tc-session.js si esta página los necesita -->
+<script>
+  // ── Rotación aleatoria de fotos en el hero ──
+  (function() {
+    var fotos = ['/img/hero-1.png', '/img/hero-2.png', '/img/hero-3.png'];
+    var img   = document.getElementById('hero-foto');
+    if (!img) return;
+
+    // Cargar una foto aleatoria al inicio
+    var idx = Math.floor(Math.random() * fotos.length);
+    img.src = fotos[idx];
+
+    // Rotar cada 5 segundos con fade
+    setInterval(function() {
+      img.style.opacity = '0';
+      setTimeout(function() {
+        idx = (idx + 1) % fotos.length;
+        img.src = fotos[idx];
+        img.style.opacity = '1';
+      }, 600);
+    }, 5000);
+  })();
+</script>
 
 </body>
 </html>
