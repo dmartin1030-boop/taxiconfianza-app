@@ -424,8 +424,8 @@ body.light-mode .tc-toggle-knob {
 /* ---- Hero right: foto estilo Workana (forma orgánica) ---- */
 .tc-hero-right {
   position: relative;
-  padding: 40px 48px;
-  min-height: 420px;
+  padding: 20px 32px;
+  min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -434,16 +434,16 @@ body.light-mode .tc-toggle-knob {
 .tc-organic-graphic {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  height: 380px;
+  max-width: 500px;
+  height: 480px;
 }
 
 .tc-blob-bg {
   position: absolute;
   top: 0;
   right: 0;
-  width: 220px;
-  height: 220px;
+  width: 280px;
+  height: 280px;
   border-radius: 50% 50% 0 50%;
   background: var(--gold);
   opacity: 0.85;
@@ -452,10 +452,10 @@ body.light-mode .tc-toggle-knob {
 
 .tc-accent-circle {
   position: absolute;
-  bottom: 10px;
+  bottom: 20px;
   left: 10px;
-  width: 110px;
-  height: 110px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   background: var(--green);
   opacity: 0.9;
@@ -463,10 +463,10 @@ body.light-mode .tc-toggle-knob {
 
 .tc-accent-ring {
   position: absolute;
-  bottom: 30px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
+  bottom: 40px;
+  right: 15px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   border: 3px solid var(--gold);
   opacity: 0.6;
@@ -474,13 +474,13 @@ body.light-mode .tc-toggle-knob {
 
 .tc-photo-mask {
   position: absolute;
-  top: 25px;
-  right: 35px;
-  width: 320px;
-  height: 290px;
+  top: 20px;
+  right: 20px;
+  width: 420px;
+  height: 420px;
   border-radius: 50% 8% 50% 50%;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
   background: linear-gradient(135deg, #2a3045, #1a2035);
 }
 
@@ -488,7 +488,7 @@ body.light-mode .tc-toggle-knob {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center top;
 }
 
 .tc-photo-placeholder {
