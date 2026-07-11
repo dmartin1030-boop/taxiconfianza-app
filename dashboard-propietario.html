@@ -24,6 +24,18 @@
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
     }
     *{box-sizing:border-box}
+    /* ── Toggle de tema ── */
+    .tc-theme-toggle{display:flex;align-items:center;gap:7px;padding:6px 11px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.1);border-radius:20px;cursor:pointer;user-select:none;transition:border-color 0.2s;}
+    .tc-theme-toggle:hover{border-color:rgba(251,191,36,0.5);}
+    .tc-toggle-icon{font-size:13px;opacity:0.4;transition:opacity 0.25s;}
+    .tc-toggle-icon.active{opacity:1;}
+    .tc-toggle-track{width:36px;height:20px;background:#d4a017;border-radius:12px;position:relative;transition:background 0.25s;}
+    .tc-toggle-knob{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left 0.25s;box-shadow:0 1px 2px rgba(0,0,0,0.3);}
+    body.light-mode .tc-toggle-knob{left:19px;}
+    body.light-mode{background:#f4f2ed!important;color:#1a1a2e!important;}
+    body.light-mode .sidebar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .card{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;color:#1a1a2e!important;}
+    body.light-mode .main{background:#f4f2ed!important;}
     body{
       margin:0;
       font-family:var(--font);
@@ -1007,6 +1019,7 @@
     </div>
   </div>
 
+  <script src="/js/tc-theme.js"></script>
   <script src="js/tc-session.js"></script>
   <script src="js/tc-api.js"></script>
   <script src="js/tc-dashboard-propietario.js"></script>
