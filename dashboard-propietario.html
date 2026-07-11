@@ -402,11 +402,11 @@
         <a class="active" href="#" aria-current="page">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
           Dashboard
-        <button type="button" id="btn-publicar-sidebar" class="nav-cta" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 11px;border-radius:9px;border:0.5px solid rgba(212,160,23,0.3);background:rgba(212,160,23,0.1);color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">
+        <button type="button" id="btn-publicar-sidebar" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid rgba(212,160,23,0.35);background:rgba(212,160,23,0.12);color:#fbbf24;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
   <svg class="ico" viewBox="0 0 24 24" fill="none">
     <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
   </svg>
-  Publicar oferta
+  + Publicar oferta
 </button>
 
         <a href="#">
@@ -453,13 +453,24 @@
         
       </nav>
 
-      <div style="margin:14px 6px 0; padding:12px; border-radius: var(--radius2); border:1px solid var(--border); background: rgba(255,255,255,.03);">
+      <!-- Toggle de tema -->
+      <div style="margin:10px 6px 0; padding:6px 0;">
+        <div class="tc-theme-toggle" data-tc-theme-toggle style="width:100%;justify-content:center;cursor:pointer;display:flex;align-items:center;gap:7px;padding:6px 11px;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);border-radius:20px;">
+          <span class="tc-toggle-icon" data-tc-theme-icon="sun" style="font-size:13px;opacity:0.4;">☀️</span>
+          <div class="tc-toggle-track" style="width:36px;height:20px;background:#d4a017;border-radius:12px;position:relative;transition:background 0.25s;">
+            <div class="tc-toggle-knob" style="width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left 0.25s;box-shadow:0 1px 2px rgba(0,0,0,0.3);"></div>
+          </div>
+          <span class="tc-toggle-icon" data-tc-theme-icon="moon" style="font-size:13px;opacity:1;">🌙</span>
+        </div>
+      </div>
+
+      <div style="margin:10px 6px 0; padding:12px; border-radius: var(--radius2); border:1px solid var(--border); background: rgba(255,255,255,.03);">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
           <div>
             <div class="badge">Estado: <strong id="owner-verif">Verificado</strong></div>
             <div class="muted" style="margin-top:6px; font-size:12px;">Administra tus ofertas y postulaciones.</div>
           </div>
-          <button class="btn danger" type="button">Salir</button>
+          <button class="btn" id="btnLogout" type="button" style="background:rgba(239,68,68,0.15);border:0.5px solid rgba(239,68,68,0.4);color:#fca5a5;">Salir</button>
         </div>
       </div>
     </aside>
@@ -1034,5 +1045,6 @@
     })();
   </script>
 
+<script src="/js/tc-theme.js"></script>
 </body>
 </html>

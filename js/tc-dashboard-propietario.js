@@ -79,7 +79,7 @@
             </div>
           </div>
           <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-            <a href="/mis-vehiculos.html" style="display:inline-flex; align-items:center; gap:7px; padding:11px 20px; border-radius:10px; background:var(--gold); color:#0f1117; font-size:13px; font-weight:700; text-decoration:none;">
+            <a href="/mis-vehiculos.html" style="display:inline-flex; align-items:center; gap:7px; padding:11px 20px; border-radius:10px; background:var(--gold); color:#0f1117; font-size:13px; font-weight:700; text-decoration:none; border:2px solid rgba(212,160,23,0.5);">
               🚗 Registrar mi taxi ahora
             </a>
             <button type="button" id="btn-cerrar-bienvenida" style="display:inline-flex; align-items:center; gap:7px; padding:11px 16px; border-radius:10px; background:var(--bg-card); border:0.5px solid var(--border); color:var(--text-tertiary); font-size:12px; cursor:pointer; font-family:var(--font-sans);">
@@ -152,8 +152,9 @@
           <a href="/mis-vehiculos.html" style="
             display:flex; align-items:center; justify-content:center; gap:8px;
             padding:13px; border-radius:10px;
-            background:var(--gold); color:#0f1117;
+            background:#D4A017; color:#0f1117;
             font-size:14px; font-weight:700; text-decoration:none;
+            border:2px solid rgba(212,160,23,0.6);
           ">
             🚗 Registrar mi taxi ahora
           </a>
