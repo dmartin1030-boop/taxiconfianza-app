@@ -242,8 +242,10 @@
     setText("kpi-trabajo", data.kpis?.trabajo_activo ?? 0);
 
     // Nivel y rating en topbar
-    setText("owner-level", data.stats?.nivel || "Bronce");
-    setText("owner-avg", data.stats?.avg ? Number(data.stats.avg).toFixed(1) : "—");
+    // Nivel y reputación desde localStorage (guardado al login)
+    const userLocal = window.TC?.session?.getUser?.() || {};
+    setText("owner-level", userLocal.nivel_actual || data.kpis?.nivel || "Bronce");
+    setText("owner-avg", userLocal.score_reputacion ? Number(userLocal.score_reputacion).toFixed(1) : "—");
 
     // Trabajo actual
     const trabajoContent = $("trabajo-actual-content");

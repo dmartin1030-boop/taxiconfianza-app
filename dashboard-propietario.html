@@ -10,6 +10,8 @@
       --surface:#0f172a;
       --card:#111c33;
       --text:#e5e7eb;
+      --border-color:rgba(255,255,255,0.07);
+      --muted-color:rgba(255,255,255,0.45);
       --muted:#9ca3af;
       --border:rgba(255,255,255,.08);
       --shadow: 0 10px 25px rgba(0,0,0,.35);
@@ -32,7 +34,14 @@
     .tc-toggle-track{width:36px;height:20px;background:#d4a017;border-radius:12px;position:relative;transition:background 0.25s;}
     .tc-toggle-knob{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left 0.25s;box-shadow:0 1px 2px rgba(0,0,0,0.3);}
     body.light-mode .tc-toggle-knob{left:19px;}
-    body.light-mode{background:#f4f2ed!important;color:#1a1a2e!important;}
+    body.light-mode{
+      --bg:#f4f2ed!important;
+      --surface:#ffffff!important;
+      --card:#ffffff!important;
+      --text:#1a1a2e!important;
+      background:#f4f2ed!important;
+      color:#1a1a2e!important;
+    }
     body.light-mode .wrap{background:#f4f2ed!important;}
     body.light-mode .sidebar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
     body.light-mode .sidebar *{color:#1a1a2e!important;}
@@ -429,12 +438,8 @@
         <a class="active" href="#" aria-current="page">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
           Dashboard
-        <a href="#" id="btn-publicar-sidebar" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid rgba(212,160,23,0.2);color:rgba(212,160,23,0.6);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:none;opacity:0.7;">
-  <svg class="ico" viewBox="0 0 24 24" fill="none">
-    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-  </svg>
-  Publicar oferta
-</a>
+        <!-- btn-publicar-sidebar oculto — solo se usa el del topbar -->
+<span id="btn-publicar-sidebar" style="display:none;"></span>
 
         <a href="#">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
