@@ -39,27 +39,54 @@
       --surface:#ffffff!important;
       --card:#ffffff!important;
       --text:#1a1a2e!important;
+      --muted:#666666!important;
+      --border:rgba(0,0,0,0.08)!important;
       background:#f4f2ed!important;
       color:#1a1a2e!important;
     }
-    body.light-mode .wrap{background:#f4f2ed!important;}
-    body.light-mode .sidebar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
+    /* Sobreescribir el radial-gradient del body */
+    body.light-mode{ background:linear-gradient(135deg,rgba(212,160,23,0.06),transparent 50%),#f4f2ed!important; }
+    body.light-mode .wrap{background:#f4f2ed!important; min-height:100vh;}
+    /* Sidebar */
+    body.light-mode .sidebar{background:linear-gradient(180deg,#ffffff,#f9f7f4)!important;border-color:rgba(0,0,0,0.08)!important;}
     body.light-mode .sidebar *{color:#1a1a2e!important;}
-    body.light-mode nav.nav a{color:#666!important;}
-    body.light-mode nav.nav a.active{color:#b8860b!important;background:rgba(212,160,23,0.1)!important;}
-    body.light-mode .card{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;color:#1a1a2e!important;}
+    body.light-mode .brand{background:rgba(0,0,0,0.03)!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode nav.nav a{color:#555!important;background:transparent!important;border-color:transparent!important;}
+    body.light-mode nav.nav a:hover{background:rgba(0,0,0,0.04)!important;color:#1a1a2e!important;}
+    body.light-mode nav.nav a.active{color:#b8860b!important;background:rgba(212,160,23,0.12)!important;border-color:rgba(212,160,23,0.25)!important;}
+    /* Main y topbar */
     body.light-mode .main{background:#f4f2ed!important;}
-    body.light-mode .topbar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
-    body.light-mode .topbar *{color:#1a1a2e!important;}
+    body.light-mode .topbar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;box-shadow:0 1px 3px rgba(0,0,0,0.05)!important;}
+    body.light-mode .topbar,.topbar *{color:#1a1a2e!important;}
+    /* Cards y grids */
+    body.light-mode .card{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;color:#1a1a2e!important;}
+    body.light-mode .card *{color:#1a1a2e!important;}
     body.light-mode .tips-card{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
-    body.light-mode table th,body.light-mode table td{color:#1a1a2e!important;border-color:rgba(0,0,0,0.08)!important;}
-    body.light-mode .muted{color:#666!important;}
+    body.light-mode .tips-card *{color:#1a1a2e!important;}
     body.light-mode .kpi{background:#f9f7f2!important;border-color:rgba(0,0,0,0.08)!important;}
     body.light-mode .kpi *{color:#1a1a2e!important;}
-    body.light-mode .item{background:#f9f7f2!important;border-color:rgba(0,0,0,0.08)!important;}
-    body.light-mode .profile-mini,body.light-mode .badge-wrap{background:#f0ede6!important;}
-    body.light-mode dialog{background:#ffffff!important;color:#1a1a2e!important;}
+    body.light-mode .kpi .v{color:#b8860b!important;font-size:24px!important;}
+    /* Tabla */
+    body.light-mode table{color:#1a1a2e!important;}
+    body.light-mode table th{color:#666!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode table td{color:#1a1a2e!important;border-color:rgba(0,0,0,0.06)!important;}
+    body.light-mode table tr:hover td{background:#f0ede6!important;}
+    /* Items y listas */
+    body.light-mode .item{background:#f9f7f2!important;border-color:rgba(0,0,0,0.08)!important;color:#1a1a2e!important;}
+    body.light-mode .item *{color:#1a1a2e!important;}
+    body.light-mode .muted{color:#666!important;}
+    /* Perfil y badge */
+    body.light-mode .profile-mini{background:#f0ede6!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .badge{background:#f0ede6!important;border-color:rgba(0,0,0,0.1)!important;color:#1a1a2e!important;}
+    /* Dialog publicar oferta */
+    body.light-mode dialog{background:#ffffff!important;color:#1a1a2e!important;border-color:rgba(0,0,0,0.12)!important;}
+    body.light-mode dialog *{color:#1a1a2e!important;}
     body.light-mode input,body.light-mode select,body.light-mode textarea{background:#f0ede6!important;color:#1a1a2e!important;border-color:rgba(0,0,0,0.15)!important;}
+    /* Banner bienvenida */
+    body.light-mode #tc-bienvenida-banner{background:linear-gradient(135deg,rgba(212,160,23,0.08),rgba(29,158,117,0.04))!important;border-color:rgba(212,160,23,0.25)!important;}
+    body.light-mode #tc-bienvenida-banner *{color:#1a1a2e!important;}
+    /* Chips y badges de estado */
+    body.light-mode .chip{border-color:rgba(0,0,0,0.1)!important;}
     body{
       margin:0;
       font-family:var(--font);
