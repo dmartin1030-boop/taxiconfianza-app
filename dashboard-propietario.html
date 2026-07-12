@@ -33,9 +33,24 @@
     .tc-toggle-knob{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left 0.25s;box-shadow:0 1px 2px rgba(0,0,0,0.3);}
     body.light-mode .tc-toggle-knob{left:19px;}
     body.light-mode{background:#f4f2ed!important;color:#1a1a2e!important;}
+    body.light-mode .wrap{background:#f4f2ed!important;}
     body.light-mode .sidebar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .sidebar *{color:#1a1a2e!important;}
+    body.light-mode nav.nav a{color:#666!important;}
+    body.light-mode nav.nav a.active{color:#b8860b!important;background:rgba(212,160,23,0.1)!important;}
     body.light-mode .card{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;color:#1a1a2e!important;}
     body.light-mode .main{background:#f4f2ed!important;}
+    body.light-mode .topbar{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .topbar *{color:#1a1a2e!important;}
+    body.light-mode .tips-card{background:#ffffff!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode table th,body.light-mode table td{color:#1a1a2e!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .muted{color:#666!important;}
+    body.light-mode .kpi{background:#f9f7f2!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .kpi *{color:#1a1a2e!important;}
+    body.light-mode .item{background:#f9f7f2!important;border-color:rgba(0,0,0,0.08)!important;}
+    body.light-mode .profile-mini,body.light-mode .badge-wrap{background:#f0ede6!important;}
+    body.light-mode dialog{background:#ffffff!important;color:#1a1a2e!important;}
+    body.light-mode input,body.light-mode select,body.light-mode textarea{background:#f0ede6!important;color:#1a1a2e!important;border-color:rgba(0,0,0,0.15)!important;}
     body{
       margin:0;
       font-family:var(--font);
@@ -414,12 +429,12 @@
         <a class="active" href="#" aria-current="page">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
           Dashboard
-        <button type="button" id="btn-publicar-sidebar" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid rgba(212,160,23,0.35);background:rgba(212,160,23,0.12);color:#fbbf24;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+        <a href="#" id="btn-publicar-sidebar" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid rgba(212,160,23,0.2);color:rgba(212,160,23,0.6);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:none;opacity:0.7;">
   <svg class="ico" viewBox="0 0 24 24" fill="none">
     <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
   </svg>
-  + Publicar oferta
-</button>
+  Publicar oferta
+</a>
 
         <a href="#">
           <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -499,7 +514,7 @@
         <div class="top-actions">
           <button class="btn mobile-toggle" id="btnOpenMenu" type="button">☰ Menú</button>
           <span class="badge">Nivel: <strong id="owner-level">Oro</strong> · ★ <strong id="owner-avg">4.8</strong></span>
-          <button type="button" id="btn-publicar-top" class="btn primary">+ Publicar oferta</button>
+          <button type="button" id="btn-publicar-top" class="btn primary" style="padding:9px 20px;font-size:13px;font-weight:700;">+ Publicar oferta</button>
         </div>
       </header>
 
