@@ -46,43 +46,43 @@
       <div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">
         <div style="font-size:40px; flex-shrink:0;">🚕</div>
         <div style="flex:1; min-width:0;">
-          <div style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:6px;">
+          <div style="font-size:16px; font-weight:700; color:#e5e7eb; margin-bottom:6px;">
             ¡Bienvenido a TaxiConfianza! Estás a 2 pasos de encontrar tu conductor ideal
           </div>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.65; margin:0 0 16px;">
+          <p style="font-size:13px; color:#94a3b8; line-height:1.65; margin:0 0 16px;">
             Para publicar una oferta de trabajo y conectar con conductores verificados, primero necesitas registrar tu taxi. 
             Es rápido — solo la placa es obligatoria.
           </p>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:var(--bg-card); border:0.5px solid var(--border);">
-              <div style="width:26px; height:26px; border-radius:50%; background:rgba(212,160,23,0.15); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">1</div>
+            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:#111c33; border:0.5px solid rgba(255,255,255,0.07);">
+              <div style="width:26px; height:26px; border-radius:50%; background:rgba(212,160,23,0.15); color:#d4a017; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">1</div>
               <div>
-                <div style="font-size:12px; font-weight:600; color:var(--text-primary);">Registra tu taxi</div>
-                <div style="font-size:11px; color:var(--text-tertiary);">Placa, marca y modelo</div>
+                <div style="font-size:12px; font-weight:600; color:#e5e7eb;">Registra tu taxi</div>
+                <div style="font-size:11px; color:#64748b;">Placa, marca y modelo</div>
               </div>
             </div>
-            <div style="color:var(--text-tertiary); font-size:18px;">→</div>
-            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:var(--bg-card); border:0.5px solid var(--border);">
-              <div style="width:26px; height:26px; border-radius:50%; background:rgba(29,158,117,0.15); color:var(--green); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">2</div>
+            <div style="color:#64748b; font-size:18px;">→</div>
+            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:#111c33; border:0.5px solid rgba(255,255,255,0.07);">
+              <div style="width:26px; height:26px; border-radius:50%; background:rgba(29,158,117,0.15); color:#1d9e75; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">2</div>
               <div>
-                <div style="font-size:12px; font-weight:600; color:var(--text-primary);">Publica tu oferta</div>
-                <div style="font-size:11px; color:var(--text-tertiary);">Turno, cuota y requisitos</div>
+                <div style="font-size:12px; font-weight:600; color:#e5e7eb;">Publica tu oferta</div>
+                <div style="font-size:11px; color:#64748b;">Turno, cuota y requisitos</div>
               </div>
             </div>
-            <div style="color:var(--text-tertiary); font-size:18px;">→</div>
-            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:var(--bg-card); border:0.5px solid var(--border);">
+            <div style="color:#64748b; font-size:18px;">→</div>
+            <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:#111c33; border:0.5px solid rgba(255,255,255,0.07);">
               <div style="width:26px; height:26px; border-radius:50%; background:rgba(59,130,246,0.15); color:#60A5FA; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">3</div>
               <div>
-                <div style="font-size:12px; font-weight:600; color:var(--text-primary);">Conecta con conductores</div>
-                <div style="font-size:11px; color:var(--text-tertiary);">Revisa postulaciones</div>
+                <div style="font-size:12px; font-weight:600; color:#e5e7eb;">Conecta con conductores</div>
+                <div style="font-size:11px; color:#64748b;">Revisa postulaciones</div>
               </div>
             </div>
           </div>
           <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-            <a href="/mis-vehiculos.html" style="display:inline-flex; align-items:center; gap:7px; padding:11px 20px; border-radius:10px; background:var(--gold); color:#0f1117; font-size:13px; font-weight:700; text-decoration:none; border:2px solid rgba(212,160,23,0.5);">
+            <a href="/mis-vehiculos.html" style="display:inline-flex; align-items:center; gap:7px; padding:11px 20px; border-radius:10px; background:#d4a017; color:#0f1117; font-size:13px; font-weight:700; text-decoration:none; border:2px solid rgba(212,160,23,0.5);">
               🚗 Registrar mi taxi ahora
             </a>
-            <button type="button" id="btn-cerrar-bienvenida" style="display:inline-flex; align-items:center; gap:7px; padding:11px 16px; border-radius:10px; background:var(--bg-card); border:0.5px solid var(--border); color:var(--text-tertiary); font-size:12px; cursor:pointer; font-family:var(--font-sans);">
+            <button type="button" id="btn-cerrar-bienvenida" style="display:inline-flex; align-items:center; gap:7px; padding:11px 16px; border-radius:10px; background:#111c33; border:0.5px solid rgba(255,255,255,0.07); color:#64748b; font-size:12px; cursor:pointer; font-family:inherit;">
               Ya lo haré después
             </button>
           </div>
@@ -124,27 +124,28 @@
     const overlay = document.createElement("div");
     overlay.id = "tc-alerta-vehiculo";
     overlay.style.cssText = `
-      position: fixed; inset: 0; z-index: 2000;
-      background: rgba(0,0,0,0.65);
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85);
       display: flex; align-items: center; justify-content: center;
       padding: 20px;
     `;
 
     overlay.innerHTML = `
       <div style="
-        background: var(--bg-card-solid);
-        border: 0.5px solid rgba(212,160,23,0.3);
+        background: #111c33;
+        border: 1px solid rgba(212,160,23,0.4);
         border-radius: 16px;
         padding: 28px;
         max-width: 420px;
         width: 100%;
         text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.8);
       ">
         <div style="font-size:48px; margin-bottom:14px;">🚗</div>
-        <h3 style="font-size:17px; font-weight:700; color:var(--text-primary); margin:0 0 10px;">
+        <h3 style="font-size:17px; font-weight:700; color:#f1f5f9; margin:0 0 10px;">
           Primero registra tu taxi
         </h3>
-        <p style="font-size:13px; color:var(--text-secondary); line-height:1.65; margin:0 0 20px;">
+        <p style="font-size:13px; color:#94a3b8; line-height:1.65; margin:0 0 20px;">
           Para publicar una oferta necesitas tener al menos un vehículo registrado. 
           Es muy rápido — solo necesitas la placa de tu taxi.
         </p>
@@ -154,20 +155,19 @@
             padding:13px; border-radius:10px;
             background:#D4A017; color:#0f1117;
             font-size:14px; font-weight:700; text-decoration:none;
-            border:2px solid rgba(212,160,23,0.6);
           ">
             🚗 Registrar mi taxi ahora
           </a>
           <button id="btn-cerrar-alerta-vehiculo" type="button" style="
             padding:11px; border-radius:10px;
-            background:var(--bg-card); border:0.5px solid var(--border);
-            color:var(--text-tertiary); font-size:13px;
-            cursor:pointer; font-family:var(--font-sans);
+            background:rgba(255,255,255,0.06); border:0.5px solid rgba(255,255,255,0.12);
+            color:#94a3b8; font-size:13px;
+            cursor:pointer; font-family:inherit;
           ">
             Cancelar
           </button>
         </div>
-        <p style="font-size:11px; color:var(--text-tertiary); margin:14px 0 0; line-height:1.6;">
+        <p style="font-size:11px; color:#64748b; margin:14px 0 0; line-height:1.6;">
           💡 Tip: Después de registrar tu taxi vuelve aquí y ya podrás publicar tu oferta en segundos.
         </p>
       </div>
@@ -192,8 +192,8 @@
           <tr>
             <td colspan="6" style="text-align:center; padding:20px;">
               <div class="muted">No tienes ofertas publicadas aún.</div>
-              <div style="margin-top:8px; font-size:12px; color:var(--text-tertiary);">
-                Haz clic en <strong style="color:var(--gold);">+ Nueva oferta</strong> para publicar tu primera oferta.
+              <div style="margin-top:8px; font-size:12px; color:#64748b;">
+                Haz clic en <strong style="color:#d4a017;">+ Nueva oferta</strong> para publicar tu primera oferta.
               </div>
             </td>
           </tr>`;
@@ -254,21 +254,21 @@
       if (trabajoContent) {
         trabajoContent.innerHTML = `
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-            <div style="padding:10px; background:var(--bg-card-solid); border-radius:9px; border:0.5px solid var(--border);">
-              <div style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Conductor</div>
-              <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${escapeHtml(data.trabajo.conductor_nombre || "—")}</div>
+            <div style="padding:10px; background:#0f172a; border-radius:9px; border:0.5px solid rgba(255,255,255,0.07);">
+              <div style="font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Conductor</div>
+              <div style="font-size:13px; font-weight:600; color:#e5e7eb;">${escapeHtml(data.trabajo.conductor_nombre || "—")}</div>
             </div>
-            <div style="padding:10px; background:var(--bg-card-solid); border-radius:9px; border:0.5px solid var(--border);">
-              <div style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Vehículo</div>
-              <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${escapeHtml(data.trabajo.placa || "—")}</div>
+            <div style="padding:10px; background:#0f172a; border-radius:9px; border:0.5px solid rgba(255,255,255,0.07);">
+              <div style="font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Vehículo</div>
+              <div style="font-size:13px; font-weight:600; color:#e5e7eb;">${escapeHtml(data.trabajo.placa || "—")}</div>
             </div>
-            <div style="padding:10px; background:var(--bg-card-solid); border-radius:9px; border:0.5px solid var(--border);">
-              <div style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Ciudad</div>
-              <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${escapeHtml(data.trabajo.ciudad || "—")}</div>
+            <div style="padding:10px; background:#0f172a; border-radius:9px; border:0.5px solid rgba(255,255,255,0.07);">
+              <div style="font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Ciudad</div>
+              <div style="font-size:13px; font-weight:600; color:#e5e7eb;">${escapeHtml(data.trabajo.ciudad || "—")}</div>
             </div>
-            <div style="padding:10px; background:var(--bg-card-solid); border-radius:9px; border:0.5px solid var(--border);">
-              <div style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Desde</div>
-              <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${escapeHtml(data.trabajo.fecha_inicio || "—")}</div>
+            <div style="padding:10px; background:#0f172a; border-radius:9px; border:0.5px solid rgba(255,255,255,0.07);">
+              <div style="font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Desde</div>
+              <div style="font-size:13px; font-weight:600; color:#e5e7eb;">${escapeHtml(data.trabajo.fecha_inicio || "—")}</div>
             </div>
           </div>
           <button type="button" id="btn-finalizar-trabajo" class="btn danger" style="margin-top:12px; width:100%; justify-content:center; padding:10px;">
@@ -300,7 +300,7 @@
         <div class="item">
           <div class="left">
             <span class="muted">No hay postulaciones recientes.</span>
-            <span style="font-size:11px; color:var(--text-tertiary); margin-top:3px;">Cuando publiques una oferta, los conductores interesados aparecerán aquí.</span>
+            <span style="font-size:11px; color:#64748b; margin-top:3px;">Cuando publiques una oferta, los conductores interesados aparecerán aquí.</span>
           </div>
         </div>`;
       return;
@@ -432,7 +432,7 @@
       const vehs = data.data || [];
       if (!vehs.length) {
         if (sel) sel.innerHTML = `<option value="">— Sin vehículos registrados —</option>`;
-        if (msg) msg.innerHTML = `⚠️ No tienes vehículos. <a href="/mis-vehiculos.html" style="color:var(--gold);font-weight:600;">Registra tu taxi aquí</a> y vuelve a publicar.`;
+        if (msg) msg.innerHTML = `⚠️ No tienes vehículos. <a href="/mis-vehiculos.html" style="color:#d4a017;font-weight:600;">Registra tu taxi aquí</a> y vuelve a publicar.`;
       } else {
         if (sel) sel.innerHTML = `<option value="">Selecciona un vehículo</option>` +
           vehs.map(v => {
